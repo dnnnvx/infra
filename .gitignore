@@ -54,3 +54,5 @@ Temporary Items
 
 secrets.yaml
 talos*
+rendered/
+.env*
