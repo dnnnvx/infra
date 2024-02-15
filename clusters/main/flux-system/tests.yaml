@@ -4,7 +4,7 @@ metadata:
   name: tests
   namespace: flux-system
 spec:
-  interval: 10m0s
+  interval: 5m0s
   path: ./clusters/main/tests
   prune: true
   sourceRef:
