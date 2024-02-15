@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
 - repository.yaml
 - release.yaml
+# - bgp-peering-policy.yaml
+# - lb-ip-pool.yaml
