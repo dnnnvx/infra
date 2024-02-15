@@ -2,6 +2,10 @@ export CLUSTER_NAME=ilposto
 export API_ENDPOINT="https://192.168.1.100:6443"
 export NODE_NAME=nuc-3
 
+set -a
+source .env
+set +a
+
 talosctl gen secrets --output-file secrets.yaml
 
 talosctl gen config  \
@@ -78,5 +82,5 @@ ssh-keygen -t ed25519 -C "marco@ilposto.studio"
 gpg --export-secret-keys --armor "6B960E729E05C93E5C7FAD360F5213C262342832" |
   kubectl create secret generic sops-gpg \
   --namespace=flux-system \
-  --from-file=sops.asc=/dev/stdin --dry-run=client -o yaml > clusters/main/flux-system/sops.yaml
+  --from-file=sops.asc=/dev/stdin --dry-run=client -o yaml > tmp.yaml
 gpg --export --armor "6B960E729E05C93E5C7FAD360F5213C262342832" > .flux.pub.asc
