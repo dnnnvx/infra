@@ -84,5 +84,3 @@ gpg --export-secret-keys --armor "6B960E729E05C93E5C7FAD360F5213C262342832" |
   --namespace=flux-system \
   --from-file=sops.asc=/dev/stdin --dry-run=client -o yaml > tmp.yaml
 gpg --export --armor "6B960E729E05C93E5C7FAD360F5213C262342832" > .flux.pub.asc
-
-# kubernetes.io/hostname=nuc-1
