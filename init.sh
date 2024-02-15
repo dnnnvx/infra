@@ -1,3 +1,7 @@
+set -a
+source .env
+set +a
+
 export CLUSTER_NAME=ilposto
 export API_ENDPOINT="https://192.168.1.100:6443"
 export NODE_NAME=nuc-3
