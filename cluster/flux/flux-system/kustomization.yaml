@@ -4,5 +4,6 @@ resources:
 - gotk-components.yaml
 - gotk-sync.yaml
 - cilium.yaml
+- cloudflared.yaml
 - external-dns.yaml
 - tests.yaml
