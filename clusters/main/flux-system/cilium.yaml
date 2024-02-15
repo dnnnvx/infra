@@ -4,12 +4,12 @@ metadata:
   name: cilium
   namespace: flux-system
 spec:
-  interval: 10m0s
+  interval: 5m0s
   path: ./clusters/main/cilium
   prune: false
   sourceRef:
     kind: GitRepository
-    name: cilium
+    name: flux-system
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2beta1
       kind: HelmRelease
