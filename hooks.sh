@@ -12,7 +12,7 @@ done
 if [ ! -f .git/hooks/pre-commit ]; then
   touch .git/hooks/pre-commit
 elif [ $FORCE != "true" ]; then
-  echo ".git/hooks/pre-commit already exists, skipping (use ´-f´ or ´--force´ to overwrite it)."
+  echo ".git/hooks/pre-commit already exists, skipping (use `-f` or `--force` to overwrite it)."
   exit 1
 fi
 
