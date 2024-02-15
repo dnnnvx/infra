@@ -68,7 +68,7 @@ flux bootstrap github \
   --owner=$GITHUB_USER \
   --repository=ilposto-infra \
   --branch=main \
-  --path=./clusters/main \
+  --path=./cluster/flux \
   --personal
 
 # sops
