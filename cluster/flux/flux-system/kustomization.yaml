@@ -4,4 +4,5 @@ resources:
 - gotk-components.yaml
 - gotk-sync.yaml
 - cilium.yaml
+- external-dns.yaml
 - tests.yaml
