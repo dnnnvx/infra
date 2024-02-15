@@ -24,6 +24,9 @@ spec:
         enabled: true
       ui:
         enabled: true
+        service:
+          annotations:
+            external-dns.alpha.kubernetes.io/internal-hostname: hubble.ilposto.studio
     kubeProxyReplacement: disabled
     cgroup:
       autoMount:
