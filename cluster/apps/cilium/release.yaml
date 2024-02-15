@@ -25,6 +25,11 @@ spec:
       ui:
         enabled: true
     kubeProxyReplacement: disabled
+    bgp:
+      enabled: true
+      announce:
+        loadbalancerIP: true
+        podCIDR: false
     securityContext:
       capabilities:
         ciliumAgent:
