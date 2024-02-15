@@ -30,6 +30,8 @@ spec:
       announce:
         loadbalancerIP: true
         podCIDR: false
+    bgpControlPlane:
+      enabled: true
     securityContext:
       capabilities:
         ciliumAgent:
