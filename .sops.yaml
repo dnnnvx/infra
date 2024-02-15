@@ -1,0 +1,12 @@
+creation_rules:
+  - path_regex: clusters.*secret.*\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
+
+  - path_regex: talosconfig.yaml
+    encrypted_regex: ^key$
+    pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
+
+  - path_regex: secrets.yaml
+    encrypted_regex: ^(secret|bootstraptoken|secretboxencryptionsecret|token|key)$
+    pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
