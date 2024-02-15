@@ -60,7 +60,7 @@ helm install                                                    \
     --set k8sServiceHost="${KUBERNETES_API_SERVER_ADDRESS}"     \
     --set k8sServicePort="${KUBERNETES_API_SERVER_PORT}"
 
-# FLUX
+# Flux
 
 export GITHUB_TOKEN=$GITHUB_TOKEN
 export GITHUB_USER=dnnnvx
@@ -70,3 +70,13 @@ flux bootstrap github \
   --branch=main \
   --path=./clusters/main \
   --personal
+
+# sops
+
+gpg --expert --full-generate-key
+ssh-keygen -t ed25519 -C "marco@ilposto.studio"
+gpg --export-secret-keys --armor "6B960E729E05C93E5C7FAD360F5213C262342832" |
+  kubectl create secret generic sops-gpg \
+  --namespace=flux-system \
+  --from-file=sops.asc=/dev/stdin --dry-run=client -o yaml > clusters/main/flux-system/sops.yaml
+gpg --export --armor "6B960E729E05C93E5C7FAD360F5213C262342832" > .flux.pub.asc
