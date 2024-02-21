@@ -18,7 +18,7 @@ fi
 
 echo -e '#!/bin/sh\n' > .git/hooks/pre-commit
 
-find 'hooks' -type f -exec sh -c '
+find 'scripts/hooks' -type f -exec sh -c '
   for file in "$@"; do
     echo "# ${file}" >> .git/hooks/pre-commit
     cat $file >> .git/hooks/pre-commit
