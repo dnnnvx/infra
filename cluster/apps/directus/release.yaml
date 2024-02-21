@@ -64,10 +64,10 @@ spec:
       #    hosts:
       #      - directus.ilposto.studio
     cache:
-      enabled: false
+      enabled: true
       ttl: "5m"
       autoPurge: true
-      store: "redis"
+      store: "memory"
     generateEnvVars:
       mariadb: false
       redis: false
