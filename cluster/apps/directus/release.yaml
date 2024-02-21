@@ -76,12 +76,6 @@ spec:
         value: "postgresql.postgresql.svc.cluster.local"
       - name: DB_PORT
         value: "5432"
-      - name: DB_SCHEMA
-        value: "postgresql"
-      - name: DB_CUSTOM_SCHEMA
-        value: "postgresql"
-      - name: DB_SEARCH_PATH
-        value: "array:postgresql,public"
       - name: RATE_LIMITER_ENABLED
         value: "true"
       - name: RATE_LIMITER_POINTS # The amount of allowed hits per duration
