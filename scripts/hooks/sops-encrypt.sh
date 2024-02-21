@@ -4,6 +4,8 @@ if ! type sops > /dev/null; then
 fi
 FILES=$(git diff --cached --name-only)
 for FILE in $FILES; do
-  sops --encrypt --in-place $FILE 2>/dev/null
-  git add $FILE
+  if [ -f "$FILE" ]; then
+    sops --encrypt --in-place $FILE 2>/dev/null
+    git add $FILE
+  fi
 done

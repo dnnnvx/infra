@@ -1,8 +1,0 @@
-machine:
-  files:
-    - content: |
-        TS_AUTHKEY=$TS_AUTHKEY
-        TS_ROUTES=10.96.0.0/12
-      permissions: 0o644
-      path: /var/etc/tailscale/auth.env
-      op: create

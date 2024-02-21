@@ -1,9 +1,0 @@
-customization:
-  systemExtensions:
-    officialExtensions:
-      - siderolabs/tailscale
-
-# curl -X POST --data-binary @images/bare-metal.yaml https://factory.talos.dev/schematics
-# talosctl upgrade -n 192.168.1.103 --image factory.talos.dev/installer/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b:v1.6.4
-#
-# https://factory.talos.dev/image/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b/v1.6.4/metal-amd64.iso
