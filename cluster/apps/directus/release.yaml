@@ -30,7 +30,7 @@ spec:
     podAnnotations:
       seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
     podSecurityContext:
-      fsGroup: 2000
+      fsGroup: 1000
     securityContext:
       capabilities:
         drop: ["ALL"]
