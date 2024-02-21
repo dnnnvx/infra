@@ -27,16 +27,6 @@ spec:
       repository: directus/directus
       pullPolicy: Always
       tag: "10"
-    podAnnotations:
-      seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
-    podSecurityContext:
-      fsGroup: 1000
-    securityContext:
-      capabilities:
-        drop: ["ALL"]
-      readOnlyRootFilesystem: false
-      runAsNonRoot: true
-      runAsUser: 1000
     service:
       type: ClusterIP
       port: 80
