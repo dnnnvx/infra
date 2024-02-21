@@ -5,4 +5,5 @@ metadata:
   namespace: postgresql
 spec:
   interval: 10m0s
+  type: "oci"
   url: oci://registry-1.docker.io/bitnamicharts/postgresql
