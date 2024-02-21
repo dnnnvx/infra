@@ -68,16 +68,22 @@ spec:
         value: "sqlite3"
       - name: DB_FILENAME
         value: "app.db"
+      - name: DB_SCHEMA
+        value: "directus"
+      - name: DB_CUSTOM_SCHEMA
+        value: "directus"
+      - name: DB_SEARCH_PATH
+        value: "array:directus,public"
       # - name: DB_HOST
       #   value: "database"
       # - name: DB_PORT
       #   value: "5432"
-      # - name: DB_DATABASE
-      #   value: "directus"
-      # - name: DB_USER
-      #   value: "directus"
-      # - name: DB_PASSWORD
-      #   value: "directus"
+      - name: DB_DATABASE
+        value: "directus"
+      - name: DB_USER
+        value: "directus"
+      - name: DB_PASSWORD
+        value: "directus"
       - name: RATE_LIMITER_ENABLED
         value: "true"
       - name: RATE_LIMITER_POINTS # The amount of allowed hits per duration
