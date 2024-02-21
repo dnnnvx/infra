@@ -77,7 +77,7 @@ spec:
       - name: DB_CLIENT
         value: "sqlite3"
       - name: DB_FILENAME
-        value: app.db
+        value: "app.db"
       # - name: DB_HOST
       #   value: "database"
       # - name: DB_PORT
@@ -108,8 +108,36 @@ spec:
         value: "150"
       - name: RATE_LIMITER_GLOBAL_STORE	# Where to store the rate limiter counts. One of memory, redis
         value: "memory"
+      - name: STORAGE_LOCATIONS
+        value: "s3"
+      - name: STORAGE_S3_DRIVER
+        value: "s3"
+      - name: STORAGE_S3_KEY
+        value: "xV7u5IeqPsomv1DYxQPS6cKiT2Dy7PpxDrK7xpYA"
+      - name: STORAGE_S3_SECRET
+        value: "f2154efb561e80b6a8bac0b3018ce07a29973b1fad147ae52991c0396126a6e3"
+      - name: STORAGE_S3_ENDPOINT
+        value: "https://997f91bd76e7456df317ac9ac3fff92b.eu.r2.cloudflarestorage.com"
+      - name: STORAGE_S3_BUCKET
+        value: "directus"
+      - name: STORAGE_S3_REGION
+        value: "eu"
+      - name: STORAGE_S3_ROOT
+        value: "assets"
+      - name: FILES_MAX_UPLOAD_SIZE
+        value: "50mb"
+      - name: FILES_MIME_TYPE_ALLOW_LIST
+        value: "image/jepg,image/tiff,image/png,image/webp"
+      - name: SYNCHRONIZATION_STORE
+        value: "memory"
+      - name: TELEMETRY
+        value: "false"
+      - name: EMAIL_TRANSPORT
+        value: "sendmail"
+      - name: EMAIL_FROM
+        value: "no-reply@ilposto.studio"
     log:
-      level: "warn"
+      level: "info"
       style: "raw"
     resources:
       limits:
