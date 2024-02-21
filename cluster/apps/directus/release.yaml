@@ -97,7 +97,9 @@ spec:
       - name: STORAGE_LOCATIONS
         value: "local" # "s3"
       - name: STORAGE_S3_DRIVER
-        value: "s3"
+        value: "local" # "s3"
+      - name: STORAGE_LOCAL_ROOT
+        value: "tmp/assets"
       - name: STORAGE_S3_KEY
         value: "xV7u5IeqPsomv1DYxQPS6cKiT2Dy7PpxDrK7xpYA"
       - name: STORAGE_S3_SECRET
