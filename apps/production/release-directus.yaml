@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: directus
-      version: ">=0.7.40"
+      version: "0.x"
       sourceRef:
         kind: HelmRepository
         name: directus

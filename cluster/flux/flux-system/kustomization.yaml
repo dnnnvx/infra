@@ -3,9 +3,3 @@ kind: Kustomization
 resources:
 - gotk-components.yaml
 - gotk-sync.yaml
-- cilium.yaml
-- cloudflared.yaml
-- directus.yaml
-- external-dns.yaml
-- postgresql.yaml
-- tests.yaml

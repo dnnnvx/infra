@@ -1,8 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: cloudflared
-  namespace: cloudflare
+  name: directus
+  namespace: directus
 spec:
   interval: 10m0s
-  url: https://charts.kubito.dev/
+  url: https://digitalist-se.github.io/directus-helm-chart
