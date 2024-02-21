@@ -47,7 +47,7 @@ spec:
           paths:
             - path: /
               backend:
-                serviceName: chart-example.local
+                serviceName: directus
                 servicePort: 80
       tls: []
       #  - secretName: chart-example-tls
@@ -62,8 +62,6 @@ spec:
       mariadb: false
       redis: false
     extraEnvVars:
-      # - name: STORAGE_LOCATIONS
-      #   value: "s3"
       - name: DB_CLIENT
         value: "postgres"
       - name: DB_DATABASE
@@ -97,7 +95,7 @@ spec:
       - name: RATE_LIMITER_GLOBAL_STORE	# Where to store the rate limiter counts. One of memory, redis
         value: "memory"
       - name: STORAGE_LOCATIONS
-        value: "s3"
+        value: "local" # "s3"
       - name: STORAGE_S3_DRIVER
         value: "s3"
       - name: STORAGE_S3_KEY
@@ -125,7 +123,7 @@ spec:
       - name: EMAIL_FROM
         value: "no-reply@ilposto.studio"
     log:
-      level: "info"
+      level: "warn"
       style: "raw"
     resources:
       limits:
