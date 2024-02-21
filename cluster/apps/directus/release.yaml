@@ -89,25 +89,25 @@ spec:
       # - name: DB_PASSWORD
       #   value: "directus"
       - name: RATE_LIMITER_ENABLED
-        value: true
+        value: "true"
       - name: RATE_LIMITER_POINTS # The amount of allowed hits per duration
-        value: 50
+        value: "50"
       - name: RATE_LIMITER_DURATION # The time window in seconds in which the points are counted
-        value: 10
+        value: "10"
       - name: RATE_LIMITER_STORE # Where to store the rate limiter counts. One of memory, redis
-        value: memory
+        value: "memory"
       - name: RATE_LIMITER_HEALTHCHECK_THRESHOLD # Healthcheck timeout threshold in ms
-        value: 150
+        value: "150"
       - name: RATE_LIMITER_GLOBAL_ENABLED	# Whether or not to enable global rate limiting on the API
-        value: false
+        value: "false"
       - name: RATE_LIMITER_GLOBAL_POINTS	# The total amount of allowed hits per duration
-        value: 1000
+        value: "1000"
       - name: RATE_LIMITER_GLOBAL_DURATION	# The time window in seconds in which the points are counted
-        value: 1
+        value: "1"
       - name: RATE_LIMITER_GLOBAL_HEALTHCHECK_THRESHOLD	# Healthcheck timeout threshold in ms
-        value: 150
+        value: "150"
       - name: RATE_LIMITER_GLOBAL_STORE	# Where to store the rate limiter counts. One of memory, redis
-        value: memory
+        value: "memory"
     log:
       level: "warn"
       style: "raw"
