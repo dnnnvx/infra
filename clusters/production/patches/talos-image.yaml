@@ -1,0 +1,22 @@
+machine:
+  install:
+    image: factory.talos.dev/installer/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b:v1.6.4
+    extraKernelArgs:
+      - init_on_free=1
+      - talos.platform=metal
+  network:
+    nameservers:
+      - 192.168.1.1
+      - 1.1.1.1
+      - 8.8.4.4
+      - 8.8.8.8
+    extraHostEntries:
+      - ip: 192.168.1.101
+        aliases:
+          - nuc-1
+      - ip: 192.168.1.102
+        aliases:
+          - nuc-3
+      - ip: 192.168.1.103
+        aliases:
+          - nuc-3
