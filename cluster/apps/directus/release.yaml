@@ -65,25 +65,23 @@ spec:
       # - name: STORAGE_LOCATIONS
       #   value: "s3"
       - name: DB_CLIENT
-        value: "sqlite3"
-      - name: DB_FILENAME
-        value: "app.db"
-      - name: DB_SCHEMA
-        value: "directus"
-      - name: DB_CUSTOM_SCHEMA
-        value: "directus"
-      - name: DB_SEARCH_PATH
-        value: "array:directus,public"
-      # - name: DB_HOST
-      #   value: "database"
-      # - name: DB_PORT
-      #   value: "5432"
+        value: "postgres"
       - name: DB_DATABASE
-        value: "directus"
+        value: "postgresql"
       - name: DB_USER
-        value: "directus"
+        value: "postgresql"
       - name: DB_PASSWORD
-        value: "directus"
+        value: "postgresql"
+      - name: DB_HOST
+        value: "postgresql.postgresql.svc.cluster.local"
+      - name: DB_PORT
+        value: "5432"
+      - name: DB_SCHEMA
+        value: "postgresql"
+      - name: DB_CUSTOM_SCHEMA
+        value: "postgresql"
+      - name: DB_SEARCH_PATH
+        value: "array:postgresql,public"
       - name: RATE_LIMITER_ENABLED
         value: "true"
       - name: RATE_LIMITER_POINTS # The amount of allowed hits per duration

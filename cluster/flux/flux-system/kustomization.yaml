@@ -7,4 +7,5 @@ resources:
 - cloudflared.yaml
 - directus.yaml
 - external-dns.yaml
+- postgresql.yaml
 - tests.yaml
