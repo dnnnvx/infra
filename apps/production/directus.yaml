@@ -71,7 +71,7 @@ spec:
       - name: DB_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: directus-secrets
+            name: directus-auth
             key: DB_PASSWORD
       - name: DB_HOST
         value: postgresql.postgresql.svc.cluster.local
@@ -114,12 +114,12 @@ spec:
       - name: STORAGE_S3_KEY
         valueFrom:
           secretKeyRef:
-            name: directus-secrets
+            name: directus-auth
             key: STORAGE_S3_KEY
       - name: STORAGE_S3_SECRET
         valueFrom:
           secretKeyRef:
-            name: directus-secrets
+            name: directus-auth
             key: STORAGE_S3_SECRET
       - name: FILES_MAX_UPLOAD_SIZE
         value: 50mb
