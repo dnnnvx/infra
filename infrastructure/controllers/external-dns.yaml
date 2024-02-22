@@ -1,63 +1,132 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: external-dns
+    name: external-dns
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:yhJKeCs7yrL+hBitQiezjikYT2z7Ad+9ZvEauOS2eXAkGlCxU2M2BVANL6vFex5bw9rdM8IkaaEDf/45pkgzUaRWmLCLbqKwcGl0BXrRARTmDlXhn1hLM+/QUOSyGCfHfRurPZQv5HnJ0AD5DGQA3+Zg0jkkuyhuJw7swfKU/8k=,iv:9gtfLjF7NDJ4ODj5LeTForRWAoDu5vdmSjHFn1ReRqc=,tag:ZETvl01OQjITR+xBU3ATlA==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAwX5FHTqDbIGfMYlsGXVj3qjMdRP9SjADmiZQ5OMq4Tkw
+            zvZfJM22wRqno28zqZ6D4I92FNaGL47I6FqOJ8dhMR5x/n5qv3BRNQGP70roNjEw
+            1GgBCQIQAwhzayfX+5QuoARuhuFOvtc0iQxIerjcfs3MjxJnKQx+e28CmEYX6xbd
+            Rr/V40zToG98rU1PalwcHymLNRKbUW5tKX/fTCkvJAesmRXofmPJujS6MXEDnsFr
+            MEJ0BsadjFsRFg==
+            =C7fa
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: external-dns
-  namespace: external-dns
+    name: external-dns
+    namespace: external-dns
 spec:
-  interval: 24h
-  url: https://kubernetes-sigs.github.io/external-dns/
+    interval: 24h
+    url: https://kubernetes-sigs.github.io/external-dns/
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:yhJKeCs7yrL+hBitQiezjikYT2z7Ad+9ZvEauOS2eXAkGlCxU2M2BVANL6vFex5bw9rdM8IkaaEDf/45pkgzUaRWmLCLbqKwcGl0BXrRARTmDlXhn1hLM+/QUOSyGCfHfRurPZQv5HnJ0AD5DGQA3+Zg0jkkuyhuJw7swfKU/8k=,iv:9gtfLjF7NDJ4ODj5LeTForRWAoDu5vdmSjHFn1ReRqc=,tag:ZETvl01OQjITR+xBU3ATlA==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAwX5FHTqDbIGfMYlsGXVj3qjMdRP9SjADmiZQ5OMq4Tkw
+            zvZfJM22wRqno28zqZ6D4I92FNaGL47I6FqOJ8dhMR5x/n5qv3BRNQGP70roNjEw
+            1GgBCQIQAwhzayfX+5QuoARuhuFOvtc0iQxIerjcfs3MjxJnKQx+e28CmEYX6xbd
+            Rr/V40zToG98rU1PalwcHymLNRKbUW5tKX/fTCkvJAesmRXofmPJujS6MXEDnsFr
+            MEJ0BsadjFsRFg==
+            =C7fa
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: external-dns
-  namespace: external-dns
+    name: external-dns
+    namespace: external-dns
 spec:
-  interval: 30m
-  chart:
-    spec:
-      chart: external-dns
-      version: ">=v1.14.3"
-      sourceRef:
-        kind: HelmRepository
-        name: external-dns
-        namespace: external-dns
-      interval: 24h
-  values:
-    env:
-      - name: CF_API_TOKEN
-        valueFrom:
-          secretKeyRef:
-            name: cf-api-token
-            key: CF_API_TOKEN
-    resources: {}
-    nodeSelector: {}
-    affinity: {}
-    topologySpreadConstraints: []
-    tolerations: []
-    serviceMonitor:
-      enabled: false
-    logLevel: info
-    logFormat: text
-    interval: 1m
-    sources:
-      - service
-      - ingress
-    policy: sync
-    registry: txt
-    txtOwnerId: ilposto-infra
-    txtPrefix:
-    domainFilters:
-      - ilposto.studio
-      - olab.zone
-    provider:
-      name: cloudflare
-    extraArgs: []
+    interval: 30m
+    chart:
+        spec:
+            chart: external-dns
+            version: '>=v1.14.3'
+            sourceRef:
+                kind: HelmRepository
+                name: external-dns
+                namespace: external-dns
+            interval: 24h
+    values:
+        env:
+            - name: CF_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                    name: cf-api-token
+                    key: CF_API_TOKEN
+        resources: {}
+        nodeSelector: {}
+        affinity: {}
+        topologySpreadConstraints: []
+        tolerations: []
+        serviceMonitor:
+            enabled: false
+        logLevel: info
+        logFormat: text
+        interval: 1m
+        sources:
+            - service
+            - ingress
+        policy: sync
+        registry: txt
+        txtOwnerId: ilposto-infra
+        txtPrefix: null
+        domainFilters:
+            - ilposto.studio
+            - olab.zone
+        provider:
+            name: cloudflare
+        extraArgs: []
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:yhJKeCs7yrL+hBitQiezjikYT2z7Ad+9ZvEauOS2eXAkGlCxU2M2BVANL6vFex5bw9rdM8IkaaEDf/45pkgzUaRWmLCLbqKwcGl0BXrRARTmDlXhn1hLM+/QUOSyGCfHfRurPZQv5HnJ0AD5DGQA3+Zg0jkkuyhuJw7swfKU/8k=,iv:9gtfLjF7NDJ4ODj5LeTForRWAoDu5vdmSjHFn1ReRqc=,tag:ZETvl01OQjITR+xBU3ATlA==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAwX5FHTqDbIGfMYlsGXVj3qjMdRP9SjADmiZQ5OMq4Tkw
+            zvZfJM22wRqno28zqZ6D4I92FNaGL47I6FqOJ8dhMR5x/n5qv3BRNQGP70roNjEw
+            1GgBCQIQAwhzayfX+5QuoARuhuFOvtc0iQxIerjcfs3MjxJnKQx+e28CmEYX6xbd
+            Rr/V40zToG98rU1PalwcHymLNRKbUW5tKX/fTCkvJAesmRXofmPJujS6MXEDnsFr
+            MEJ0BsadjFsRFg==
+            =C7fa
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
 ---
 apiVersion: v1
 kind: Secret
@@ -65,7 +134,7 @@ metadata:
     name: cf-api-token
     namespace: external-dns
 stringData:
-    CF_API_TOKEN: ENC[AES256_GCM,data:dlc/8IjJ4aURq7eq5NYilv/ENIvH0r3kiz5favEXcpJlC0/f8UTkjQ==,iv:yj5ogwiZb32Jp6FgYeMk8AfaxNmG6ds1njDujkZJ27U=,tag:0MvR2wSdukFDg1ZwxdkVpw==,type:str]
+    CF_API_TOKEN: ENC[AES256_GCM,data:UWAy47EeFFa6tAEvJcgRRDGioILGmA8lanPcqyTGXrAT47xl2A3YyGKu/v/ifhujbl40Tlf3Dzu1vh8wsdauJ+Z1kPoZM7Ghs66qigN2VIve+R6WlwQwn1VrRUs4emjTL3Z9N+S1By/UMGjFppudke5CeUZ/eQvTjvswdme74yjajYUiGhFiMiIre7zFAm+hPcvXTOLNrqxP9kE5gyGQzONpVA==,iv:mRZx5nJ7vCDJCI4M+lPtLUqc336ascSa+/rsbAUzmko=,tag:XgP9T2ZVyLQqQeDBU0Ao+g==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -85,6 +154,29 @@ sops:
             lVyt9vcG5Th9teTaTUR7DDbQnuJ5sz2JkbGJvB4IpVim2L8EPChAh6rHVxwJVk5B
             IFMtGNyd7Qs=
             =f5H3
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:yhJKeCs7yrL+hBitQiezjikYT2z7Ad+9ZvEauOS2eXAkGlCxU2M2BVANL6vFex5bw9rdM8IkaaEDf/45pkgzUaRWmLCLbqKwcGl0BXrRARTmDlXhn1hLM+/QUOSyGCfHfRurPZQv5HnJ0AD5DGQA3+Zg0jkkuyhuJw7swfKU/8k=,iv:9gtfLjF7NDJ4ODj5LeTForRWAoDu5vdmSjHFn1ReRqc=,tag:ZETvl01OQjITR+xBU3ATlA==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAwX5FHTqDbIGfMYlsGXVj3qjMdRP9SjADmiZQ5OMq4Tkw
+            zvZfJM22wRqno28zqZ6D4I92FNaGL47I6FqOJ8dhMR5x/n5qv3BRNQGP70roNjEw
+            1GgBCQIQAwhzayfX+5QuoARuhuFOvtc0iQxIerjcfs3MjxJnKQx+e28CmEYX6xbd
+            Rr/V40zToG98rU1PalwcHymLNRKbUW5tKX/fTCkvJAesmRXofmPJujS6MXEDnsFr
+            MEJ0BsadjFsRFg==
+            =C7fa
             -----END PGP MESSAGE-----
           fp: 6B960E729E05C93E5C7FAD360F5213C262342832
     encrypted_regex: ^(data|stringData)$

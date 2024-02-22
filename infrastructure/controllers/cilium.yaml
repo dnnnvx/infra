@@ -1,68 +1,114 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: cilium
-  namespace: kube-system
+    name: cilium
+    namespace: kube-system
 spec:
-  interval: 24h
-  url: https://helm.cilium.io/
+    interval: 24h
+    url: https://helm.cilium.io/
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:Rp35RJM5UpvAFqx85TFCDnSrFIGQrETg1jXP/9Q3DZUJsLB2/Nj0i4bR9zsm3mFBh93sGsktcX6rsfM/2zRUVldG0UlJQsAlNBEQn4PgrZKCcWMB6uDtNnV8BjCVC6DPzO5awHW6yLzGGBDs9A+CzTEtQwuSaWaPzgf8BUPnO2k=,iv:RQ6SDWb/pqgRRAtjfp7MRQHGAFJ9YfS7it6wcgsC3i8=,tag:LRPRuN/EwMDOjtObiC9QoA==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAnjKCRRu6xw1aykB0MhAhfxsbF0VQ2nOLIK4+Q/V/CjMw
+            fzGEnxBEZx6GtDQmQFIelQlwj+hH4C69h/eUTCP7BpnTT96Ab/S1js+m3wUUoISe
+            1GgBCQIQI32xGBp/NjERwLs2H54+dlJd7JUKSNzUph3OUUXPiiwOspF7PSSGw3g5
+            CLZywMZqm39CAUwMfU+d3M/Y56Zs69wOM+2FyQwrf+I10T6OTr1tTSxQti0jXW4O
+            UVlz6+sS1s7B+g==
+            =xy9V
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: cilium
-  namespace: kube-system
+    name: cilium
+    namespace: kube-system
 spec:
-  interval: 30m
-  chart:
-    spec:
-      chart: cilium
-      version: "1.15.x"
-      sourceRef:
-        kind: HelmRepository
-        name: cilium
-        namespace: kube-system
-      interval: 24h
-  values:
-    ipam:
-      mode: kubernetes
-    hostFirewall:
-      enabled: true
-    hubble:
-      relay:
-        enabled: true
-      ui:
-        enabled: true
-        service:
-          annotations:
-            external-dns.alpha.kubernetes.io/internal-hostname: hubble.ilposto.studio
-    kubeProxyReplacement: disabled
-    cgroup:
-      autoMount:
-        enabled: true
-      hostRoot: /sys/fs/cgroup
-    k8sServiceHost: "192.168.1.100"
-    k8sServicePort: "6443"
-    # https://www.talos.dev/v1.6/learn-more/process-capabilities/
-    securityContext:
-      capabilities:
-        ciliumAgent:
-          - CHOWN
-          - KILL
-          - NET_ADMIN
-          - NET_RAW
-          - IPC_LOCK
-          - SYS_ADMIN
-          - SYS_RESOURCE
-          - DAC_OVERRIDE
-          - FOWNER
-          - SETGID
-          - SETUID
-          - PERFMON
-          - BPF
-        cleanCiliumState:
-          - NET_ADMIN
-          - SYS_ADMIN
-          - SYS_RESOURCE
-          - PERFMON
-          - BPF
+    interval: 30m
+    chart:
+        spec:
+            chart: cilium
+            version: 1.15.x
+            sourceRef:
+                kind: HelmRepository
+                name: cilium
+                namespace: kube-system
+            interval: 24h
+    values:
+        ipam:
+            mode: kubernetes
+        hostFirewall:
+            enabled: true
+        hubble:
+            relay:
+                enabled: true
+            ui:
+                enabled: true
+                service:
+                    annotations:
+                        external-dns.alpha.kubernetes.io/internal-hostname: hubble.ilposto.studio
+        kubeProxyReplacement: disabled
+        cgroup:
+            autoMount:
+                enabled: true
+            hostRoot: /sys/fs/cgroup
+        k8sServiceHost: 192.168.1.100
+        k8sServicePort: "6443"
+        # https://www.talos.dev/v1.6/learn-more/process-capabilities/
+        securityContext:
+            capabilities:
+                ciliumAgent:
+                    - CHOWN
+                    - KILL
+                    - NET_ADMIN
+                    - NET_RAW
+                    - IPC_LOCK
+                    - SYS_ADMIN
+                    - SYS_RESOURCE
+                    - DAC_OVERRIDE
+                    - FOWNER
+                    - SETGID
+                    - SETUID
+                    - PERFMON
+                    - BPF
+                cleanCiliumState:
+                    - NET_ADMIN
+                    - SYS_ADMIN
+                    - SYS_RESOURCE
+                    - PERFMON
+                    - BPF
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:Rp35RJM5UpvAFqx85TFCDnSrFIGQrETg1jXP/9Q3DZUJsLB2/Nj0i4bR9zsm3mFBh93sGsktcX6rsfM/2zRUVldG0UlJQsAlNBEQn4PgrZKCcWMB6uDtNnV8BjCVC6DPzO5awHW6yLzGGBDs9A+CzTEtQwuSaWaPzgf8BUPnO2k=,iv:RQ6SDWb/pqgRRAtjfp7MRQHGAFJ9YfS7it6wcgsC3i8=,tag:LRPRuN/EwMDOjtObiC9QoA==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAnjKCRRu6xw1aykB0MhAhfxsbF0VQ2nOLIK4+Q/V/CjMw
+            fzGEnxBEZx6GtDQmQFIelQlwj+hH4C69h/eUTCP7BpnTT96Ab/S1js+m3wUUoISe
+            1GgBCQIQI32xGBp/NjERwLs2H54+dlJd7JUKSNzUph3OUUXPiiwOspF7PSSGw3g5
+            CLZywMZqm39CAUwMfU+d3M/Y56Zs69wOM+2FyQwrf+I10T6OTr1tTSxQti0jXW4O
+            UVlz6+sS1s7B+g==
+            =xy9V
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1

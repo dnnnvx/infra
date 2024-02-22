@@ -1,42 +1,111 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cloudflare
+    name: cloudflare
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:jyzmidFMF3CZSHsbxxZkbLv7FtYcaMsPcf74kOBrXShaSrezSJRF2+fCSZPG0ZcCROMdwGYi+q+xV/rb/CKFnEb4UiIjU5z0iizS3uOC0tpKw1Qq6mOYezFr3fMws0K1hV453fJ6UaJoFAM6lZ/KFiuDwEDm8JFDxwZv8KdxcaE=,iv:nyl55tFTwEZ8MPLUHNP7RHcmqsJPliEhAsN7PGtr4oU=,tag:7F3JAMMKGjnsqX206yUi3g==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAykxBp56XW+44Bh/YaYiFGBC64cVpuNrA8R1P6Hn6ezgw
+            VAZSAs1iLumQNOljWUmeFQRgXFsiDS1saoN8rjVnzV4Di5WXJxtfa2yxkhm/5DNM
+            1GgBCQIQ6NCOqhDqT0wV1xmqQH5Boni93heoyh3mvIJ/EEX7r5LAzfXGI+5HnMgp
+            c667LMQUAxt70GG70adyS5MgoeZnsCUKx6K2TjpxI5x03ydgSUA7RcgpQSWj4fhs
+            Td9FX88mO9mo7Q==
+            =nHP8
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: cloudflared
-  namespace: cloudflare
+    name: cloudflared
+    namespace: cloudflare
 spec:
-  interval: 24h
-  url: https://charts.kubito.dev/
+    interval: 24h
+    url: https://charts.kubito.dev/
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:jyzmidFMF3CZSHsbxxZkbLv7FtYcaMsPcf74kOBrXShaSrezSJRF2+fCSZPG0ZcCROMdwGYi+q+xV/rb/CKFnEb4UiIjU5z0iizS3uOC0tpKw1Qq6mOYezFr3fMws0K1hV453fJ6UaJoFAM6lZ/KFiuDwEDm8JFDxwZv8KdxcaE=,iv:nyl55tFTwEZ8MPLUHNP7RHcmqsJPliEhAsN7PGtr4oU=,tag:7F3JAMMKGjnsqX206yUi3g==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAykxBp56XW+44Bh/YaYiFGBC64cVpuNrA8R1P6Hn6ezgw
+            VAZSAs1iLumQNOljWUmeFQRgXFsiDS1saoN8rjVnzV4Di5WXJxtfa2yxkhm/5DNM
+            1GgBCQIQ6NCOqhDqT0wV1xmqQH5Boni93heoyh3mvIJ/EEX7r5LAzfXGI+5HnMgp
+            c667LMQUAxt70GG70adyS5MgoeZnsCUKx6K2TjpxI5x03ydgSUA7RcgpQSWj4fhs
+            Td9FX88mO9mo7Q==
+            =nHP8
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
 ---
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: cloudflared
-  namespace: cloudflare
+    name: cloudflared
+    namespace: cloudflare
 spec:
-  interval: 30m
-  chart:
-    spec:
-      chart: cloudflared
-      version: ">=1.1.0"
-      sourceRef:
-        kind: HelmRepository
-        name: cloudflared
-        namespace: cloudflare
-      interval: 24h
-  values:
-    image:
-      repository: cloudflare/cloudflared
-      tag: "2024.2.0"
-      imagePullPolicy: IfNotPresent
-    replicaCount: 1
-    managed:
-      enabled: true
-      existingSecret: cf-tunnel-token
+    interval: 30m
+    chart:
+        spec:
+            chart: cloudflared
+            version: '>=1.1.0'
+            sourceRef:
+                kind: HelmRepository
+                name: cloudflared
+                namespace: cloudflare
+            interval: 24h
+    values:
+        image:
+            repository: cloudflare/cloudflared
+            tag: 2024.2.0
+            imagePullPolicy: IfNotPresent
+        replicaCount: 1
+        managed:
+            enabled: true
+            existingSecret: cf-tunnel-token
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:jyzmidFMF3CZSHsbxxZkbLv7FtYcaMsPcf74kOBrXShaSrezSJRF2+fCSZPG0ZcCROMdwGYi+q+xV/rb/CKFnEb4UiIjU5z0iizS3uOC0tpKw1Qq6mOYezFr3fMws0K1hV453fJ6UaJoFAM6lZ/KFiuDwEDm8JFDxwZv8KdxcaE=,iv:nyl55tFTwEZ8MPLUHNP7RHcmqsJPliEhAsN7PGtr4oU=,tag:7F3JAMMKGjnsqX206yUi3g==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAykxBp56XW+44Bh/YaYiFGBC64cVpuNrA8R1P6Hn6ezgw
+            VAZSAs1iLumQNOljWUmeFQRgXFsiDS1saoN8rjVnzV4Di5WXJxtfa2yxkhm/5DNM
+            1GgBCQIQ6NCOqhDqT0wV1xmqQH5Boni93heoyh3mvIJ/EEX7r5LAzfXGI+5HnMgp
+            c667LMQUAxt70GG70adyS5MgoeZnsCUKx6K2TjpxI5x03ydgSUA7RcgpQSWj4fhs
+            Td9FX88mO9mo7Q==
+            =nHP8
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
 ---
 apiVersion: v1
 kind: Secret
@@ -44,7 +113,7 @@ metadata:
     name: cf-tunnel-token
     namespace: cloudflare
 stringData:
-    cf-tunnel-token: ENC[AES256_GCM,data:VtIWPFAJdN1zMJAdrqsXG5lv+UmrGacoi2VUxWTlrw943IOzHthXCGkMRNq7sEqYnlrwkPC73PZH7tumQPr9ot0XhrJfNtL4T0LY6tSyN+nSbMGP5004M4SbVbcMT2u6zMbo6o90P96tREMR0xNvNRwIpNlPMBMcIse/RvZAAaVTEOsBCCuFrDVJ6rzwrmmniLDLMAY811BZs78+N5q27cgOL3j/iBMBqxEpPlPdJVI+srLlJZDO2w==,iv:dHow6NlltWIloheKT5JA68o7hG0m5solcgwB6Bvcf7o=,tag:oAMmIO23+aLR8Q1Z8PFZjw==,type:str]
+    cf-tunnel-token: ENC[AES256_GCM,data:gpgVS3/e2I/psymHzSXHZh7oVod/5YFTZXiV0YAsTYBKl2rAH8WmgyP/yxOBe8O8AGtp0EmkdTPlj2CndYeEqh5cWfc3upCtXngUHeveuSsxExqtzyZhDcrmWiO8qIRmCmvLaweUY6DbDMyDEhy85JGrXgpHIiembQMcG2WFgKTVMgp2sVDsDPBPvnYigaPAWXlp1aIWvm1445+0VFukA0sRl7eJnlEz3bsmmCXZKciIVU2CMRJTCsrTHGfM7jY35+tWfkttmBH9vmbuiohmlZUO0zp2ktZI9ZBwNu2uzAiS9HfgVMePvupTE6x0SX7mfkLCySsQNS4jNZrGSC6TtLXRAVoabUdXYpxK53e5AxRujP3FChhiQcBW0Wb0qXpTQyDTTDVBC3IVSrXb2dL0bqhReZsO1wv458yoVlniHj3DNFiZXCA/YTM7YywXHqBWuMs+wN0zZQuBbiWQgYL6evE8qA==,iv:wdmOl6WArBDC3ASMjSqzFpj9ylJ9q6rCfUU9OVL+th0=,tag:hb+/TSdi7lF8aBbQxakz0Q==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -64,6 +133,29 @@ sops:
             Wv8Sj5syT1wbVCKzN+xJxSzyQNRTaFt8Fx/SRHqjRUnl7XfYePUNrKRM34wDYajb
             unolk6f8ppA=
             =oFBA
+            -----END PGP MESSAGE-----
+          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(data|stringData)$
+    version: 3.8.1
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-22T01:18:12Z"
+    mac: ENC[AES256_GCM,data:jyzmidFMF3CZSHsbxxZkbLv7FtYcaMsPcf74kOBrXShaSrezSJRF2+fCSZPG0ZcCROMdwGYi+q+xV/rb/CKFnEb4UiIjU5z0iizS3uOC0tpKw1Qq6mOYezFr3fMws0K1hV453fJ6UaJoFAM6lZ/KFiuDwEDm8JFDxwZv8KdxcaE=,iv:nyl55tFTwEZ8MPLUHNP7RHcmqsJPliEhAsN7PGtr4oU=,tag:7F3JAMMKGjnsqX206yUi3g==,type:str]
+    pgp:
+        - created_at: "2024-02-22T01:18:12Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DEp/Y/xwwvGESAQdAykxBp56XW+44Bh/YaYiFGBC64cVpuNrA8R1P6Hn6ezgw
+            VAZSAs1iLumQNOljWUmeFQRgXFsiDS1saoN8rjVnzV4Di5WXJxtfa2yxkhm/5DNM
+            1GgBCQIQ6NCOqhDqT0wV1xmqQH5Boni93heoyh3mvIJ/EEX7r5LAzfXGI+5HnMgp
+            c667LMQUAxt70GG70adyS5MgoeZnsCUKx6K2TjpxI5x03ydgSUA7RcgpQSWj4fhs
+            Td9FX88mO9mo7Q==
+            =nHP8
             -----END PGP MESSAGE-----
           fp: 6B960E729E05C93E5C7FAD360F5213C262342832
     encrypted_regex: ^(data|stringData)$
