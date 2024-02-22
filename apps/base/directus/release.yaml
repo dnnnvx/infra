@@ -1,192 +1,169 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-    name: directus
-    namespace: directus
+  name: directus
+  namespace: directus
 spec:
-    interval: 5m
-    chart:
-        spec:
-            chart: directus
-            version: '>=0.7.40'
-            sourceRef:
-                kind: HelmRepository
-                name: directus
-                namespace: directus
-            interval: 1m
-    values:
-        replicaCount: 1
-        admin:
-            email: marco@ilposto.studio
-            password: anubi@ilposto
-        public:
-            # directus.ilposto.studio => with cloudflared doesn't work
-            url: ""
-        key: 1kd75mhf02n4jv8501mc1q09l24bca2
-        secret: 1lc96nx0x6x9m8cv43m80xg2lw8vm93
-        image:
-            repository: directus/directus
-            pullPolicy: Always
-            tag: "10"
-        service:
-            type: ClusterIP
-            port: 80
-        persistence:
-            enabled: false
-            # existingClaim: ""
-            # storageClass: "-"
-            annotations: {}
-            accessModes: ReadWriteOnce
-            size: 8Gi
-        ingress:
-            enabled: false
-            annotations: {}
-            # kubernetes.io/ingress.class: nginx
-            # kubernetes.io/tls-acme: "true"
-            hosts:
-                # directus.ilposto.studio
-                - host: ""
-                  paths:
-                    - path: /
-                      backend:
-                        serviceName: directus
-                        servicePort: 80
-            tls: []
-            #  - secretName: chart-example-tls
-            #    hosts:
-            #      - directus.ilposto.studio
-        cache:
-            enabled: true
-            ttl: 5m
-            autoPurge: true
-            store: memory
-        generateEnvVars:
-            mariadb: false
-            redis: false
-        extraEnvVars:
-            - name: DB_CLIENT
-              value: postgres
-            - name: DB_DATABASE
-              value: postgresql
-            - name: DB_USER
-              value: postgresql
-            - name: DB_PASSWORD
-              value: postgresql
-            - name: DB_HOST
-              value: postgresql.postgresql.svc.cluster.local
-            - name: DB_PORT
-              value: "5432"
-            - name: RATE_LIMITER_ENABLED
-              value: "true"
-            # The amount of allowed hits per duration
-            - name: RATE_LIMITER_POINTS
-              value: "50"
-            # The time window in seconds in which the points are counted
-            - name: RATE_LIMITER_DURATION
-              value: "10"
-            # Where to store the rate limiter counts. One of memory, redis
-            - name: RATE_LIMITER_STORE
-              value: memory
-            # Healthcheck timeout threshold in ms
-            - name: RATE_LIMITER_HEALTHCHECK_THRESHOLD
-              value: "150"
-            # Whether or not to enable global rate limiting on the API
-            - name: RATE_LIMITER_GLOBAL_ENABLED
-              value: "false"
-            # The total amount of allowed hits per duration
-            - name: RATE_LIMITER_GLOBAL_POINTS
-              value: "1000"
-            # The time window in seconds in which the points are counted
-            - name: RATE_LIMITER_GLOBAL_DURATION
-              value: "1"
-            # Healthcheck timeout threshold in ms
-            - name: RATE_LIMITER_GLOBAL_HEALTHCHECK_THRESHOLD
-              value: "150"
-            # Where to store the rate limiter counts. One of memory, redis
-            - name: RATE_LIMITER_GLOBAL_STORE
-              value: memory
-            - name: STORAGE_LOCATIONS
-              # "s3"
-              value: local
-            - name: STORAGE_S3_DRIVER
-              # "s3"
-              value: local
-            - name: STORAGE_LOCAL_ROOT
-              value: assets
-            - name: STORAGE_S3_KEY
-              value: xV7u5IeqPsomv1DYxQPS6cKiT2Dy7PpxDrK7xpYA
-            - name: STORAGE_S3_SECRET
-              value: f2154efb561e80b6a8bac0b3018ce07a29973b1fad147ae52991c0396126a6e3
-            - name: STORAGE_S3_ENDPOINT
-              value: https://997f91bd76e7456df317ac9ac3fff92b.eu.r2.cloudflarestorage.com
-            - name: STORAGE_S3_BUCKET
-              value: directus
-            - name: STORAGE_S3_REGION
-              value: eu
-            - name: STORAGE_S3_ROOT
-              value: assets
-            - name: FILES_MAX_UPLOAD_SIZE
-              value: 50mb
-            - name: FILES_MIME_TYPE_ALLOW_LIST
-              value: image/jepg,image/tiff,image/png,image/webp
-            - name: SYNCHRONIZATION_STORE
-              value: memory
-            - name: TELEMETRY
-              value: "false"
-            - name: EMAIL_TRANSPORT
-              value: sendmail
-            - name: EMAIL_FROM
-              value: no-reply@ilposto.studio
-        log:
-            level: warn
-            style: raw
-        resources:
-            limits:
-                cpu: 500m
-                memory: 512Mi
-            requests:
-                cpu: 80m
-                memory: 128Mi
-        autoscaling:
-            enabled: false
-            minReplicas: 1
-            maxReplicas: 10
-            targetCPUUtilizationPercentage: 80
-            # targetMemoryUtilizationPercentage: 80
-        startupProbe:
-            enabled: true
-        livenessProbe:
-            enabled: true
-        readinessProbe:
-            enabled: true
-        nodeSelector: {}
-        tolerations: []
-        affinity: {}
-        mariadb:
-            enabled: false
-        redis:
-            enabled: false
-            architecture: standalone
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2024-02-22T01:18:12Z"
-    mac: ENC[AES256_GCM,data:PST/BH7T52+DrA5e7GBM94V37TK1rj4cKXvapLXLhNgkP2f5L+z70g0LcbEwZvsOtcmVMawEyL67PZ0IFeq/lGxZkv7kVE1vY7rH0M1NXMKEHITnhh6CgC2gNfxaxVkO4N5m/7Puzy2fTpI13zpMH2WpCdtF1C6DnIdSfbRaAe0=,iv:NRLerRyQLf0JNuwUEQmlxHrW/JYXwi+tn59QPfoYPA4=,tag:tQ9VBmjd8C3e1WS+p/sCyA==,type:str]
-    pgp:
-        - created_at: "2024-02-22T01:18:12Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hF4DEp/Y/xwwvGESAQdAmP0eFfeY/BlYmk+1LJ+JGPqEKAygKDIFQGyFU2ml0R8w
-            Sqx3HL138wOa2JZa1+Ly+/f0GzU5gI5uYELHKrBbQvbK03OrMvOwahcCY0vOMhhM
-            1GgBCQIQkoFSwPC8RygBMbbDRwBF/VKikG8Xprb3jvPEbXVPDhRl0m4/SehrzpV+
-            1OaJirgVB94KZXN5CVbDszFPwymlbJvtm4gqSKG2eiN1QMbuaHqlhjpadINDYcQj
-            1l+CdhPSDCZQWA==
-            =ChLs
-            -----END PGP MESSAGE-----
-          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  interval: 5m
+  chart:
+    spec:
+      chart: directus
+      version: '>=0.7.40'
+      sourceRef:
+        kind: HelmRepository
+        name: directus
+        namespace: directus
+      interval: 1m
+  values:
+    replicaCount: 1
+    admin:
+      email: marco@ilposto.studio
+      password: anubi@ilposto
+    public:
+      # directus.ilposto.studio => with cloudflared doesn't work
+      url: ""
+    key: 1kd75mhf02n4jv8501mc1q09l24bca2
+    secret: 1lc96nx0x6x9m8cv43m80xg2lw8vm93
+    image:
+      repository: directus/directus
+      pullPolicy: Always
+      tag: "10"
+    service:
+      type: ClusterIP
+      port: 80
+    persistence:
+      enabled: false
+      # existingClaim: ""
+      # storageClass: "-"
+      annotations: {}
+      accessModes: ReadWriteOnce
+      size: 8Gi
+    ingress:
+      enabled: false
+      annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+      hosts:
+        # directus.ilposto.studio
+        - host: ""
+          paths:
+            - path: /
+              backend:
+                serviceName: directus
+                servicePort: 80
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - directus.ilposto.studio
+    cache:
+      enabled: true
+      ttl: 5m
+      autoPurge: true
+      store: memory
+    generateEnvVars:
+      mariadb: false
+      redis: false
+    extraEnvVars:
+      - name: DB_CLIENT
+        value: postgres
+      - name: DB_DATABASE
+        value: postgresql
+      - name: DB_USER
+        value: postgresql
+      - name: DB_PASSWORD
+        value: postgresql
+      - name: DB_HOST
+        value: postgresql.postgresql.svc.cluster.local
+      - name: DB_PORT
+        value: "5432"
+      - name: RATE_LIMITER_ENABLED
+        value: "true"
+      # The amount of allowed hits per duration
+      - name: RATE_LIMITER_POINTS
+        value: "50"
+      # The time window in seconds in which the points are counted
+      - name: RATE_LIMITER_DURATION
+        value: "10"
+      # Where to store the rate limiter counts. One of memory, redis
+      - name: RATE_LIMITER_STORE
+        value: memory
+      # Healthcheck timeout threshold in ms
+      - name: RATE_LIMITER_HEALTHCHECK_THRESHOLD
+        value: "150"
+      # Whether or not to enable global rate limiting on the API
+      - name: RATE_LIMITER_GLOBAL_ENABLED
+        value: "false"
+      # The total amount of allowed hits per duration
+      - name: RATE_LIMITER_GLOBAL_POINTS
+        value: "1000"
+      # The time window in seconds in which the points are counted
+      - name: RATE_LIMITER_GLOBAL_DURATION
+        value: "1"
+      # Healthcheck timeout threshold in ms
+      - name: RATE_LIMITER_GLOBAL_HEALTHCHECK_THRESHOLD
+        value: "150"
+      # Where to store the rate limiter counts. One of memory, redis
+      - name: RATE_LIMITER_GLOBAL_STORE
+        value: memory
+      - name: STORAGE_LOCATIONS
+        # "s3"
+        value: local
+      - name: STORAGE_S3_DRIVER
+        # "s3"
+        value: local
+      - name: STORAGE_LOCAL_ROOT
+        value: assets
+      - name: STORAGE_S3_KEY
+        value: xV7u5IeqPsomv1DYxQPS6cKiT2Dy7PpxDrK7xpYA
+      - name: STORAGE_S3_SECRET
+        value: f2154efb561e80b6a8bac0b3018ce07a29973b1fad147ae52991c0396126a6e3
+      - name: STORAGE_S3_ENDPOINT
+        value: https://997f91bd76e7456df317ac9ac3fff92b.eu.r2.cloudflarestorage.com
+      - name: STORAGE_S3_BUCKET
+        value: directus
+      - name: STORAGE_S3_REGION
+        value: eu
+      - name: STORAGE_S3_ROOT
+        value: assets
+      - name: FILES_MAX_UPLOAD_SIZE
+        value: 50mb
+      - name: FILES_MIME_TYPE_ALLOW_LIST
+        value: image/jepg,image/tiff,image/png,image/webp
+      - name: SYNCHRONIZATION_STORE
+        value: memory
+      - name: TELEMETRY
+        value: "false"
+      - name: EMAIL_TRANSPORT
+        value: sendmail
+      - name: EMAIL_FROM
+        value: no-reply@ilposto.studio
+    log:
+      level: warn
+      style: raw
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 80m
+        memory: 128Mi
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+    startupProbe:
+      enabled: true
+    livenessProbe:
+      enabled: true
+    readinessProbe:
+      enabled: true
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    mariadb:
+      enabled: false
+    redis:
+      enabled: false
+      architecture: standalone
