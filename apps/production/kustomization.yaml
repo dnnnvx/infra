@@ -6,11 +6,11 @@ resources:
 commonLabels:
   ilposto.studio/stage: production
 patches:
-  - path: release-directus.yaml
+  - path: directus.yaml
     target:
       kind: HelmRelease
       name: directus
-  - path: release-postgresql.yaml
+  - path: postgresql.yaml
     target:
       kind: HelmRelease
       name: postgresql
