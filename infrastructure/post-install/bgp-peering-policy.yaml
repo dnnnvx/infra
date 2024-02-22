@@ -1,7 +1,7 @@
 apiVersion: cilium.io/v2alpha1
 kind: CiliumBGPPeeringPolicy
 metadata:
- name: bgp-peering-policy
+  name: bgp-peering-policy
 spec:
   virtualRouters:
     - localASN: 64512
@@ -13,4 +13,5 @@ spec:
         matchExpressions:
           - key: usage
             operator: NotIn
-            values: ['internal']
+            values:
+              - internal

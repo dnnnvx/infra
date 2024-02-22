@@ -1,8 +1,3 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: external-dns
----
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
@@ -33,8 +28,8 @@ spec:
       - name: CF_API_TOKEN
         valueFrom:
         secretKeyRef:
-          name: cf-api-token
-          key: CF_API_TOKEN
+          name: cf-dns-token
+          key: cf-dns-token
     resources: {}
     nodeSelector: {}
     affinity: {}
@@ -58,34 +53,3 @@ spec:
     provider:
       name: cloudflare
     extraArgs: []
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: cf-api-token
-  namespace: external-dns
-stringData:
-  CF_API_TOKEN: ENC[AES256_GCM,data:UWAy47EeFFa6tAEvJcgRRDGioILGmA8lanPcqyTGXrAT47xl2A3YyGKu/v/ifhujbl40Tlf3Dzu1vh8wsdauJ+Z1kPoZM7Ghs66qigN2VIve+R6WlwQwn1VrRUs4emjTL3Z9N+S1By/UMGjFppudke5CeUZ/eQvTjvswdme74yjajYUiGhFiMiIre7zFAm+hPcvXTOLNrqxP9kE5gyGQzONpVA==,iv:mRZx5nJ7vCDJCI4M+lPtLUqc336ascSa+/rsbAUzmko=,tag:XgP9T2ZVyLQqQeDBU0Ao+g==,type:str]
-sops:
-  kms: []
-  gcp_kms: []
-  azure_kv: []
-  hc_vault: []
-  age: []
-  lastmodified: "2024-02-15T14:22:48Z"
-  mac: ENC[AES256_GCM,data:WZ5HcOZqVbvxxn8T8n6iSrFZzjJkHampeSA6IYeZGpwaPjXJ/ygRhH3C+dr0XJtEUT4qkRlaOk/gv67lcdGvwGJYQhFJjfFoVBaJba/lMLnY7NuB5tyEmRHomkFlnUYPZevrs+XtQsna2uQPrVSn9tKZnteht1cWroJA0CWY+AU=,iv:ehA69v8xPP0GK1tzMDvsmX5r9qBN1qfThhLRfEkCLgI=,tag:KDOisGACeFVyyF9dqHv2xg==,type:str]
-  pgp:
-    - created_at: "2024-02-15T14:22:48Z"
-      enc: |-
-        -----BEGIN PGP MESSAGE-----
-
-        hF4DEp/Y/xwwvGESAQdArBHbSIMeAWEnoI3e8+EH/S3l49s76BMWxejKxS2CElAw
-        fl/jOwTq2ZVqItSriZa7hlH1Pv7zJZ6hb2V0PyuC1I/XLM7dV04clFrns4cQPpsG
-        1GYBCQIQwCN+I8ksT9fDBIoEU7Snb9caFtWH80UwSDnC9Uym1T4Qk8TsXhZfznGf
-        lVyt9vcG5Th9teTaTUR7DDbQnuJ5sz2JkbGJvB4IpVim2L8EPChAh6rHVxwJVk5B
-        IFMtGNyd7Qs=
-        =f5H3
-        -----END PGP MESSAGE-----
-      fp: 6B960E729E05C93E5C7FAD360F5213C262342832
-  encrypted_regex: ^(data|stringData)$
-  version: 3.8.1

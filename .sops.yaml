@@ -1,13 +1,16 @@
 creation_rules:
-  # - path_regex: apps\/.*\.yaml$
-  #   encrypted_regex: ^(data|stringData)$
-  #   pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
-  # - path_regex: infrastructure\/.*\.yaml$
-  #   encrypted_regex: ^(data|stringData)$
-  #   pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
+  #
+  # kubernetes secrets
+  #
+  - path_regex: ^(apps|infrastructure)\/.*\/secret-.*\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    age: age1xql5qrpyrvrxjjcyl53j80ny679n8c4vzxuufwqywgyddkc4fc5qrwup5k
+  #
+  # talos secrets
+  #
   - path_regex: clusters\/.*\/talosconfig\.yaml$
-    encrypted_regex: ^key$
-    pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(ca|crt|key)$
+    age: age1xql5qrpyrvrxjjcyl53j80ny679n8c4vzxuufwqywgyddkc4fc5qrwup5k
   - path_regex: clusters\/.*\/secrets\.yaml$
-    encrypted_regex: ^(secret|bootstraptoken|secretboxencryptionsecret|token|key)$
-    pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
+    encrypted_regex: ^(ca|crt|secret|bootstraptoken|secretboxencryptionsecret|token|key)$
+    age: age1xql5qrpyrvrxjjcyl53j80ny679n8c4vzxuufwqywgyddkc4fc5qrwup5k
