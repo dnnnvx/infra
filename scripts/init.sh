@@ -28,6 +28,7 @@ talosctl gen config \
     --config-patch @patches/disable-default-cni.yaml          \
     --config-patch @patches/tailscale-auth.yaml               \
     --config-patch @nodes/$NODE_NAME.yaml                     \
+    --config-patch @patches/storage-mayastore.yaml            \
     $CLUSTER_NAME                                             \
     $API_ENDPOINT
 
@@ -81,3 +82,7 @@ cat ~/Library/Application\ Support/sops/age/key.txt |
 kubectl create secret generic sops-age \
 --namespace=flux-system \
 --from-file=age.agekey=/dev/stdin
+
+
+# fix mayastore
+talosctl patch --mode=no-reboot machineconfig -n 100.86.127.55 --patch @clusters/production/patches/storage-mayastore.yaml
