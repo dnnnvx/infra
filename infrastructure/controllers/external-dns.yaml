@@ -27,9 +27,9 @@ spec:
     env:
       - name: CF_API_TOKEN
         valueFrom:
-        secretKeyRef:
-          name: cf-dns-token
-          key: cf-dns-token
+          secretKeyRef:
+            name: cf-dns-token
+            key: cf-dns-token
     resources: {}
     nodeSelector: {}
     affinity: {}

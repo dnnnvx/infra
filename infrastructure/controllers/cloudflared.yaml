@@ -32,3 +32,6 @@ spec:
     managed:
       enabled: true
       existingSecret: cf-tunnel-token
+    extraEnvVars:
+      - name: TUNNEL_MANAGEMENT_DIAGNOSTICS
+        value: "false"
