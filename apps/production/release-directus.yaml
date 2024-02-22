@@ -69,7 +69,20 @@ spec:
       - name: DB_USER
         value: postgresql
       - name: DB_PASSWORD
-        value: postgresql
+        valueFrom:
+          secretKeyRef:
+            name: directus-secrets
+            key: DB_PASSWORD
+      - name: STORAGE_S3_KEY
+        valueFrom:
+          secretKeyRef:
+            name: directus-secrets
+            key: STORAGE_S3_KEY
+      - name: STORAGE_S3_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: directus-secrets
+            key: STORAGE_S3_SECRET
       - name: DB_HOST
         value: postgresql.postgresql.svc.cluster.local
       - name: DB_PORT
@@ -100,10 +113,6 @@ spec:
         value: local # "s3"
       - name: STORAGE_LOCAL_ROOT
         value: assets
-      - name: STORAGE_S3_KEY
-        value: xV7u5IeqPsomv1DYxQPS6cKiT2Dy7PpxDrK7xpYA
-      - name: STORAGE_S3_SECRET
-        value: f2154efb561e80b6a8bac0b3018ce07a29973b1fad147ae52991c0396126a6e3
       - name: STORAGE_S3_ENDPOINT
         value: https://997f91bd76e7456df317ac9ac3fff92b.eu.r2.cloudflarestorage.com
       - name: STORAGE_S3_BUCKET
