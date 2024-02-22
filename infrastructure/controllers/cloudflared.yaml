@@ -14,15 +14,15 @@ metadata:
   namespace: cloudflared
 spec:
   interval: 30m
-  chart: null
-  spec:
-    chart: cloudflared
-    version: '>=1.1.0'
-    sourceRef: null
-    kind: HelmRepository
-    name: cloudflared
-    namespace: cloudflared
-    interval: 24h
+  chart:
+    spec:
+      chart: cloudflared
+      version: '>=v1.1.0'
+      sourceRef:
+        kind: HelmRepository
+        name: cloudflared
+        namespace: cloudflared
+      interval: 24h
   values:
     image:
       repository: cloudflare/cloudflared
