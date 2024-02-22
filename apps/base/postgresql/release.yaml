@@ -1,149 +1,126 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-    name: postgresql
-    namespace: postgresql
+  name: postgresql
+  namespace: postgresql
 spec:
-    interval: 5m
-    chart:
-        spec:
-            chart: postgresql
-            version: '>=14.2.1'
-            sourceRef:
-                kind: HelmRepository
-                name: postgresql
-                namespace: postgresql
-            interval: 1m
-    values:
-        global:
-            storageClass: ""
-            postgresql:
-                auth:
-                    username: postgresql
-                    database: postgresql
-                    existingSecret: auth
-                    secretKeys:
-                        adminPasswordKey: postgres-password
-                        userPasswordKey: password
-                        replicationPasswordKey: replication-password
-        architecture: standalone
-        primary:
-            name: primary
-            configuration: ""
-            ## @param primary.pgHbaConfiguration PostgreSQL Primary client authentication configuration
-            ## ref: https://www.postgresql.org/docs/current/static/auth-pg-hba-conf.html
-            ## e.g:#
-            ## pgHbaConfiguration: |-
-            ##   local all all trust
-            ##   host all all localhost trust
-            ##   host mydatabase mysuser 192.168.0.0/24 md5
-            ##
-            pgHbaConfiguration: ""
-            ## @param primary.existingConfigmap Name of an existing ConfigMap with PostgreSQL Primary configuration
-            ## NOTE: `primary.configuration` and `primary.pgHbaConfiguration` will be ignored
-            ##
-            existingConfigmap: ""
-            ## @param primary.extendedConfiguration Extended PostgreSQL Primary configuration (appended to main or default configuration)
-            ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#allow-settings-to-be-loaded-from-files-other-than-the-default-postgresqlconf
-            ##
-            extendedConfiguration: ""
-            ## @param primary.existingExtendedConfigmap Name of an existing ConfigMap with PostgreSQL Primary extended configuration
-            ## NOTE: `primary.extendedConfiguration` will be ignored
-            ##
-            existingExtendedConfigmap: ""
-            ## Initdb configuration
-            ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#specifying-initdb-arguments
-            ##
-            initdb:
-                ## @param primary.initdb.args PostgreSQL initdb extra arguments
-                ##
-                args: ""
-                ## @param primary.initdb.postgresqlWalDir Specify a custom location for the PostgreSQL transaction log
-                ##
-                postgresqlWalDir: ""
-                ## @param primary.initdb.scripts Dictionary of initdb scripts
-                ## Specify dictionary of scripts to be run at first boot
-                ## e.g:
-                ## scripts:
-                ##   my_init_script.sh: |
-                ##      #!/bin/sh
-                ##      echo "Do something."
-                ##
-                scripts: {}
-                ## @param primary.initdb.scriptsConfigMap ConfigMap with scripts to be run at first boot
-                ## NOTE: This will override `primary.initdb.scripts`
-                ##
-                scriptsConfigMap: ""
-                ## @param primary.initdb.scriptsSecret Secret with scripts to be run at first boot (in case it contains sensitive information)
-                ## NOTE: This can work along `primary.initdb.scripts` or `primary.initdb.scriptsConfigMap`
-                ##
-                scriptsSecret: ""
-                ## @param primary.initdb.user Specify the PostgreSQL username to execute the initdb scripts
-                ##
-                user: ""
-                ## @param primary.initdb.password Specify the PostgreSQL password to execute the initdb scripts
-                ##
-                password: ""
-            resources:
-                requests:
-                    cpu: 80m
-                    memory: 128Mi
-                limits:
-                    cpu: 400m
-                    memory: 512Mi
-            persistence:
-                enabled: false
-                existingClaim: ""
-                mountPath: /bitnami/postgresql
-                storageClass: ""
-                size: 8Gi
-            persistentVolumeClaimRetentionPolicy:
-                enabled: false
-                whenScaled: Retain
-                whenDeleted: Retain
-        readReplicas:
-            replicaCount: 0
-            persistence:
-                enabled: false
-        backup:
-            enabled: false
-            cronjob:
-                schedule: '@daily'
-                timeZone: ""
-                concurrencyPolicy: Allow
-                failedJobsHistoryLimit: 1
-                successfulJobsHistoryLimit: 3
-                startingDeadlineSeconds: ""
-                ttlSecondsAfterFinished: ""
-                restartPolicy: OnFailure
-                storage:
-                    existingClaim: ""
-                    resourcePolicy: ""
-                    storageClass: ""
-                    size: 8Gi
-                    mountPath: /backup/pgdump
-        metrics:
-            enabled: false
-sops:
-    kms: []
-    gcp_kms: []
-    azure_kv: []
-    hc_vault: []
-    age: []
-    lastmodified: "2024-02-22T01:18:12Z"
-    mac: ENC[AES256_GCM,data:2cLjDK3amRM3eOp//zjOzipRjTCkzunyQ5i1YA7giv4qfwfZQypvrkuhBiOhxYoZQC7UJw46rrK4j5yoxSnTGaTCEg2kkn5h7zdRI+XZ5+BKrISr5ZHja/fY4hAl8jS8z6yR40JKuJ61wlibBaebhBrvJi+pFacqIikfX5rBuU4=,iv:IT6sFXP5MyK43IJSXm7wJrgYhkYcpe/aUMvcSk11cXA=,tag:ztfAoqr+c28aRS+M4pjL8w==,type:str]
-    pgp:
-        - created_at: "2024-02-22T01:18:12Z"
-          enc: |-
-            -----BEGIN PGP MESSAGE-----
-
-            hF4DEp/Y/xwwvGESAQdA2QhuX9SHi1K8s+drxhqAwE+oUzXRNQ6rhm+RA4Dw0H8w
-            ifJNb9nisGo4Il+Y8/C9dXAzU68AhqjXVb9gDndhVYM2BDZTFgPeivg+SrfgWr5d
-            1GYBCQIQR0Mavy5OApQ+7/6Crr6efqQUOzR0b/z9xuzIl67eLdx7U0oj9stMQjK6
-            nEnb6B4m9AGO/XHZ/WKKDiTKR4tkI6kQA+QBpneEajDdW+2AKwVaoZ42IgqCGYBZ
-            aUhzUso0wDA=
-            =2tFi
-            -----END PGP MESSAGE-----
-          fp: 6B960E729E05C93E5C7FAD360F5213C262342832
-    encrypted_regex: ^(data|stringData)$
-    version: 3.8.1
+  interval: 5m
+  chart:
+    spec:
+      chart: postgresql
+      version: '>=14.2.1'
+      sourceRef:
+        kind: HelmRepository
+        name: postgresql
+        namespace: postgresql
+      interval: 1m
+  values:
+    global:
+      storageClass: ""
+      postgresql:
+        auth:
+          username: postgresql
+          database: postgresql
+          existingSecret: auth
+          secretKeys:
+            adminPasswordKey: postgres-password
+            userPasswordKey: password
+            replicationPasswordKey: replication-password
+    architecture: standalone
+    primary:
+      name: primary
+      configuration: ""
+      ## @param primary.pgHbaConfiguration PostgreSQL Primary client authentication configuration
+      ## ref: https://www.postgresql.org/docs/current/static/auth-pg-hba-conf.html
+      ## e.g:#
+      ## pgHbaConfiguration: |-
+      ##   local all all trust
+      ##   host all all localhost trust
+      ##   host mydatabase mysuser 192.168.0.0/24 md5
+      ##
+      pgHbaConfiguration: ""
+      ## @param primary.existingConfigmap Name of an existing ConfigMap with PostgreSQL Primary configuration
+      ## NOTE: `primary.configuration` and `primary.pgHbaConfiguration` will be ignored
+      ##
+      existingConfigmap: ""
+      ## @param primary.extendedConfiguration Extended PostgreSQL Primary configuration (appended to main or default configuration)
+      ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#allow-settings-to-be-loaded-from-files-other-than-the-default-postgresqlconf
+      ##
+      extendedConfiguration: ""
+      ## @param primary.existingExtendedConfigmap Name of an existing ConfigMap with PostgreSQL Primary extended configuration
+      ## NOTE: `primary.extendedConfiguration` will be ignored
+      ##
+      existingExtendedConfigmap: ""
+      ## Initdb configuration
+      ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#specifying-initdb-arguments
+      ##
+      initdb:
+        ## @param primary.initdb.args PostgreSQL initdb extra arguments
+        ##
+        args: ""
+        ## @param primary.initdb.postgresqlWalDir Specify a custom location for the PostgreSQL transaction log
+        ##
+        postgresqlWalDir: ""
+        ## @param primary.initdb.scripts Dictionary of initdb scripts
+        ## Specify dictionary of scripts to be run at first boot
+        ## e.g:
+        ## scripts:
+        ##   my_init_script.sh: |
+        ##      #!/bin/sh
+        ##      echo "Do something."
+        ##
+        scripts: {}
+        ## @param primary.initdb.scriptsConfigMap ConfigMap with scripts to be run at first boot
+        ## NOTE: This will override `primary.initdb.scripts`
+        ##
+        scriptsConfigMap: ""
+        ## @param primary.initdb.scriptsSecret Secret with scripts to be run at first boot (in case it contains sensitive information)
+        ## NOTE: This can work along `primary.initdb.scripts` or `primary.initdb.scriptsConfigMap`
+        ##
+        scriptsSecret: ""
+        ## @param primary.initdb.user Specify the PostgreSQL username to execute the initdb scripts
+        ##
+        user: ""
+        ## @param primary.initdb.password Specify the PostgreSQL password to execute the initdb scripts
+        ##
+        password: ""
+      resources:
+        requests:
+          cpu: 80m
+          memory: 128Mi
+        limits:
+          cpu: 400m
+          memory: 512Mi
+      persistence:
+        enabled: false
+        existingClaim: ""
+        mountPath: /bitnami/postgresql
+        storageClass: ""
+        size: 8Gi
+      persistentVolumeClaimRetentionPolicy:
+        enabled: false
+        whenScaled: Retain
+        whenDeleted: Retain
+    readReplicas:
+      replicaCount: 0
+      persistence:
+        enabled: false
+    backup:
+      enabled: false
+      cronjob:
+        schedule: '@daily'
+        timeZone: ""
+        concurrencyPolicy: Allow
+        failedJobsHistoryLimit: 1
+        successfulJobsHistoryLimit: 3
+        startingDeadlineSeconds: ""
+        ttlSecondsAfterFinished: ""
+        restartPolicy: OnFailure
+        storage:
+          existingClaim: ""
+          resourcePolicy: ""
+          storageClass: ""
+          size: 8Gi
+          mountPath: /backup/pgdump
+    metrics:
+      enabled: false
