@@ -8,11 +8,9 @@ done
 
 FILES=$(git diff --cached --name-only)
 for FILE in $FILES; do
-  if [ -f "$FILE" ]; then
+  if [[ -f "$FILE" ]] && [[ $FILE == *.yaml ]]; then
     sops --encrypt --in-place $FILE 2>/dev/null
-    # adjust identation until https://github.com/getsops/sops/pull/1273 is part of the next release
-    yq e -Pi $FILE
+    yq e -Pi $FILE # adjust identation until https://github.com/getsops/sops/pull/1273 is part of the next release
     git add $FILE
-    echo "Encrypted secret in $FILE"
   fi
 done
