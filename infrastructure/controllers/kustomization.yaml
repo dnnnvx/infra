@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - cert-manager.yaml
   - cilium.yaml
+  - cloudflared.yaml
+  - external-dns.yaml
