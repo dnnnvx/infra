@@ -1,9 +1,9 @@
 creation_rules:
-  - path_regex: apps\/.*secret.*\.yaml$
+  - path_regex: apps\/.*\.yaml$
     encrypted_regex: ^(data|stringData)$
     pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
 
-  - path_regex: infrastructure\/.*secret.*\.yaml$
+  - path_regex: infrastructure\/.*\.yaml$
     encrypted_regex: ^(data|stringData)$
     pgp: 6B960E729E05C93E5C7FAD360F5213C262342832
 

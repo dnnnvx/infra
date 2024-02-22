@@ -17,16 +17,3 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/args/-
         value: --requeue-dependency=10s
-  - target:
-      group: kustomize.toolkit.fluxcd.io
-      version: v1
-      kind: Kustomization
-      name: "flux-system"
-    patch: |
-      - op: add
-        path: /spec
-        value:
-          decryption:
-            provider: sops
-            secretRef:
-              name: sops-gpg
