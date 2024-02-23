@@ -90,9 +90,9 @@ spec:
     etcd:
       replicaCount: 3
       persistence:
-        enabled: false
+        enabled: true
         size: 2Gi
-      removeMemberOnContainerTermination: true
+      removeMemberOnContainerTermination: false
       auth:
         rbac:
           create: false
