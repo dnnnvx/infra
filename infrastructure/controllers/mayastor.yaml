@@ -90,7 +90,7 @@ spec:
     etcd:
       replicaCount: 3
       persistence:
-        enabled: true
+        enabled: false
         size: 2Gi
       removeMemberOnContainerTermination: false
       auth:
@@ -102,18 +102,7 @@ spec:
       enabled: false
     obs:
       callhome:
-        enabled: true
-        logLevel: info
-        sendReport: true
-        resources:
-          limits:
-            cpu: 100m
-            memory: 32Mi
-          requests:
-            cpu: 50m
-            memory: 16Mi
-      stats:
-        logLevel: info
+        enabled: false
     storageClass:
       enabled: true
       nameSuffix: single-replica
