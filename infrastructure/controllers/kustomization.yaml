@@ -5,3 +5,4 @@ resources:
   - cilium.yaml
   - cloudflared.yaml
   - external-dns.yaml
+  - mayastor.yaml
