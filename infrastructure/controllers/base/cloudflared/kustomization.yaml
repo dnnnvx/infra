@@ -1,8 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: directus
+namespace: cloudflared
 resources:
   - namespace.yaml
   - repository.yaml
   - release.yaml
-  - secret-directus-auth.yaml
+  - secret-cf-tunnel-token.yaml
