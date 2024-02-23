@@ -92,7 +92,7 @@ spec:
       persistence:
         enabled: false
         size: 2Gi
-      removeMemberOnContainerTermination: false
+      removeMemberOnContainerTermination: true
       auth:
         rbac:
           create: false
