@@ -5,6 +5,6 @@ resources:
   - ../base/cilium
   - ../base/cloudflared
   - ../base/external-dns
-  - ../base/metrics-server
+  - ../base/storage
 commonLabels:
   ilposto.studio/stage: production
