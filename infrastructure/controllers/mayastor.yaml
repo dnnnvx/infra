@@ -106,6 +106,7 @@ spec:
     storageClass:
       enabled: true
       default: true
+      nameSuffix: ""
       parameters:
         protocol: nvmf
         ioTimeout: "30"
