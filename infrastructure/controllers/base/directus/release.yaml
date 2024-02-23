@@ -1,0 +1,95 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: directus
+  namespace: directus
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: directus
+      version: '>=0.7.40'
+      sourceRef:
+        kind: HelmRepository
+        name: directus
+        namespace: directus
+      interval: 1m
+  values:
+    replicaCount: 1
+    admin:
+      email: marco@ilposto.studio
+      password: anubi@ilposto
+    public:
+      # directus.ilposto.studio => with cloudflared doesn't work
+      url: ""
+    key: 1kd75mhf02n4jv8501mc1q09l24bca2
+    secret: 1lc96nx0x6x9m8cv43m80xg2lw8vm93
+    image:
+      repository: directus/directus
+      pullPolicy: Always
+      tag: "10"
+    service:
+      type: ClusterIP
+      port: 80
+    persistence:
+      enabled: false
+      # existingClaim: ""
+      # storageClass: "-"
+      annotations: {}
+      accessModes: ReadWriteOnce
+      size: 8Gi
+    ingress:
+      enabled: false
+      annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+      hosts:
+        # directus.ilposto.studio
+        - host: ""
+          paths:
+            - path: /
+              backend:
+                serviceName: directus
+                servicePort: 80
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - directus.ilposto.studio
+    cache:
+      enabled: true
+      ttl: 5m
+      autoPurge: true
+      store: memory
+    generateEnvVars:
+      mariadb: false
+      redis: false
+    log:
+      level: warn
+      style: raw
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 80m
+        memory: 128Mi
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 80
+      # targetMemoryUtilizationPercentage: 80
+    startupProbe:
+      enabled: true
+    livenessProbe:
+      enabled: true
+    readinessProbe:
+      enabled: true
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    mariadb:
+      enabled: false
+    redis:
+      enabled: false
+      architecture: standalone
