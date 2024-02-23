@@ -1,9 +1,9 @@
 machine:
   kubelet:
     extraMounts:
-      - destination: /var/local/mayastor
+      - destination: /var/local
         type: bind
-        source: /var/local/mayastor
+        source: /var/local
         options:
           - bind
           - rshared

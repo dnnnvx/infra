@@ -1,0 +1,16 @@
+machine:
+  install:
+    disk: /dev/sda
+  network:
+    hostname: nuc-3
+    interfaces:
+      - deviceSelector:
+          busPath: 0*
+        dhcp: true
+        vip:
+          ip: 192.168.1.100
+        addresses:
+          - 192.168.1.103/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 192.168.1.1
