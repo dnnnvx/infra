@@ -1,40 +1,103 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: metrics-server
-  namespace: kube-system
+  name: mayastor
+  namespace: mayastor
 spec:
   interval: 30m
   chart:
     spec:
-      chart: metrics-server
-      version: '>=3.12.0'
+      chart: mayastor
+      version: '>=2.5.0'
       sourceRef:
         kind: HelmRepository
-        name: metrics-server
-        namespace: kube-system
+        name: mayastor
+        namespace: mayastor
       interval: 24h
   values:
-    replicas: 1
-    defaultArgs:
-      - --cert-dir=/tmp
-      - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-      - −−kubelet-insecure-tls
-      - --kubelet-use-node-status-port
-      - --metric-resolution=15s
-    metrics:
+    image:
+      tag: develop
+      pullPolicy: IfNotPresent
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    base:
+      metrics:
+        enabled: false
+        pollingInterval: 5m
+      jaeger:
+        enabled: false
+    eventing:
       enabled: false
-    serviceMonitor:
+    operators:
+      pool:
+        logLevel: info
+    agents:
+      core:
+        logLevel: info
+        capacity:
+          thin:
+            # -- The allowed pool commitment limit when dealing with thin provisioned volumes.
+            # Example: If the commitment is 250 and the pool is 10GiB we can overcommit the pool
+            # up to 25GiB (create 2 10GiB and 1 5GiB volume) but no further.
+            poolCommitment: 250%
+            # -- When creating replicas for an existing volume, each replica pool must have at least
+            # this much free space percentage of the volume size.
+            # Example: if this value is 40, the pool has 40GiB free, then the max volume size allowed
+            # to be created on the pool is 100GiB.
+            volumeCommitment: 40%
+            # -- Same as the `volumeCommitment` argument, but applicable only when creating replicas
+            # for a new volume.
+            volumeCommitmentInitial: 40%
+            # -- When creating snapshots for an existing volume, each replica pool must have at least
+            # this much free space percentage of the volume size.
+            # Example: if this value is 40, the pool has 40GiB free, then the max volume size allowed
+            # to be snapped on the pool is 100GiB.
+            snapshotCommitment: 40%
+      ha:
+        enabled: true
+        node:
+          logLevel: info
+        cluster:
+          logLevel: info
+    apis:
+      rest:
+        logLevel: info
+        replicaCount: 1
+    io_engine:
+      logLevel: info
+      nvme:
+        ioTimeout: 110s
+        adminTimeout: 30s
+        keepAliveTimeout: 10s
+        tcp:
+          maxQueueDepth: "32"
+      envcontext: ""
+      reactorFreezeDetection:
+        enabled: false
+      cpuCount: "1"
+      nodeSelector:
+        openebs.io/engine: mayastor
+        kubernetes.io/arch: amd64
+    etcd:
+      replicaCount: 3
+      persistence:
+        enabled: true
+        size: 2Gi
+      removeMemberOnContainerTermination: false
+      auth:
+        rbac:
+          create: false
+          enabled: false
+          allowNoneAuthentication: true
+    loki-stack:
       enabled: false
-      additionalLabels: {}
-      interval: 1m
-      scrapeTimeout: 10s
-      metricRelabelings: []
-      relabelings: []
-    resources:
-      requests:
-        cpu: 40m
-        memory: 80Mi
-      limits:
-        cpu: 100m
-        memory: 200Mi
+    obs:
+      callhome:
+        enabled: false
+    storageClass:
+      enabled: true
+      default: true
+      parameters:
+        repl: 1 # f set to two, then it tolerates one node failure. If set to three, then two node failures, etc
+    localpv-provisioner:
+      enabled: true
