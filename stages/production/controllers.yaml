@@ -13,3 +13,7 @@ spec:
   path: ./infrastructure/controllers/production
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
