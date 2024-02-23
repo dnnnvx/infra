@@ -105,10 +105,10 @@ spec:
         enabled: false
     storageClass:
       enabled: true
-      nameSuffix: single-replica
-      default: false
+      default: true
       parameters:
         protocol: nvmf
-        repl: 1
+        ioTimeout: "30"
+        repl: 1 # f set to two, then it tolerates one node failure. If set to three, then two node failures, etc
     localpv-provisioner:
       enabled: true
