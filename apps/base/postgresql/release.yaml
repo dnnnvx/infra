@@ -92,11 +92,11 @@ spec:
           cpu: 400m
           memory: 512Mi
       persistence:
-        enabled: false
-        existingClaim: ""
-        mountPath: /bitnami/postgresql
-        storageClass: ""
-        size: 8Gi
+        enabled: true
+        existingClaim: postgresql-pvc
+        mountPath: /var/local/postgresql
+        storageClass: local
+        size: 4Gi
       persistentVolumeClaimRetentionPolicy:
         enabled: false
         whenScaled: Retain
