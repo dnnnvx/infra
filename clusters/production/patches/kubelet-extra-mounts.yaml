@@ -1,0 +1,10 @@
+machine:
+  kubelet:
+    extraMounts:
+      - destination: /var/local/mayastor
+        type: bind
+        source: /var/local/mayastor
+        options:
+          - bind
+          - rshared
+          - rw

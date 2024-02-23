@@ -85,4 +85,6 @@ kubectl create secret generic sops-age \
 
 
 # fix mayastore
-talosctl patch --mode=no-reboot machineconfig -n 100.86.127.55 --patch @clusters/production/patches/storage-mayastore.yaml
+talosctl patch --mode=no-reboot machineconfig -n 192.168.1.101 --patch @clusters/production/patches/storage-mayastor.yaml
+talosctl patch --mode=no-reboot machineconfig -n 192.168.1.101 --patch @clusters/production/patches/kubelet-extra-mounts.yaml
+talosctl -n 192.168.1.101 service kubelet restart
