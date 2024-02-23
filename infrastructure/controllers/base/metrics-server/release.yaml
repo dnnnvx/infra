@@ -19,9 +19,10 @@ spec:
     defaultArgs:
       - --cert-dir=/tmp
       - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-      - −−kubelet-insecure-tls
       - --kubelet-use-node-status-port
       - --metric-resolution=15s
+    args:
+      - −−kubelet-insecure-tls
     metrics:
       enabled: false
     serviceMonitor:
