@@ -4,6 +4,5 @@ resources:
   - namespace-cloudflared.yaml
   - namespace-cert-manager.yaml
   - namespace-external-dns.yaml
-  - namespace-mayastor.yaml
   - secret-cf-dns-token.yaml
   - secret-cf-tunnel-token.yaml
