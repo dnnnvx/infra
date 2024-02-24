@@ -66,16 +66,28 @@ spec:
             enabled: false
           auth.anonymous:
             enabled: true
-            org_name: Il Posto
+            org_name: ilposto
             org_role: Editor
+        defaultDashboardsEnabled: true
         defaultDashboardsTimezone: Europe/Rome
+        defaultDashboardsEditable: true
+        service:
+          annotations:
+            external-dns.alpha.kubernetes.io/internal-hostname: grafana.ilposto.studio
         ingress:
           enabled: false
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
         persistence:
           enabled: false
           storageClassName: local
           accessModes:
             - ReadWriteOnce
+          inMemory:
+            enabled: true
+            sizeLimit: 200Mi
           size: 1Gi
       kubeApiServer:
         enabled: true
