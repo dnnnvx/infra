@@ -72,6 +72,8 @@ spec:
         defaultDashboardsTimezone: Europe/Rome
         defaultDashboardsEditable: true
         service:
+          enabled: true
+          type: ClusterIP
           annotations:
             external-dns.alpha.kubernetes.io/internal-hostname: grafana.ilposto.studio
         ingress:
