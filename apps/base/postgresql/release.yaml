@@ -28,7 +28,6 @@ spec:
             replicationPasswordKey: replication-password
     architecture: standalone
     primary:
-      name: primary
       configuration: ""
       ## @param primary.pgHbaConfiguration PostgreSQL Primary client authentication configuration
       ## ref: https://www.postgresql.org/docs/current/static/auth-pg-hba-conf.html
@@ -93,8 +92,6 @@ spec:
           memory: 512Mi
       persistence:
         enabled: true
-        existingClaim: postgresql-pvc
-        mountPath: /var/local/postgresql
         storageClass: local
         size: 4Gi
       persistentVolumeClaimRetentionPolicy:

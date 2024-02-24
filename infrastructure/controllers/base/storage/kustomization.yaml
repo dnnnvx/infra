@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - storage-class.yaml
+  - persistent-volumes.yaml
