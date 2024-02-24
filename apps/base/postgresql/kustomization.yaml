@@ -6,4 +6,3 @@ resources:
   - repository.yaml
   - release.yaml
   - secret-auth.yaml
-  - persistent-volume.yaml
