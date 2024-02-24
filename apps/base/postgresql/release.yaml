@@ -98,7 +98,7 @@ spec:
         storageClass: local
         size: 4Gi
       persistentVolumeClaimRetentionPolicy:
-        enabled: false
+        enabled: true
         whenScaled: Retain
         whenDeleted: Retain
     readReplicas:

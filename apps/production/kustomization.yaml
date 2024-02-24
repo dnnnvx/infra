@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - ../base/directus
   - ../base/postgresql
+  - ../base/kube-prometheus-stack
 commonLabels:
   ilposto.studio/stage: production
 patches:
