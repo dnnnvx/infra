@@ -65,7 +65,6 @@ spec:
           enabled: false
         auth.anonymous:
           enabled: true
-          org_name: ilposto
           org_role: Editor
       defaultDashboardsEnabled: true
       defaultDashboardsTimezone: Europe/Rome
