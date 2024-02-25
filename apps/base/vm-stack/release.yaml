@@ -156,8 +156,7 @@ spec:
         receivers:
           - name: telegram
             telegram_configs:
-              - channel: '#channel'
-                send_resolved: true
+              - send_resolved: true
                 # message: '{{ template "slack.monzo.title" . }}: {{ template "slack.monzo.text" . }}'
                 bot_token: 7170271606:AAGqLjFOzdlCITYPzR64pKbyifXHsNd-k_g
                 chat_id: 2052897951
