@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - ../base/directus
   - ../base/postgresql
-  - ../base/vm-stack
+  - ../base/grafana-agent
 commonLabels:
   ilposto.studio/stage: production
 patches:

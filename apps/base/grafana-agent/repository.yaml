@@ -1,8 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: victoria-metrics
+  name: grafana
   namespace: metrics
 spec:
   interval: 10m0s
-  url: https://victoriametrics.github.io/helm-charts/
+  url: https://grafana.github.io/helm-charts
