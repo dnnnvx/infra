@@ -1,0 +1,40 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: directus
+  namespace: postgresql
+spec:
+  description: Directus postgres
+  instances: 1
+  startDelay: 300
+  stopDelay: 300
+  primaryUpdateStrategy: unsupervised
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      pg_stat_statements.max: "10000"
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: 10s
+    # local and tailscale
+    pg_hba:
+      - host all all 192.168.1.0/24 md5
+      - host all all 10.96.0.0/12 md5
+  bootstrap:
+    initdb:
+      database: directus
+      owner: directus
+      secret:
+        name: directus-auth
+  storage:
+    storageClass: local
+    size: 4Gi
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
+      cpu: 1500mi
+  nodeMaintenanceWindow:
+    inProgress: false
+    reusePVC: true
