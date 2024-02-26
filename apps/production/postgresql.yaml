@@ -5,14 +5,6 @@ spec:
       create: true
     config:
       create: true
-      name: cnpg-controller-manager-config
-      secret: false
-      # https://cloudnative-pg.io/documentation/current/operator_conf/#available-options
-      data: {}
-      # INHERITED_ANNOTATIONS: categories
-      # INHERITED_LABELS: environment, workload, app
-      # WATCH_NAMESPACE: namespace-a,namespace-b
-    additionalArgs: []
     resources:
       limits:
         cpu: 100m
