@@ -27,10 +27,16 @@ spec:
         name: directus-auth
   storage:
     storageClass: local
-    size: 4Gi
-  walStorage:
-    storageClass: local
-    size: 1Gi
+    size: 2Gi
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+  # walStorage:
+  #   storageClass: local
+  #   size: 1Gi
   ephemeralVolumesSizeLimit:
     shm: 128Mi
     temporaryData: 128Mi
