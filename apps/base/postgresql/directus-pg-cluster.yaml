@@ -28,13 +28,20 @@ spec:
   storage:
     storageClass: local
     size: 4Gi
+  walStorage:
+    storageClass: local
+    size: 1Gi
   resources:
     requests:
       memory: 128Mi
-      cpu: 100m
+      cpu: 80m
     limits:
       memory: 1Gi
-      cpu: 1500mi
+      cpu: 800mi
   nodeMaintenanceWindow:
     inProgress: false
     reusePVC: true
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+    podAntiAffinityType: preferred
