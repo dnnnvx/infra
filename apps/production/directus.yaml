@@ -111,16 +111,16 @@ spec:
         value: eu
       - name: STORAGE_S3_ROOT
         value: assets
-      - name: STORAGE_S3_KEY
-        valueFrom:
-          secretKeyRef:
-            name: directus-auth
-            key: STORAGE_S3_KEY
-      - name: STORAGE_S3_SECRET
-        valueFrom:
-          secretKeyRef:
-            name: directus-auth
-            key: STORAGE_S3_SECRET
+      # - name: STORAGE_S3_KEY
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: directus-auth
+      #       key: STORAGE_S3_KEY
+      # - name: STORAGE_S3_SECRET
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: directus-auth
+      #       key: STORAGE_S3_SECRET
       - name: FILES_MAX_UPLOAD_SIZE
         value: 50mb
       - name: FILES_MIME_TYPE_ALLOW_LIST
