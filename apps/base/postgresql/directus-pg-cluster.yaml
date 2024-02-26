@@ -32,15 +32,15 @@ spec:
     storageClass: local
     size: 1Gi
   ephemeralVolumesSizeLimit:
-    shm: 128mi
-    temporaryData: 128mi
+    shm: 128Mi
+    temporaryData: 128Mi
   resources:
     requests:
       memory: 128Mi
       cpu: 80m
     limits:
       memory: 1Gi
-      cpu: 800mi
+      cpu: 800m
   nodeMaintenanceWindow:
     inProgress: false
     reusePVC: true
