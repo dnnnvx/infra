@@ -31,6 +31,9 @@ spec:
   walStorage:
     storageClass: local
     size: 1Gi
+  ephemeralVolumesSizeLimit:
+    shm: 128mi
+    temporaryData: 128mi
   resources:
     requests:
       memory: 128Mi
