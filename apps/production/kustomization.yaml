@@ -14,4 +14,4 @@ patches:
   - path: postgresql.yaml
     target:
       kind: HelmRelease
-      name: postgresql
+      name: cloudnative-pg
