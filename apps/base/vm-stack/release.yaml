@@ -139,7 +139,6 @@ spec:
       config:
         global:
           resolve_timeout: 5m
-          slack_api_url: http://slack:30500/
         route:
           receiver: telegram
           routes:
@@ -153,7 +152,7 @@ spec:
               - send_resolved: true
                 # message: '{{ template "slack.monzo.title" . }}: {{ template "slack.monzo.text" . }}'
                 bot_token: 7170271606:AAGqLjFOzdlCITYPzR64pKbyifXHsNd-k_g
-                chat_id: 2052897951
+                chat_id: -1002052897951
       monzoTemplate:
         enabled: true
     vmalert:
