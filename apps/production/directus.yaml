@@ -133,6 +133,10 @@ spec:
         value: sendmail
       - name: EMAIL_FROM
         value: no-reply@ilposto.studio
+      - name: CORS_ENABLED
+        value: "true"
+      - name: CORS_ORIGIN
+        value: '*'
     log:
       level: warn
       style: raw
