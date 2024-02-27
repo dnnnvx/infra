@@ -137,6 +137,8 @@ spec:
         value: "true"
       - name: CORS_ORIGIN
         value: '*'
+      - name: CORS_CREDENTIALS
+        value: "false"
     log:
       level: warn
       style: raw
