@@ -1,0 +1,57 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: ilposto
+  namespace: postgresql
+spec:
+  description: ilposto postgres
+  instances: 1
+  startDelay: 300
+  stopDelay: 300
+  primaryUpdateStrategy: unsupervised
+  postgresql:
+    parameters:
+      shared_buffers: 128MB
+      pg_stat_statements.max: "10000"
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: 10s
+    # local and services (tailscale)
+    pg_hba:
+      - host all all 192.168.1.0/24 md5
+      - host all all 10.96.0.0/12 md5
+  bootstrap:
+    initdb:
+      database: ilposto
+      owner: ilposto
+      secret:
+        name: ilposto-auth
+  storage:
+    storageClass: local
+    size: 8Gi
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+      storageClassName: local
+  # walStorage:
+  #   storageClass: local
+  #   size: 1Gi
+  ephemeralVolumesSizeLimit:
+    shm: 128Mi
+    temporaryData: 128Mi
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 80m
+    limits:
+      memory: 1Gi
+      cpu: 800m
+  nodeMaintenanceWindow:
+    inProgress: false
+    reusePVC: true
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+    podAntiAffinityType: preferred
