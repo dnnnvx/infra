@@ -70,11 +70,11 @@ helm install                                                    \
 export GITHUB_TOKEN=$GITHUB_TOKEN
 export GITHUB_USER=dnnnvx
 flux bootstrap github \
-  --owner=$GITHUB_USER \
-  --repository=ilposto-infra \
+  --token-auth \
+  --owner=ilposto \
+  --repository=infra \
   --branch=main \
-  --path=./cluster/flux \
-  --personal
+  --path=./cluster/flux
 
 # sops
 
