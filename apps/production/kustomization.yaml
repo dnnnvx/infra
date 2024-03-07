@@ -4,6 +4,7 @@ resources:
   - ../base/directus
   - ../base/postgresql
   - ../base/grafana-agent
+  - ../base/ilposto
 commonLabels:
   ilposto.studio/stage: production
 patches:
