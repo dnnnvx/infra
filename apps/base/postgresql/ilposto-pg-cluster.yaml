@@ -25,16 +25,16 @@ spec:
       owner: ilposto
       secret:
         name: ilposto-auth
-  storage:
-    storageClass: local
-    size: 8Gi
-    pvcTemplate:
-      accessModes:
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: 8Gi
-      storageClassName: local
+  # storage:
+  #   storageClass: local
+  #   size: 8Gi
+  #   pvcTemplate:
+  #     accessModes:
+  #       - ReadWriteOnce
+  #     resources:
+  #       requests:
+  #         storage: 8Gi
+  #     storageClassName: local
   # walStorage:
   #   storageClass: local
   #   size: 1Gi
