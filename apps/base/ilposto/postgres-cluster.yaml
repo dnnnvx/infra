@@ -35,9 +35,9 @@ spec:
         requests:
           storage: 8Gi
       storageClassName: local
-  walStorage:
-    storageClass: local
-    size: 1Gi
+  # walStorage:
+  #   storageClass: local
+  #   size: 1Gi
   ephemeralVolumesSizeLimit:
     shm: 128Mi
     temporaryData: 128Mi
