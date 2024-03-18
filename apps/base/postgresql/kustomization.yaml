@@ -8,5 +8,3 @@ resources:
   - secret-backup.yaml
   - secret-directus-auth.yaml
   - directus-pg-cluster.yaml
-  - secret-ilposto-auth.yaml
-  - ilposto-pg-cluster.yaml

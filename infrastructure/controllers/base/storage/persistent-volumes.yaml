@@ -4,7 +4,7 @@ metadata:
   name: nuc-1-pv
 spec:
   capacity:
-    storage: 20Gi
+    storage: 16Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -27,7 +27,7 @@ metadata:
   name: nuc-2-pv
 spec:
   capacity:
-    storage: 20Gi
+    storage: 16Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -50,7 +50,7 @@ metadata:
   name: nuc-3-pv
 spec:
   capacity:
-    storage: 20Gi
+    storage: 16Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce

@@ -2,7 +2,7 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: ilposto
-  namespace: postgresql
+  namespace: ilposto
 spec:
   description: ilposto postgres
   instances: 1
@@ -25,19 +25,19 @@ spec:
       owner: ilposto
       secret:
         name: ilposto-auth
-  # storage:
-  #   storageClass: local
-  #   size: 8Gi
-  #   pvcTemplate:
-  #     accessModes:
-  #       - ReadWriteOnce
-  #     resources:
-  #       requests:
-  #         storage: 8Gi
-  #     storageClassName: local
-  # walStorage:
-  #   storageClass: local
-  #   size: 1Gi
+  storage:
+    storageClass: local
+    size: 8Gi
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+      storageClassName: local
+  walStorage:
+    storageClass: local
+    size: 1Gi
   ephemeralVolumesSizeLimit:
     shm: 128Mi
     temporaryData: 128Mi
