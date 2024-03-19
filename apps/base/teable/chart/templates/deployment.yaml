@@ -69,6 +69,10 @@ spec:
               value: http://db.ilposto.studio
             - name: PRISMA_DATABASE_URL
               value: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+            - name: BACKEND_MAIL_AUTH_USER
+              value: dotmarcodestefani@gmail.com
+            - name: BACKEND_MAIL_AUTH_PASS
+              value: ilposto-admin
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
