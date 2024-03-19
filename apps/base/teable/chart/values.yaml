@@ -16,6 +16,8 @@ podLabels: {}
 podSecurityContext:
   fsGroup: 1001
 securityContext:
+  privileged: false
+  allowPrivilegeEscalation: true
   capabilities:
     drop:
       - ALL
@@ -23,6 +25,8 @@ securityContext:
   readOnlyFilesystem: false
   runAsNonRoot: true
   runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
 service:
   type: ClusterIP
   port: 80
@@ -57,13 +61,18 @@ autoscaling:
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
-volumes: []
+volumes:
+  - name: assets
+    emptyDir: {}
 # - name: foo
 #   secret:
 #     secretName: mysecret
 #     optional: false
 
-volumeMounts: []
+volumeMounts:
+  - name: assets
+    mountPath: /app/.assets
+    readOnly: false
 # - name: foo
 #   mountPath: "/etc/foo"
 #   readOnly: true
