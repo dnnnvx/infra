@@ -72,7 +72,7 @@ spec:
         valueFrom:
           secretKeyRef:
             name: directus-auth
-            key: DB_PASSWORD
+            key: password
       - name: DB_HOST
         value: directus-rw.postgresql.svc.cluster.local
       - name: DB_PORT
