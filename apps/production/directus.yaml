@@ -74,7 +74,7 @@ spec:
             name: directus-auth
             key: password
       - name: DB_HOST
-        value: directus-rw.postgresql.svc.cluster.local
+        value: directus-rw.directus.svc.cluster.local
       - name: DB_PORT
         value: "5432"
       - name: RATE_LIMITER_ENABLED
