@@ -16,13 +16,13 @@ podLabels: {}
 podSecurityContext:
   fsGroup: 1001
 securityContext:
-  privileged: false
-  allowPrivilegeEscalation: true
-  capabilities:
-    drop:
-      - ALL
-  readOnlyRootFilesystem: true
-  readOnlyFilesystem: false
+  # privileged: false
+  # allowPrivilegeEscalation: true
+  # capabilities:
+  #   drop:
+  #     - ALL
+  # readOnlyRootFilesystem: true
+  # readOnlyFilesystem: false
   runAsNonRoot: true
   runAsUser: 1001
   runAsGroup: 1001
@@ -64,9 +64,6 @@ autoscaling:
 volumes:
   - name: assets
     emptyDir: {}
-  - name: fake-file
-    configMap:
-      name: fake-file
 # - name: foo
 #   secret:
 #     secretName: mysecret
@@ -75,10 +72,6 @@ volumes:
 volumeMounts:
   - name: assets
     mountPath: /app/.assets
-    readOnly: false
-  - name: fake-file
-    mountPath: /app/apps/nestjs-backend/dist/openapi.json
-    subPath: openapi.json
     readOnly: false
 nodeSelector: {}
 tolerations: []
