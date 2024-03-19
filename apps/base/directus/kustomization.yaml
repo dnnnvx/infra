@@ -3,6 +3,8 @@ kind: Kustomization
 namespace: directus
 resources:
   - namespace.yaml
+  - postgres-cluster.yaml
   - repository.yaml
   - release.yaml
   - secret-directus-auth.yaml
+  - secret-postgres-auth.yaml

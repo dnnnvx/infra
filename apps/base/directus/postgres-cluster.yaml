@@ -2,7 +2,7 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: directus
-  namespace: postgresql
+  namespace: directus
 spec:
   description: Directus postgres
   instances: 1
@@ -26,7 +26,6 @@ spec:
       secret:
         name: directus-auth
   storage:
-    storageClass: local
     size: 2Gi
     pvcTemplate:
       accessModes:
@@ -34,7 +33,6 @@ spec:
       resources:
         requests:
           storage: 2Gi
-      storageClassName: local
   # walStorage:
   #   storageClass: local
   #   size: 1Gi

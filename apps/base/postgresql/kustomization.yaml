@@ -6,5 +6,3 @@ resources:
   - repository.yaml
   - release.yaml
   - secret-backup.yaml
-  - secret-directus-auth.yaml
-  - directus-pg-cluster.yaml
