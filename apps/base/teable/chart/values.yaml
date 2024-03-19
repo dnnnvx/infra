@@ -64,14 +64,9 @@ autoscaling:
 volumes:
   - name: assets
     emptyDir: {}
-  - name: be
-    emptyDir: {}
 volumeMounts:
   - name: assets
-    mountPath: /app/.assets
-    readOnly: false
-  - name: be
-    mountPath: /app/apps/nestjs-backend/dist
+    mountPath: /app
     readOnly: false
 nodeSelector: {}
 tolerations: []
