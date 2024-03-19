@@ -20,6 +20,7 @@ securityContext:
     drop:
       - ALL
   readOnlyRootFilesystem: true
+  readOnlyFilesystem: false
   runAsNonRoot: true
   runAsUser: 1001
 service:
