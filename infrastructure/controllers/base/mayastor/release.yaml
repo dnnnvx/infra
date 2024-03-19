@@ -15,8 +15,8 @@ spec:
         namespace: mayastor
       interval: 24h
   values:
-  crds:
-    enabled: true
+    crds:
+      enabled: true
     jaeger:
       enabled: false
     image:
