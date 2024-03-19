@@ -7,12 +7,11 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: teable
+      chart: ./apps/base/teable/chart
       sourceRef:
         kind: GitRepository
         name: flux-system
         namespace: flux-system
-      path: ./apps/base/teable/chart
       interval: 1m
       reconcileStrategy: Revision
   values: {}
