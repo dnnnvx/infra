@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  repository: ghcr.io/teableio/teable
+  repository: ghcr.io/undb-xyz/undb
   pullPolicy: IfNotPresent
   tag: latest
 imagePullSecrets: []
@@ -62,16 +62,11 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 volumes:
-  - name: assets
+  - name: db
     emptyDir: {}
-# - name: foo
-#   secret:
-#     secretName: mysecret
-#     optional: false
-
 volumeMounts:
-  - name: assets
-    mountPath: /app/.assets
+  - name: db
+    mountPath: /var/opt/.undb
     readOnly: false
 nodeSelector: {}
 tolerations: []
