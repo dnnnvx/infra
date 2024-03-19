@@ -26,7 +26,7 @@ spec:
       secret:
         name: ilposto-auth
   storage:
-    storageClass: local
+    storageClass: mayastor-etcd-localpv
     size: 8Gi
     pvcTemplate:
       accessModes:
@@ -34,9 +34,10 @@ spec:
       resources:
         requests:
           storage: 8Gi
-      storageClassName: local
+      storageClassName: mayastor-etcd-localpv
+      volumeMode: Filesystem
   # walStorage:
-  #   storageClass: local
+  #   storageClass: mayastor-etcd-localpv
   #   size: 1Gi
   ephemeralVolumesSizeLimit:
     shm: 128Mi

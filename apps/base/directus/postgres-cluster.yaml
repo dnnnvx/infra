@@ -26,6 +26,7 @@ spec:
       secret:
         name: directus-auth
   storage:
+    storageClass: mayastor-etcd-localpv
     size: 2Gi
     pvcTemplate:
       accessModes:
@@ -33,9 +34,11 @@ spec:
       resources:
         requests:
           storage: 2Gi
-  # walStorage:
-  #   storageClass: local
-  #   size: 1Gi
+      storageClassName: mayastor-etcd-localpv
+      volumeMode: Filesystem
+  # walStorage:
+  #   storageClass: mayastor-etcd-localpv
+  #   size: 1Gi
   ephemeralVolumesSizeLimit:
     shm: 128Mi
     temporaryData: 128Mi
