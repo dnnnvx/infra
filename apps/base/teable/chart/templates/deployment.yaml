@@ -51,6 +51,8 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
+            - name: NEXT_ENV_IMAGES_ALL_REMOTE
+              value: "true"
             - name: TIMEZONE
               value: UTC
             - name: POSTGRES_HOST
