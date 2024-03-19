@@ -64,8 +64,9 @@ autoscaling:
 volumes:
   - name: assets
     emptyDir: {}
-  - name: be
-    emptyDir: {}
+  - name: fake-file
+    configMap:
+      name: fake-file
 # - name: foo
 #   secret:
 #     secretName: mysecret
@@ -75,7 +76,7 @@ volumeMounts:
   - name: assets
     mountPath: /app/.assets
     readOnly: false
-  - name: be
+  - name: fake-file
     mountPath: /app/apps/nestjs-backend/dist/openapi.json
     subPath: openapi.json
     readOnly: false
