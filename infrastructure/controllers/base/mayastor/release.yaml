@@ -15,25 +15,23 @@ spec:
         namespace: mayastor
       interval: 24h
   values:
+  crds:
+    enabled: true
+    jaeger:
+      enabled: false
     image:
-      tag: develop
       pullPolicy: IfNotPresent
-    nodeSelector:
-      kubernetes.io/arch: amd64
     base:
+      logging:
+        format: json
+        color: false
       metrics:
         enabled: false
         pollingInterval: 5m
       jaeger:
         enabled: false
-    eventing:
-      enabled: false
-    operators:
-      pool:
-        logLevel: info
     agents:
       core:
-        logLevel: info
         capacity:
           thin:
             # -- The allowed pool commitment limit when dealing with thin provisioned volumes.
@@ -54,42 +52,17 @@ spec:
             # to be snapped on the pool is 100GiB.
             snapshotCommitment: 40%
       ha:
-        enabled: true
-        node:
-          logLevel: info
-        cluster:
-          logLevel: info
-    apis:
-      rest:
-        logLevel: info
-        replicaCount: 1
-    io_engine:
-      logLevel: info
-      nvme:
-        ioTimeout: 110s
-        adminTimeout: 30s
-        keepAliveTimeout: 10s
-        tcp:
-          maxQueueDepth: "32"
-      envcontext: ""
-      reactorFreezeDetection:
         enabled: false
+    io_engine:
       cpuCount: "1"
-      nodeSelector:
-        openebs.io/engine: mayastor
-        kubernetes.io/arch: amd64
     etcd:
       replicaCount: 3
       persistence:
         enabled: true
         size: 2Gi
-      removeMemberOnContainerTermination: false
-      auth:
-        rbac:
-          create: false
-          enabled: false
-          allowNoneAuthentication: true
     loki-stack:
+      enabled: false
+    eventing:
       enabled: false
     obs:
       callhome:
