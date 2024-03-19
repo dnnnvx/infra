@@ -5,6 +5,7 @@ resources:
   - ../base/postgresql
   - ../base/grafana-agent
   - ../base/ilposto
+  - ../base/teable
 commonLabels:
   ilposto.studio/stage: production
 patches:
