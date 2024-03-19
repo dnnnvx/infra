@@ -51,22 +51,22 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
-            name: TIMEZONE
-            value: UTC
-            name: POSTGRES_HOST
-            value: ilposto-rw.ilposto.svc.cluster.local
-            name: POSTGRES_PORT
-            value: "5432"
-            name: POSTGRES_DB
-            value: ilposto
-            name: POSTGRES_USER
-            value: ilposto
-            name: POSTGRES_PASSWORD
-            value: ilposto
-            name: PUBLIC_ORIGIN
-            value: http://db.ilposto.studio
-            name: PRISMA_DATABASE_URL
-            value: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+            - name: TIMEZONE
+              value: UTC
+            - name: POSTGRES_HOST
+              value: ilposto-rw.ilposto.svc.cluster.local
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: ilposto
+            - name: POSTGRES_USER
+              value: ilposto
+            - name: POSTGRES_PASSWORD
+              value: ilposto
+            - name: PUBLIC_ORIGIN
+              value: http://db.ilposto.studio
+            - name: PRISMA_DATABASE_URL
+              value: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
