@@ -14,14 +14,14 @@ serviceAccount:
 podAnnotations: {}
 podLabels: {}
 podSecurityContext:
-  fsGroup: nodejs
+  fsGroup: 1001
 securityContext:
   capabilities:
     drop:
       - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
-  runAsUser: nodejs
+  runAsUser: 1001
 service:
   type: ClusterIP
   port: 80
