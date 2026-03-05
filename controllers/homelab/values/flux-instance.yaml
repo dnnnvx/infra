@@ -1,5 +1,6 @@
 instance:
   sync:
+    interval: 1m
     kind: GitRepository
     url: "ssh://git@github.com/dnnnvx/infra.git"
     ref: "refs/heads/main"
