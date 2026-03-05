@@ -23,6 +23,7 @@
             kubernetes-helm
             nmap
             just
+            fluxcd
             yq-go
             nil
             nixd

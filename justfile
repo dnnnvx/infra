@@ -24,3 +24,6 @@ rm-kubeconfig:
     kubectl config delete-cluster {{cluster}} || true
     kubectl config delete-user admin@{{cluster}} || true
     @echo "Removed context '{{cluster}}' from ~/.kube/config"
+
+sync:
+    flux reconcile source git flux-system -n flux-system
