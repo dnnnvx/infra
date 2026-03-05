@@ -4,10 +4,12 @@ distribution:
 
 sync:
   kind: GitRepository
-  url: "https://github.com/dnnnvx/infra.git"
+  url: "ssh://git@github.com/dnnnvx/infra.git"
   ref:
     branch: main
   path: ./controllers/homelab
+  secretRef:
+    name: flux-system
 
 cluster:
   type: kubernetes

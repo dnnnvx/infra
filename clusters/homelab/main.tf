@@ -123,4 +123,6 @@ module "k8s" {
 
   cilium_values        = file("${path.module}/../../controllers/homelab/values/cilium.yaml")
   flux_instance_values = file("${path.module}/../../controllers/homelab/values/flux-instance.yaml")
+  flux_deploy_key      = var.flux_deploy_key
+  flux_deploy_key_pub  = var.flux_deploy_key_pub
 }
