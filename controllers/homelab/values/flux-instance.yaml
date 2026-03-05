@@ -3,7 +3,7 @@ instance:
     kind: GitRepository
     url: "ssh://git@github.com/dnnnvx/infra.git"
     ref: "refs/heads/main"
-    path: ./controllers/homelab
+    path: ./controllers/homelab/kustomization.yaml
     pullSecret: flux-system
   cluster:
     type: kubernetes
