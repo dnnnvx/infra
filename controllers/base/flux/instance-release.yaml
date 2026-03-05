@@ -11,6 +11,7 @@ spec:
   chart:
     spec:
       chart: flux-instance
+      version: 0.43.x
       sourceRef:
         kind: HelmRepository
         name: flux-operator

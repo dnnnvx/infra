@@ -8,6 +8,7 @@ spec:
   chart:
     spec:
       chart: flux-operator
+      version: 0.43.x
       sourceRef:
         kind: HelmRepository
         name: flux-operator

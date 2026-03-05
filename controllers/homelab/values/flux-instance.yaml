@@ -1,18 +1,12 @@
-distribution:
-  version: "2.x"
-  registry: "ghcr.io/fluxcd"
-
-sync:
-  kind: GitRepository
-  url: "ssh://git@github.com/dnnnvx/infra.git"
-  ref:
-    branch: main
-  path: ./controllers/homelab
-  secretRef:
-    name: flux-system
-
-cluster:
-  type: kubernetes
-  multitenant: false
-  networkPolicy: true
-  domain: cluster.local
+instance:
+  sync:
+    kind: GitRepository
+    url: "ssh://git@github.com/dnnnvx/infra.git"
+    ref: "refs/heads/main"
+    path: ./controllers/homelab
+    pullSecret: flux-system
+  cluster:
+    type: kubernetes
+    multitenant: false
+    networkPolicy: true
+    domain: cluster.local
