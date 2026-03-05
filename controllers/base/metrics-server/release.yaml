@@ -21,7 +21,7 @@ spec:
       - --kubelet-use-node-status-port
       - --metric-resolution=15s
     args:
-      - −−kubelet-insecure-tls
+      - --kubelet-insecure-tls
     metrics:
       enabled: false
     serviceMonitor:
