@@ -5,6 +5,9 @@ metadata:
   namespace: cert-manager
 spec:
   interval: 30m
+  dependsOn:
+    - name: cilium
+      namespace: kube-system
   chart:
     spec:
       chart: cert-manager
