@@ -22,6 +22,7 @@ spec:
       - --metric-resolution=15s
     args:
       - --kubelet-insecure-tls
+      - --cert-dir=/tmp
     metrics:
       enabled: false
     serviceMonitor:
