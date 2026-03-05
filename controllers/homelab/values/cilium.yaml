@@ -1,0 +1,46 @@
+kubeProxyReplacement: true
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+operator:
+  replicas: 1
+ipam:
+  mode: kubernetes
+hostFirewall:
+  enabled: false
+hubble:
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+ingressController:
+  enabled: true
+  default: true
+  loadBalancerMode: shared
+  service:
+    type: NodePort
+gatewayAPI:
+  enabled: true
+  enableAlpn: true
+  enableAppProtocol: true
+k8sServiceHost: "192.168.0.100"
+k8sServicePort: "6443"

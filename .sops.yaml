@@ -1,16 +1,5 @@
 creation_rules:
-  #
   # kubernetes secrets
-  #
   - path_regex: ^(apps|infrastructure)\/.*\/secret-.*\.yaml$
     encrypted_regex: ^(data|stringData)$
-    age: age1xql5qrpyrvrxjjcyl53j80ny679n8c4vzxuufwqywgyddkc4fc5qrwup5k
-  #
-  # talos secrets
-  #
-  - path_regex: clusters\/.*\/talosconfig\.yaml$
-    encrypted_regex: ^(ca|crt|key)$
-    age: age1xql5qrpyrvrxjjcyl53j80ny679n8c4vzxuufwqywgyddkc4fc5qrwup5k
-  - path_regex: clusters\/.*\/secrets\.yaml$
-    encrypted_regex: ^(ca|crt|secret|bootstraptoken|secretboxencryptionsecret|token|key)$
     age: age1xql5qrpyrvrxjjcyl53j80ny679n8c4vzxuufwqywgyddkc4fc5qrwup5k

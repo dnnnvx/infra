@@ -21,8 +21,11 @@
             kubie
             talosctl
             kubernetes-helm
-            nil
+            nmap
             just
+            yq-go
+            nil
+            nixd
           ];
         };
       }

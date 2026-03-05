@@ -1,0 +1,16 @@
+distribution:
+  version: "2.x"
+  registry: "ghcr.io/fluxcd"
+
+sync:
+  kind: GitRepository
+  url: "https://github.com/dnnnvx/infra.git"
+  ref:
+    branch: main
+  path: ./controllers/homelab
+
+cluster:
+  type: kubernetes
+  multitenant: false
+  networkPolicy: true
+  domain: cluster.local
