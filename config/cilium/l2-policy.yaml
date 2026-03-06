@@ -1,0 +1,17 @@
+# When a Kubernetes Service of type `LoadBalancer` gets an IP from the pool,
+# that IP doesn't physically exist on any node. Your LAN router and devices
+# have no idea where to send traffic for `192.168.0.200`.
+# CiliumL2AnnouncementPolicy makes Cilium respond to ARP requests for those IPs.
+# When something on your network asks "who has 192.168.0.200?", one of the
+# Cilium-managed nodes answers "I do" and traffic flows to that node,
+# which then routes it to the right pod.
+#
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default
+spec:
+  loadBalancerIPs: true
+  interfaces:
+    - ^eth[0-9]+
+    - ^en[a-z0-9]+
