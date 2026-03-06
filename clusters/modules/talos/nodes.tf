@@ -100,7 +100,10 @@ resource "talos_machine_configuration_apply" "this" {
   machine_configuration_input = data.talos_machine_configuration.this[each.key].machine_configuration
   node                        = each.value.ip
   endpoint                    = coalesce(each.value.endpoint, each.value.ip)
-  apply_mode                  = "auto"
+
+  # "auto" means Talos decides whether to live-apply or reboot based on what changed.
+  # # If a new system extension requires a reboot, all 4 nodes will reboot.
+  apply_mode = "auto"
 }
 
 data "talos_cluster_health" "this" {

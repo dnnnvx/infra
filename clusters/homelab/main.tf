@@ -55,7 +55,26 @@ module "talos" {
   health_check_enabled = false
 
   image_factory_extensions = [
-    # "siderolabs/qemu-guest-agent",
+    # load "drbd" and "drbd_transport_tcp" kernel modules
+    "siderolabs/drbd",
+  ]
+
+  extra_config_patches = [
+    yamlencode({
+      machine = {
+        kernel = {
+          modules = [
+            {
+              name       = "drbd"
+              parameters = ["usermode_helper=disabled"]
+            },
+            {
+              name = "drbd_transport_tcp"
+            },
+          ]
+        }
+      }
+    }),
   ]
 
   cluster_name = local.project

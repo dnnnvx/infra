@@ -25,8 +25,6 @@
             just
             fluxcd
             yq-go
-            nil
-            nixd
           ];
         };
       }

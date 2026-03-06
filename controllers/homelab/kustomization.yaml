@@ -5,6 +5,7 @@ resources:
   - ../base/cilium
   - ../base/flux
   - ../base/metrics-server
+  - ../base/piraeus
 configMapGenerator:
   - name: flux-instance-values
     namespace: flux-system
