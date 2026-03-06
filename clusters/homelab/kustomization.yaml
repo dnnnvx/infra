@@ -27,13 +27,6 @@ configMapGenerator:
     options:
       disableNameSuffixHash: true
 
-  - name: piraeus-values
-    namespace: piraeus-datastore
-    files:
-      - values.yaml=values/piraeus.yaml
-    options:
-      disableNameSuffixHash: true
-
   - name: cert-manager-values
     namespace: cert-manager
     files:
