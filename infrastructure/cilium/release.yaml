@@ -3,6 +3,8 @@ kind: HelmRelease
 metadata:
   name: cilium
   namespace: kube-system
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   interval: 30m
   chart:
