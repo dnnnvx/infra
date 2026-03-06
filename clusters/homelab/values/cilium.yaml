@@ -33,7 +33,7 @@ cgroup:
     enabled: false
   hostRoot: /sys/fs/cgroup
 ingressController:
-  enabled: true
+  enabled: false
   default: true
   loadBalancerMode: shared
   service:
