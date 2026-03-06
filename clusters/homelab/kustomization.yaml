@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - infrastructure.yaml
   - config.yaml
+  - namespaces.yaml
 
 configMapGenerator:
   - name: cilium-values
