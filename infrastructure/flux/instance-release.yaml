@@ -21,3 +21,4 @@ spec:
     - kind: ConfigMap
       name: flux-instance-values
       valuesKey: values.yaml
+      optional: true

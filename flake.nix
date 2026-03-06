@@ -16,11 +16,15 @@
       in {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            (writeShellScriptBin "k" ''exec kubectl "$@"'')
             opentofu
+            kubectl
             k9s
             kubie
             talosctl
             kubernetes-helm
+            kustomize
+            kubeconform
             nmap
             just
             fluxcd

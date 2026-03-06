@@ -8,11 +8,14 @@ spec:
   chart:
     spec:
       chart: piraeus-operator
-      version: 2.8.x
+      version: 2.10.x
       sourceRef:
         kind: HelmRepository
         name: piraeus
         namespace: piraeus-datastore
       interval: 24h
-  values:
-    installCRDs: true
+  valuesFrom:
+    - kind: ConfigMap
+      name: piraeus-values
+      valuesKey: values.yaml
+      optional: true

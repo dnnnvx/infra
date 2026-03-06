@@ -17,13 +17,8 @@ spec:
         name: cert-manager
         namespace: cert-manager
       interval: 24h
-  values:
-    installCRDs: true
-    crds:
-      enabled: true
-    dns01RecursiveNameserversOnly: true
-    dns01RecursiveNameservers: "192.168.0.1:53,1.1.1.1:53,8.8.8.8:53"
-    config:
-      apiVersion: controller.config.cert-manager.io/v1alpha1
-      kind: ControllerConfiguration
-      enableGatewayAPI: true
+  valuesFrom:
+    - kind: ConfigMap
+      name: cert-manager-values
+      valuesKey: values.yaml
+      optional: true

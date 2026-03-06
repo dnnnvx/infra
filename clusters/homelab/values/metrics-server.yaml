@@ -1,0 +1,23 @@
+replicas: 1
+defaultArgs:
+  - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+  - --kubelet-use-node-status-port
+  - --metric-resolution=15s
+args:
+  - --kubelet-insecure-tls
+  - --cert-dir=/tmp
+metrics:
+  enabled: false
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  interval: 1m
+  scrapeTimeout: 10s
+  metricRelabelings: []
+  relabelings: []
+resources:
+  requests:
+    cpu: 20m
+    memory: 32Mi
+  limits:
+    memory: 128Mi
