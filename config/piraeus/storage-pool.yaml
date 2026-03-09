@@ -5,8 +5,7 @@ metadata:
   namespace: piraeus-datastore
 spec:
   nodeSelector:
-    matchLabels:
-      cluster.casasulgorgo.net/storage: local
+    cluster.casasulgorgo.net/storage: local
   storagePools:
     - name: file-thin
       fileThinPool:

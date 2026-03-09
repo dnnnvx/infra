@@ -5,8 +5,7 @@ metadata:
   namespace: piraeus-datastore
 spec:
   nodeSelector:
-    matchLabels:
-      cluster.casasulgorgo.net/storage: hdd
+    cluster.casasulgorgo.net/storage: hdd
   storagePools:
     - name: lvm-thin-hdd
       lvmThinPool:
