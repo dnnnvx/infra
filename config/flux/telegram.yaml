@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   type: telegram
-  channel: '"${TELEGRAM_CHAT_ID}"'
+  channel: ${quote}${TELEGRAM_CHAT_ID}${quote}
   secretRef:
     name: telegram-token
 ---
