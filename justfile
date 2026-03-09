@@ -78,7 +78,7 @@ validate:
     set -euo pipefail
     errors=0
 
-    for dir in clusters/{{ cluster }} infrastructure config; do
+    for dir in clusters/{{ cluster }} infrastructure config apps/home-assistant/overlays/homelab; do
       echo "==> Building $dir..."
       output=$(kustomize build "$dir" 2>&1) || {
         echo "    ✗ kustomize build FAILED:"
