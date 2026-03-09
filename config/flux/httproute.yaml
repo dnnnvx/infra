@@ -5,11 +5,14 @@ metadata:
   namespace: flux-system
 spec:
   parentRefs:
-    - name: homelab
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: homelab
       namespace: kube-system
   hostnames:
     - flux.homelab
   rules:
     - backendRefs:
         - name: flux-operator
+          namespace: flux-system
           port: 9080

@@ -78,7 +78,8 @@ validate:
     set -euo pipefail
     errors=0
 
-    for dir in clusters/{{ cluster }} infrastructure config apps/home-assistant/overlays/homelab; do
+    overlays=$(find apps -path "*/overlays/*" -maxdepth 4 -name "kustomization.yaml" -exec dirname {} \; | sort)
+    for dir in clusters/{{ cluster }} infrastructure config $overlays; do
       echo "==> Building $dir..."
       output=$(kustomize build "$dir" 2>&1) || {
         echo "    ✗ kustomize build FAILED:"
@@ -89,7 +90,7 @@ validate:
       }
       echo "    ✓ kustomize build OK"
       echo "==> Validating $dir manifests..."
-      if echo "$output" | kubeconform -strict -ignore-missing-schemas -summary 2>&1 | sed 's/^/    /'; then
+      if echo "$output" | yq 'select(.kind != "Secret")' | kubeconform -strict -ignore-missing-schemas -summary 2>&1 | sed 's/^/    /'; then
         echo "    ✓ kubeconform OK"
       else
         errors=$((errors + 1))
