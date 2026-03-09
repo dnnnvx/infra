@@ -3,7 +3,11 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - serviceaccount.yaml
-  - configmap.yaml
   - pvc.yaml
   - deployment.yaml
   - service.yaml
+configMapGenerator:
+  - name: home-assistant-config
+    namespace: home-assistant
+    files:
+      - configuration.yaml
