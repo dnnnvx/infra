@@ -86,7 +86,7 @@ module "talos" {
     "nuc-101" = {
       machine_type = "controlplane"
       ip           = "192.168.0.101"
-      # endpoint     = "192.168.0.3"
+      # endpoint     = "192.168.0.199"
       gateway      = "192.168.0.1"
       install_disk = "/dev/sdb"
       region       = "homelab"
@@ -95,25 +95,25 @@ module "talos" {
       cpu-class    = "J3455"
       gpu-class    = "HD500"
     }
-    # "nuc-102" = {
-    #   machine_type = "worker"
-    #   ip           = "192.168.0.102"
-    #   # endpoint     = "192.168.0.11"
-    #   gateway      = "192.168.0.1"
-    #   install_disk = "/dev/nvme0n1"
-    #   region       = "homelab"
-    #   zone         = "office"
-    #   node-type    = "nuc"
-    #   cpu-class    = "i3-7100U"
-    #   gpu-class    = "HD620"
-    #   extra_disks = [
-    #     { device = "/dev/sda", mountpoint = "/var/mnt/hdd" },
-    #   ]
-    # }
+    "nuc-102" = {
+      machine_type = "worker"
+      ip           = "192.168.0.102"
+      # endpoint     = "192.168.0.199"
+      gateway      = "192.168.0.1"
+      install_disk = "/dev/nvme0n1"
+      region       = "homelab"
+      zone         = "office"
+      node-type    = "nuc"
+      cpu-class    = "i3-7100U"
+      gpu-class    = "HD620"
+      # extra_disks = [
+      #   { device = "/dev/sda", mountpoint = "/var/mnt/hdd" },
+      # ]
+    }
     "nuc-103" = {
       machine_type = "worker"
       ip           = "192.168.0.103"
-      # endpoint     = "192.168.0.11"
+      # endpoint     = "192.168.0.199"
       gateway      = "192.168.0.1"
       install_disk = "/dev/sdb"
       region       = "homelab"
@@ -125,7 +125,7 @@ module "talos" {
     "nuc-104" = {
       machine_type = "worker"
       ip           = "192.168.0.104"
-      # endpoint     = "192.168.0.13"
+      # endpoint     = "192.168.0.199"
       gateway      = "192.168.0.1"
       install_disk = "/dev/sdb"
       region       = "homelab"
