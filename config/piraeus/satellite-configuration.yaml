@@ -1,5 +1,8 @@
 # Talos-specific overrides (removes systemd/module-loader deps, fixes LVM paths)
 # see: https://piraeus.io/docs/stable/how-to/talos/#configure-talos-system-extension-for-drbd
+# - /etc/lvm/* is read-only in Talos and therefore can't be used. Let's use /var/etc/lvm/* instead.
+# - Talos does not ship with Systemd, so everything Systemd related needs to be removed
+# - /usr/lib/modules and /usr/src are not needed as the Kernel module is already compiled and needs just to be used.
 apiVersion: piraeus.io/v1
 kind: LinstorSatelliteConfiguration
 metadata:
