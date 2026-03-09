@@ -37,3 +37,16 @@ resource "kubernetes_secret_v1" "flux_system" {
 
   depends_on = [helm_release.flux_operator]
 }
+
+resource "kubernetes_secret_v1" "sops_age" {
+  metadata {
+    name      = "sops-age"
+    namespace = "flux-system"
+  }
+
+  data = {
+    "age.agekey" = var.sops_age_key
+  }
+
+  depends_on = [helm_release.flux_operator]
+}

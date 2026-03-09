@@ -50,6 +50,24 @@ upgrade-nodes:
       sleep 10
     done
 
+# encrypt a secret file in-place with sops
+encrypt file:
+    #!/usr/bin/env bash
+    echo -n "Age private key: "
+    read -rs SOPS_AGE_KEY
+    echo
+    export SOPS_AGE_KEY
+    sops --encrypt --in-place {{ file }}
+
+# edit an encrypted secret
+edit-secret file:
+    #!/usr/bin/env bash
+    echo -n "Age private key: "
+    read -rs SOPS_AGE_KEY
+    echo
+    export SOPS_AGE_KEY
+    sops {{ file }}
+
 # sync flux with the defined git repo
 sync:
     flux reconcile source git flux-system -n flux-system --context {{ cluster }}

@@ -22,3 +22,10 @@ variable "flux_deploy_key_pub" {
   type        = string
   default     = ""
 }
+
+variable "sops_age_key" {
+  description = "Age private key for SOPS decryption by Flux kustomize-controller"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

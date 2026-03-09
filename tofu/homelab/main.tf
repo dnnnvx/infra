@@ -144,4 +144,5 @@ module "k8s" {
   flux_instance_values = file("${path.module}/../../clusters/homelab/values/flux-instance.yaml")
   flux_deploy_key      = var.flux_deploy_key
   flux_deploy_key_pub  = var.flux_deploy_key_pub
+  sops_age_key         = var.sops_age_key
 }

@@ -15,6 +15,7 @@
         };
       in {
         devShells.default = pkgs.mkShell {
+          __darwinAllowLocalNetworking = true;
           packages = with pkgs; [
             (writeShellScriptBin "k" ''exec kubectl "$@"'')
             opentofu
@@ -29,6 +30,8 @@
             just
             fluxcd
             yq-go
+            sops
+            age
           ];
         };
       }
