@@ -1,0 +1,17 @@
+apiVersion: piraeus.io/v1
+kind: LinstorSatelliteConfiguration
+metadata:
+  name: storage-pool-hdd
+  namespace: piraeus-datastore
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: nuc-102
+  storagePools:
+    - name: lvm-thin-hdd
+      lvmThinPool:
+        volumeGroup: linstor-hdd-vg
+        thinPool: linstor-hdd-thinpool
+      source:
+        hostDevices:
+          - /dev/sda

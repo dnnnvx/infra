@@ -1,0 +1,14 @@
+apiVersion: piraeus.io/v1
+kind: LinstorSatelliteConfiguration
+metadata:
+  name: storage-pool
+  namespace: piraeus-datastore
+spec:
+  nodeSelector:
+    matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: DoesNotExist
+  storagePools:
+    - name: file-thin
+      fileThinPool:
+        directory: /var/lib/linstor-pool

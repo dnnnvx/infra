@@ -3,3 +3,7 @@ kind: Kustomization
 resources:
   - linstor-cluster.yaml
   - satellite-configuration.yaml
+  - storage-pool.yaml
+  - storage-class.yaml
+  # - storage-pool-hdd.yaml
+  # - storage-class-hdd.yaml
