@@ -6,7 +6,7 @@ metadata:
 spec:
   nodeSelector:
     matchLabels:
-      kubernetes.io/hostname: nuc-102
+      cluster.casasulgorgo.net/storage: hdd
   storagePools:
     - name: lvm-thin-hdd
       lvmThinPool:

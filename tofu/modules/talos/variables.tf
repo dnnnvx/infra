@@ -42,6 +42,7 @@ variable "nodes" {
     node-type     = optional(string, "")
     cpu-class     = optional(string, "")
     gpu-class     = optional(string, "")
+    storage       = optional(string, "")
     nameservers   = optional(list(string), ["192.168.0.1", "1.1.1.1", "8.8.8.8"])
     extra_disks = optional(list(object({
       device     = string

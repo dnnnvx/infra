@@ -10,16 +10,15 @@ locals {
   node_patches = {
     for name, node in var.nodes : name => yamlencode({
       machine = merge({
-        nodeLabels = merge(
-          {
-            "node.kubernetes.io/name"         = name
-            "topology.kubernetes.io/region"   = node.region
-            "topology.kubernetes.io/zone"     = node.zone
-            "cluster.sulgorgo.casa/node-type" = node.node-type
-            "cluster.sulgorgo.casa/cpu-class" = node.cpu-class
-            "cluster.sulgorgo.casa/gpu-class" = node.gpu-class
-          }
-        )
+        nodeLabels = {
+          "node.kubernetes.io/name"            = name
+          "topology.kubernetes.io/region"      = node.region
+          "topology.kubernetes.io/zone"        = node.zone
+          "cluster.casasulgorgo.net/node-type" = node.node-type
+          "cluster.casasulgorgo.net/cpu-class" = node.cpu-class
+          "cluster.casasulgorgo.net/gpu-class" = node.gpu-class
+          "cluster.casasulgorgo.net/storage"   = node.storage
+        },
 
         install = {
           disk              = node.install_disk
