@@ -13,3 +13,12 @@ spec:
   path: ./config
   prune: true
   wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: telegram-token
+        optional: true
