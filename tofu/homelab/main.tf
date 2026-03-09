@@ -107,9 +107,6 @@ module "talos" {
       cpu-class    = "i3-7100U"
       gpu-class    = "HD620"
       storage      = "hdd"
-      # extra_disks = [
-      #   { device = "/dev/sda", mountpoint = "/var/mnt/hdd" },
-      # ]
     }
     "nuc-103" = {
       machine_type = "worker"
