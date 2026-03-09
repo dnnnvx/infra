@@ -17,3 +17,10 @@ variable "sops_age_key" {
   sensitive   = true
   default     = ""
 }
+
+variable "flux_substitutions" {
+  description = "Key-value pairs exposed as Flux variable substitutions via the flux_substitutions Secret"
+  type        = map(string)
+  sensitive   = true
+  default     = {}
+}

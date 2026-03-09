@@ -95,21 +95,21 @@ module "talos" {
       cpu-class    = "J3455"
       gpu-class    = "HD500"
     }
-    "nuc-102" = {
-      machine_type = "worker"
-      ip           = "192.168.0.102"
-      # endpoint     = "192.168.0.9"
-      gateway      = "192.168.0.1"
-      install_disk = "/dev/nvme0n1"
-      region       = "homelab"
-      zone         = "office"
-      node-type    = "nuc"
-      cpu-class    = "i3-7100U"
-      gpu-class    = "HD620"
-      extra_disks = [
-        { device = "/dev/sda", mountpoint = "/var/mnt/hdd" },
-      ]
-    }
+    # "nuc-102" = {
+    #   machine_type = "worker"
+    #   ip           = "192.168.0.102"
+    #   # endpoint     = "192.168.0.11"
+    #   gateway      = "192.168.0.1"
+    #   install_disk = "/dev/nvme0n1"
+    #   region       = "homelab"
+    #   zone         = "office"
+    #   node-type    = "nuc"
+    #   cpu-class    = "i3-7100U"
+    #   gpu-class    = "HD620"
+    #   extra_disks = [
+    #     { device = "/dev/sda", mountpoint = "/var/mnt/hdd" },
+    #   ]
+    # }
     "nuc-103" = {
       machine_type = "worker"
       ip           = "192.168.0.103"
@@ -144,5 +144,6 @@ module "k8s" {
   flux_instance_values = file("${path.module}/../../clusters/homelab/values/flux-instance.yaml")
   flux_deploy_key      = var.flux_deploy_key
   flux_deploy_key_pub  = var.flux_deploy_key_pub
+  flux_substitutions   = var.flux_substitutions
   sops_age_key         = var.sops_age_key
 }
