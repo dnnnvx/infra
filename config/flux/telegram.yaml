@@ -17,11 +17,23 @@ metadata:
 spec:
   providerRef:
     name: telegram
-  eventSeverity: info
+  eventSeverity: error
   eventSources:
     - kind: GitRepository
+      name: "*"
+    - kind: OCIRepository
+      name: "*"
+    - kind: HelmRepository
+      name: "*"
+    - kind: HelmChart
       name: "*"
     - kind: Kustomization
       name: "*"
     - kind: HelmRelease
+      name: "*"
+    - kind: ImageRepository
+      name: "*"
+    - kind: ImagePolicy
+      name: "*"
+    - kind: ImageUpdateAutomation
       name: "*"
