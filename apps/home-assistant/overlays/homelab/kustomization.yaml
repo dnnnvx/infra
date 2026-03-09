@@ -3,4 +3,7 @@ kind: Kustomization
 namespace: home-assistant
 resources:
   - ../../base
-patches: []
+  - httproute.yaml
+patches:
+  - path: patch-storage.yaml
+  - path: patch-hostnetwork.yaml
