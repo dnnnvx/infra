@@ -6,4 +6,4 @@ resources:
   - httproute.yaml
 patches:
   - path: patch-storage.yaml
-  - path: patch-hostnetwork.yaml
+  - path: patch-deployment.yaml

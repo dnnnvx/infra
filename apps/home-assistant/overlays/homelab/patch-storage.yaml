@@ -5,3 +5,11 @@ metadata:
   namespace: home-assistant
 spec:
   storageClassName: piraeus
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: matter-server-data
+  namespace: home-assistant
+spec:
+  storageClassName: piraeus
