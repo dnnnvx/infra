@@ -16,9 +16,3 @@ labels:
       app.kubernetes.io/part-of: home-assistant
     includeSelectors: false
     includeTemplates: true
-
-configMapGenerator:
-  - name: home-assistant-config
-    namespace: home-assistant
-    files:
-      - configuration.yaml
