@@ -5,6 +5,7 @@ data "cloudflare_zone" "main" {
 }
 
 # Apex A record — placeholder, DDNS deployment keeps it updated
+# Subdomains are static CNAMEs pointing here; DDNS propagates the real public IP transitively
 resource "cloudflare_dns_record" "apex" {
   zone_id = data.cloudflare_zone.main.zone_id
   name    = "@"
@@ -16,4 +17,15 @@ resource "cloudflare_dns_record" "apex" {
   lifecycle {
     ignore_changes = [content]
   }
+}
+
+resource "cloudflare_dns_record" "cname_subdomains" {
+  for_each = toset(var.cname_subdomains)
+
+  zone_id = data.cloudflare_zone.main.zone_id
+  name    = each.key
+  content = var.zone_name
+  type    = "CNAME"
+  ttl     = 1      # 1 = auto (required when proxied = false on Cloudflare)
+  proxied = false
 }

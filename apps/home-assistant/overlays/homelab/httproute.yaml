@@ -23,7 +23,8 @@ metadata:
   name: home-assistant-external
   namespace: home-assistant
   annotations:
-    external-dns.alpha.kubernetes.io/target: casasulgorgo.net
+    # Exclude from external-dns — record is a static CNAME managed by Tofu
+    external-dns.alpha.kubernetes.io/exclude: "true"
 spec:
   parentRefs:
     - name: homelab
