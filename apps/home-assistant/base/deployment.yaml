@@ -23,12 +23,6 @@ spec:
             - name: http
               containerPort: 8123
               protocol: TCP
-          volumeMounts:
-            - name: config
-              mountPath: /config
-            - name: configuration-yaml
-              mountPath: /config/configuration.yaml
-              subPath: configuration.yaml
           livenessProbe:
             httpGet:
               path: /
@@ -42,6 +36,12 @@ spec:
               port: http
             initialDelaySeconds: 30
             periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: configuration-yaml
+              mountPath: /config/configuration.yaml
+              subPath: configuration.yaml3
       volumes:
         - name: config
           persistentVolumeClaim:
