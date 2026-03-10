@@ -1,3 +1,31 @@
+# GitHub
+
+variable "github_token" {
+  description = "GitHub personal access token for managing the infra repository"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_owner" {
+  description = "GitHub user or organization that owns the repository"
+  type        = string
+}
+
+variable "github_repository" {
+  description = "GitHub repository name"
+  type        = string
+}
+
+# Cloudflare
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token with Zone:Read, API Tokens: Edit, DNS:Edit permissions"
+  type        = string
+  sensitive   = true
+}
+
+# Flux
+
 variable "flux_deploy_key" {
   description = "SSH private key for Flux to pull from the git repository"
   type        = string

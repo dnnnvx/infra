@@ -16,12 +16,22 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.0"
+    }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.0"
+    }
   }
 }
 
 locals {
-  project = "homelab"
-
   client_certificate     = base64decode(module.talos.kubernetes_client_configuration.client_certificate)
   client_key             = base64decode(module.talos.kubernetes_client_configuration.client_key)
   cluster_ca_certificate = base64decode(module.talos.kubernetes_client_configuration.ca_certificate)
@@ -43,9 +53,21 @@ provider "helm" {
   }
 }
 
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
+
+provider "github" {
+  token = var.github_token
+  owner = var.github_owner
+}
+
 module "talos" {
   source  = "../modules/talos"
-  project = local.project
+  project = "homelab"
+
+  cluster_name = "homelab"
+  cluster_vip  = "192.168.0.100"
 
   talos_version      = "v1.12"
   talos_version_full = "v1.12.4"
@@ -76,9 +98,6 @@ module "talos" {
       }
     }),
   ]
-
-  cluster_name = local.project
-  cluster_vip  = "192.168.0.100"
 
   # install_disk: device name while booted from USB
   # (may shift after USB removal; Talos uses disk UUID post-install)
@@ -137,13 +156,67 @@ module "talos" {
   }
 }
 
+module "cloudflare" {
+  source = "../modules/cloudflare"
+
+  zone_name            = "casasulgorgo.net"
+  cloudflare_api_token = var.cloudflare_api_token
+}
+
+module "github" {
+  source = "../modules/github"
+
+  owner          = "dnnnvx"
+  repository     = "infra"
+  deploy_key_pub = var.flux_deploy_key_pub
+}
+
 module "k8s" {
   source = "../modules/k8s"
 
   cilium_values        = file("${path.module}/../../clusters/homelab/values/cilium.yaml")
   flux_instance_values = file("${path.module}/../../clusters/homelab/values/flux-instance.yaml")
-  flux_deploy_key      = var.flux_deploy_key
-  flux_deploy_key_pub  = var.flux_deploy_key_pub
-  flux_substitutions   = var.flux_substitutions
-  sops_age_key         = var.sops_age_key
+
+  namespaces = [
+    "cert-manager",
+    "external-dns",
+    "ddns",
+  ]
+
+  secrets = [
+    {
+      name      = "flux-system"
+      namespace = "flux-system"
+      data = {
+        identity       = var.flux_deploy_key
+        "identity.pub" = var.flux_deploy_key_pub
+        known_hosts    = module.github.known_hosts
+      }
+    },
+    {
+      name      = "sops-age"
+      namespace = "flux-system"
+      data      = { "age.agekey" = var.sops_age_key }
+    },
+    {
+      name      = "flux-substitutions"
+      namespace = "flux-system"
+      data      = var.flux_substitutions
+    },
+    {
+      name      = "cloudflare-api-token"
+      namespace = "cert-manager"
+      data      = { api-token = module.cloudflare.cluster_api_token }
+    },
+    {
+      name      = "cloudflare-api-token"
+      namespace = "external-dns"
+      data      = { api-token = module.cloudflare.cluster_api_token }
+    },
+    {
+      name      = "cloudflare-api-token"
+      namespace = "ddns"
+      data      = { api-token = module.cloudflare.cluster_api_token }
+    },
+  ]
 }

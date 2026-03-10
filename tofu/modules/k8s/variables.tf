@@ -10,29 +10,18 @@ variable "flux_instance_values" {
   default     = ""
 }
 
-variable "flux_deploy_key" {
-  description = "SSH private key for Flux to pull from the git repository"
-  type        = string
-  sensitive   = true
-  default     = ""
+variable "namespaces" {
+  description = "Namespaces to create before applying secrets (bootstrapped outside of Flux)"
+  type        = list(string)
+  default     = []
 }
 
-variable "flux_deploy_key_pub" {
-  description = "SSH public key counterpart of flux_deploy_key"
-  type        = string
-  default     = ""
-}
-
-variable "sops_age_key" {
-  description = "Age private key for SOPS decryption by Flux kustomize-controller"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "flux_substitutions" {
-  description = "Key-value pairs exposed as Flux variable substitutions via the flux_substitutions Secret"
-  type        = map(string)
-  sensitive   = true
-  default     = {}
+variable "secrets" {
+  description = "Kubernetes secrets to create (e.g. third-party credentials)"
+  type = list(object({
+    name      = string
+    namespace = string
+    data      = map(string)
+  }))
+  default   = []
 }

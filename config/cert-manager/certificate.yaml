@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-casasulgorgo-net
+  # Must be in the same namespace as the Gateway so no ReferenceGrant is needed
+  namespace: kube-system
+spec:
+  secretName: wildcard-casasulgorgo-net
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.casasulgorgo.net"
+    - "casasulgorgo.net"

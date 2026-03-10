@@ -5,7 +5,6 @@
 # When something on your network asks "who has 192.168.0.200?", one of the
 # Cilium-managed nodes answers "I do" and traffic flows to that node,
 # which then routes it to the right pod.
-#
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
 metadata:

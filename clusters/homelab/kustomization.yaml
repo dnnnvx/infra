@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - infrastructure.yaml
   - config.yaml
-  - namespaces.yaml
   - home-assistant.yaml
 
 configMapGenerator:
@@ -32,5 +31,12 @@ configMapGenerator:
     namespace: cert-manager
     files:
       - values.yaml=values/cert-manager.yaml
+    options:
+      disableNameSuffixHash: true
+
+  - name: external-dns-values
+    namespace: external-dns
+    files:
+      - values.yaml=values/external-dns.yaml
     options:
       disableNameSuffixHash: true

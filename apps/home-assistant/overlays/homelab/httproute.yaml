@@ -7,8 +7,32 @@ spec:
   parentRefs:
     - name: homelab
       namespace: kube-system
+      # Without `sectionName`, a route attaches to *all* matching listeners.
+      # `ha.homelab` should only be on HTTP (port 80), so we pinned it explicitly
+      sectionName: http
   hostnames:
     - ha.homelab
+  rules:
+    - backendRefs:
+        - name: home-assistant
+          port: 8123
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: home-assistant-external
+  namespace: home-assistant
+  annotations:
+    external-dns.alpha.kubernetes.io/target: casasulgorgo.net
+spec:
+  parentRefs:
+    - name: homelab
+      namespace: kube-system
+      # Without `sectionName`, a route attaches to *all* matching listeners.
+      # `ha.homelab` should only be on HTTP (port 80), so we pinned it explicitly
+      sectionName: https
+  hostnames:
+    - ha.casasulgorgo.net
   rules:
     - backendRefs:
         - name: home-assistant
