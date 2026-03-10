@@ -7,6 +7,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - matter-server-pvc.yaml
+  - matter-server-service.yaml
   - matter-server-deployment.yaml
 configMapGenerator:
   - name: home-assistant-config
