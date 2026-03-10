@@ -4,6 +4,7 @@ resources:
   - infrastructure.yaml
   - config.yaml
   - home-assistant.yaml
+  - ddns.yaml
 
 configMapGenerator:
   - name: cilium-values

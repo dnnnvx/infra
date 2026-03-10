@@ -3,6 +3,5 @@ kind: Kustomization
 resources:
   - ./cert-manager
   - ./cilium
-  - ./ddns
   - ./flux
   - ./piraeus

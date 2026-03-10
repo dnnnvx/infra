@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ddns
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infrastructure
+    - name: config
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/ddns/overlays/homelab
+  prune: true
+  wait: true

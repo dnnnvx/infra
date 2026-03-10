@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflare-ddns
+  namespace: ddns
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: cloudflare-ddns
+          image: favonia/cloudflare-ddns:latest
+          env:
+            - name: CF_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-api-token
+                  key: api-token
+            - name: DOMAINS
+              value: "casasulgorgo.net"
+            - name: PROXIED
+              value: "false"
+            - name: TTL
+              value: "60"
+            - name: UPDATE_CRON
+              value: "@every 5m"
