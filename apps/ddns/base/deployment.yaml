@@ -27,6 +27,22 @@ spec:
               value: "60"
             - name: UPDATE_CRON
               value: "@every 30m"
+            - name: IP4_PROVIDER
+              value: "cloudflare.trace"
+            - name: IP6_PROVIDER
+              value: "cloudflare.trace"
+            - name: UPDATE_ON_START
+              value: "true"
+            - name: DELETE_ON_STOP
+              value: "false"
+            - name: CACHE_EXPIRATION
+              value: "6h0m0s"
+            - name: DETECTION_TIMEOUT
+              value: "10s"
+            - name: UPDATE_TIMEOUT
+              value: "30s"
+            - name: "IP6_PROVIDER"
+              value: "none"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
