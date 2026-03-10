@@ -20,13 +20,13 @@ spec:
             - name: CF_API_TOKEN
               value: ""
             - name: DOMAINS
-              value: ""
+              value: "example.com"
             - name: PROXIED
               value: "false"
             - name: TTL
               value: "60"
             - name: UPDATE_CRON
-              value: "@every 30m"
+              value: "@every 10m"
             - name: IP4_PROVIDER
               value: "cloudflare.trace"
             - name: IP6_PROVIDER
