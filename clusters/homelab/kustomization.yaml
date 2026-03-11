@@ -35,9 +35,3 @@ configMapGenerator:
     options:
       disableNameSuffixHash: true
 
-  - name: external-dns-values
-    namespace: external-dns
-    files:
-      - values.yaml=values/external-dns.yaml
-    options:
-      disableNameSuffixHash: true

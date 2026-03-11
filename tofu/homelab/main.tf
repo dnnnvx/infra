@@ -180,7 +180,6 @@ module "k8s" {
 
   namespaces = [
     "cert-manager",
-    "external-dns",
     "ddns",
   ]
 
@@ -207,11 +206,6 @@ module "k8s" {
     {
       name      = "cloudflare-api-token"
       namespace = "cert-manager"
-      data      = { api-token = module.cloudflare.cluster_api_token }
-    },
-    {
-      name      = "cloudflare-api-token"
-      namespace = "external-dns"
       data      = { api-token = module.cloudflare.cluster_api_token }
     },
     {
