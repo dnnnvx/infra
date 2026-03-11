@@ -6,7 +6,12 @@ metadata:
 spec:
   template:
     spec:
+      # hostNetwork: required for LAN device discovery (mDNS, Zigbee over network, etc.)
+      # The pod gets the node's IP instead of a pod IP, giving it direct access to the LAN.
       hostNetwork: true
+      # ClusterFirstWithHostNet: with hostNetwork=true the pod would normally inherit the node's
+      # /etc/resolv.conf and lose cluster DNS. This policy restores CoreDNS so that
+      # Kubernetes service names (e.g. matter-server.home-assistant.svc.cluster.local) still resolve.
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: home-assistant
