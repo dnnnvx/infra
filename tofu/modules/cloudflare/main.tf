@@ -12,7 +12,7 @@ resource "cloudflare_dns_record" "apex" {
   content = "0.0.0.0"
   type    = "A"
   ttl     = 60
-  proxied = false
+  proxied = true
 
   lifecycle {
     ignore_changes = [content]
@@ -26,6 +26,6 @@ resource "cloudflare_dns_record" "cname_subdomains" {
   name    = each.key
   content = var.zone_name
   type    = "CNAME"
-  ttl     = 1      # 1 = auto (required when proxied = false on Cloudflare)
-  proxied = false
+  ttl     = 1 # 1 = auto (TTL is ignored when proxied)
+  proxied = true
 }
