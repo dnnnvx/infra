@@ -8,8 +8,16 @@ spec:
     - metadata:
         name: conf
       spec:
+        accessModes: [ReadWriteOnce]
         storageClassName: piraeus
+        resources:
+          requests:
+            storage: 100Mi
     - metadata:
         name: work
       spec:
+        accessModes: [ReadWriteOnce]
         storageClassName: piraeus
+        resources:
+          requests:
+            storage: 512Mi
