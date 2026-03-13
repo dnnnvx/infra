@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pocket-id
+  namespace: webauth
+spec:
+  template:
+    spec:
+      containers:
+        - name: pocket-id
+          env:
+            - name: APP_URL
+              value: "https://auth.casasulgorgo.net"
+            - name: TRUST_PROXY
+              value: "true"
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocket-id-secrets
+                  key: encryption-key

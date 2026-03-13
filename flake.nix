@@ -17,7 +17,7 @@
         devShells.default = pkgs.mkShell {
           __darwinAllowLocalNetworking = true;
           shellHook = ''
-            exec kubie ctx homelab -n flux-system
+            # exec kubie ctx homelab -n flux-system
           '';
           packages = with pkgs; [
             (writeShellScriptBin "k" ''exec kubectl "$@"'')

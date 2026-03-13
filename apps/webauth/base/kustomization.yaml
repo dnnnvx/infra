@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - pocket-id/deployment.yaml
+  - pocket-id/service.yaml
+  - pocket-id/pvc.yaml
+  - oauth2-proxy/deployment.yaml
+  - oauth2-proxy/service.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: webauth
+    includeSelectors: false
+    includeTemplates: true

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-proxy
+  namespace: webauth
+spec:
+  template:
+    spec:
+      containers:
+        - name: oauth2-proxy
+          args:
+            - --provider=oidc
+            - --oidc-issuer-url=https://auth.casasulgorgo.net
+            - --http-address=0.0.0.0:4180
+            - --cookie-secure=true
+            - --email-domain=*
+            - --reverse-proxy=true
+          env:
+            - name: OAUTH2_PROXY_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secrets
+                  key: client-id
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secrets
+                  key: client-secret
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-secrets
+                  key: cookie-secret
