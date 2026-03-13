@@ -5,6 +5,7 @@ resources:
   - config.yaml
   - home-assistant.yaml
   - ddns.yaml
+  - adguard-home.yaml
 
 configMapGenerator:
   - name: cilium-values

@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: adguard-home
+  namespace: adguard-home
+spec:
+  volumeClaimTemplates:
+    - metadata:
+        name: conf
+      spec:
+        storageClassName: piraeus
+    - metadata:
+        name: work
+      spec:
+        storageClassName: piraeus
