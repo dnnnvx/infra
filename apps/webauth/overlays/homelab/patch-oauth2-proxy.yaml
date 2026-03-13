@@ -12,9 +12,12 @@ spec:
             - --provider=oidc
             - --oidc-issuer-url=https://auth.casasulgorgo.net
             - --http-address=0.0.0.0:4180
+            - --redirect-url=https://oauth.casasulgorgo.net/oauth2/callback
             - --cookie-secure=true
+            - --cookie-domain=.casasulgorgo.net
             - --email-domain=*
             - --reverse-proxy=true
+            - --whitelist-domain=.casasulgorgo.net
           env:
             - name: OAUTH2_PROXY_CLIENT_ID
               valueFrom:

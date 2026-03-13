@@ -161,7 +161,7 @@ module "cloudflare" {
 
   zone_name            = "casasulgorgo.net"
   cloudflare_api_token = var.cloudflare_api_token
-  cname_subdomains     = ["ha", "auth"]
+  cname_subdomains     = ["ha", "auth", "oauth"]
 }
 
 module "github" {
