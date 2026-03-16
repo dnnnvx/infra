@@ -11,7 +11,11 @@ spec:
       # auth.casasulgorgo.net go out to the internet, hit Cloudflare, which then
       # tries to reach back into the home network — NAT hairpinning fails (521).
       hostAliases:
-        - ip: "192.168.0.200"
+        # Use ClusterIP, not the LoadBalancer IP — Cilium blocks pods from
+        # connecting to LoadBalancer IPs directly (EPERM).
+        # Note: the ClusterIP is stable (it doesn't change unless the Service
+        # is deleted and recreated), so hardcoding it is fine.
+        - ip: "10.111.28.85"
           hostnames:
             - auth.casasulgorgo.net
             - oauth.casasulgorgo.net
