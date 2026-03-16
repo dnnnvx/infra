@@ -6,23 +6,12 @@ metadata:
 spec:
   template:
     spec:
-      # Override DNS for casasulgorgo.net subdomains to resolve directly to the
-      # Gateway IP, bypassing Cloudflare. Without this, pods trying to reach
-      # auth.casasulgorgo.net go out to the internet, hit Cloudflare, which then
-      # tries to reach back into the home network — NAT hairpinning fails (521).
-      hostAliases:
-        # Use ClusterIP, not the LoadBalancer IP — Cilium blocks pods from
-        # connecting to LoadBalancer IPs directly (EPERM).
-        # Note: the ClusterIP is stable (it doesn't change unless the Service
-        # is deleted and recreated), so hardcoding it is fine.
-        - ip: "10.111.28.85"
-          hostnames:
-            - auth.casasulgorgo.net
-            - oauth.casasulgorgo.net
       containers:
         - name: oauth2-proxy
           args:
             - --provider=oidc
+            # Issuer URL used only to validate the `iss` claim in ID tokens.
+            # No HTTP request is made to this URL at startup.
             - --oidc-issuer-url=https://auth.casasulgorgo.net
             - --http-address=0.0.0.0:4180
             - --redirect-url=https://oauth.casasulgorgo.net/oauth2/callback
@@ -31,6 +20,14 @@ spec:
             - --email-domain=*
             - --reverse-proxy=true
             - --whitelist-domain=.casasulgorgo.net
+            # Skip automatic OIDC discovery (which would require reaching auth.casasulgorgo.net
+            # from inside the cluster — impossible due to Cilium blocking pod→LoadBalancer IP
+            # connections). Instead, point each endpoint directly at the internal Pocket-ID
+            # service over HTTP, avoiding the Gateway and Cloudflare entirely.
+            - --skip-oidc-discovery=true
+            - --login-url=https://auth.casasulgorgo.net/authorize
+            - --redeem-url=http://pocket-id.webauth.svc.cluster.local:1411/api/oidc/token
+            - --oidc-jwks-url=http://pocket-id.webauth.svc.cluster.local:1411/.well-known/jwks.json
             # In forward-auth (ext_authz) mode, OAuth2 Proxy is not the HTTP proxy —
             # Cilium's Gateway does the actual proxying to backends. OAuth2 Proxy only
             # validates auth on the /oauth2/auth endpoint and returns 200 (pass) or
