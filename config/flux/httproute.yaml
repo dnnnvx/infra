@@ -10,7 +10,7 @@ spec:
       name: homelab
       namespace: kube-system
   hostnames:
-    - flux.homelab
+    - flux.home
   rules:
     - backendRefs:
         - name: flux-operator

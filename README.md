@@ -60,14 +60,14 @@ FluxInstance (tofu bootstrap)
 
 ### Internal (LAN)
 
-| Hostname         | Service        |
-|------------------|----------------|
-| `ha.homelab`     | Home Assistant |
-| `hubble.homelab` | Hubble UI      |
-| `flux.homelab`   | Flux Operator  |
+| Hostname      | Service        |
+|---------------|----------------|
+| `ha.home`     | Home Assistant |
+| `hubble.home` | Hubble UI      |
+| `flux.home`   | Flux Operator  |
 
 All internal services share a single Cilium Gateway at `192.168.0.200` (HTTP, port 80).
-DNS configured on the router pointing each `*.homelab` hostname to `192.168.0.200`.
+DNS configured on the router pointing each `*.home` hostname to `192.168.0.200`.
 
 ### External (Internet)
 

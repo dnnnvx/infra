@@ -8,7 +8,7 @@ spec:
     - name: homelab
       namespace: kube-system
   hostnames:
-    - hubble.homelab
+    - hubble.home
   rules:
     - backendRefs:
         - name: hubble-ui
