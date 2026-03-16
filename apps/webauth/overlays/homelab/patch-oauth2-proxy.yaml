@@ -6,6 +6,15 @@ metadata:
 spec:
   template:
     spec:
+      # Override DNS for casasulgorgo.net subdomains to resolve directly to the
+      # Gateway IP, bypassing Cloudflare. Without this, pods trying to reach
+      # auth.casasulgorgo.net go out to the internet, hit Cloudflare, which then
+      # tries to reach back into the home network — NAT hairpinning fails (521).
+      hostAliases:
+        - ip: "192.168.0.200"
+          hostnames:
+            - auth.casasulgorgo.net
+            - oauth.casasulgorgo.net
       containers:
         - name: oauth2-proxy
           args:
