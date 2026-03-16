@@ -26,8 +26,6 @@ spec:
   parentRefs:
     - name: homelab
       namespace: kube-system
-      # Without `sectionName`, a route attaches to *all* matching listeners.
-      # `ha.homelab` should only be on HTTP (port 80), so we pinned it explicitly
       sectionName: https
   hostnames:
     - ha.casasulgorgo.net

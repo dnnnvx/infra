@@ -5,3 +5,4 @@ resources:
   - l2-policy.yaml
   - gateway.yaml
   - hubble-httproute.yaml
+  - ext-authz.yaml
