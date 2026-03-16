@@ -30,21 +30,6 @@ spec:
   hostnames:
     - ha.casasulgorgo.net
   rules:
-    # Redirect the root to the OIDC entry point so users land on the passkey
-    # login flow instead of the standard HA login page. Only the exact root is
-    # redirected — all other paths (including /auth/oidc/callback, API, etc.)
-    # go directly to HA so code login and app connections still work.
-    - matches:
-        - path:
-            type: Exact
-            value: /
-      filters:
-        - type: RequestRedirect
-          requestRedirect:
-            path:
-              type: ReplaceFullPath
-              replaceFullPath: /auth/oidc/redirect
-            statusCode: 302
     - backendRefs:
         - name: home-assistant
           port: 8123
