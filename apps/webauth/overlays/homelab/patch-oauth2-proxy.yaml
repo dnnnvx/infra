@@ -28,11 +28,9 @@ spec:
             - --login-url=https://auth.casasulgorgo.net/authorize
             - --redeem-url=http://pocket-id.webauth.svc.cluster.local:1411/api/oidc/token
             - --oidc-jwks-url=http://pocket-id.webauth.svc.cluster.local:1411/.well-known/jwks.json
-            # In forward-auth (ext_authz) mode, OAuth2 Proxy is not the HTTP proxy —
-            # Cilium's Gateway does the actual proxying to backends. OAuth2 Proxy only
-            # validates auth on the /oauth2/auth endpoint and returns 200 (pass) or
-            # 401/302 (redirect to login). static://202 is a built-in no-op upstream
-            # that satisfies the required --upstream flag without proxying any traffic.
+            # No upstream needed — oauth2-proxy is used only for its auth flow
+            # (login, callback, session cookies) for services that use it as a proxy.
+            # static://202 is a built-in no-op that satisfies the required --upstream flag.
             - --upstream=static://202
           env:
             - name: OAUTH2_PROXY_CLIENT_ID
