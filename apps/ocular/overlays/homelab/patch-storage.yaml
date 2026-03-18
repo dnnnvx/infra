@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ocular-data
+  namespace: ocular
+spec:
+  storageClassName: piraeus
