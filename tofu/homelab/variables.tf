@@ -18,6 +18,11 @@ variable "github_repository" {
 
 # Cloudflare
 
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID"
+  type        = string
+}
+
 variable "cloudflare_api_token" {
   description = "Cloudflare API token with Zone:Read, API Tokens: Edit, DNS:Edit permissions"
   type        = string

@@ -7,3 +7,7 @@ output "cluster_api_token" {
 output "zone_id" {
   value = data.cloudflare_zone.main.zone_id
 }
+
+output "account_id" {
+  value = var.cloudflare_account_id
+}

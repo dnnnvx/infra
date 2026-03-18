@@ -1,5 +1,5 @@
 terraform {
-  backend "local" {}
+  backend "s3" {}
 
   encryption {
     key_provider "pbkdf2" "this" {
@@ -159,9 +159,11 @@ module "talos" {
 module "cloudflare" {
   source = "../modules/cloudflare"
 
-  zone_name            = "casasulgorgo.net"
-  cloudflare_api_token = var.cloudflare_api_token
-  cname_subdomains     = ["ha", "auth", "oauth"]
+  cloudflare_account_id = var.cloudflare_account_id
+  zone_name             = "casasulgorgo.net"
+  cloudflare_api_token  = var.cloudflare_api_token
+  cname_subdomains      = ["ha", "auth", "oauth"]
+  r2_buckets            = { "tofu-state" = {} }
 }
 
 module "github" {

@@ -19,6 +19,13 @@ resource "cloudflare_dns_record" "apex" {
   }
 }
 
+resource "cloudflare_r2_bucket" "this" {
+  for_each   = var.r2_buckets
+  account_id = var.cloudflare_account_id
+  name       = each.key
+  location   = each.value.location
+}
+
 resource "cloudflare_dns_record" "cname_subdomains" {
   for_each = toset(var.cname_subdomains)
 
