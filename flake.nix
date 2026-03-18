@@ -35,6 +35,7 @@
             yq-go
             sops
             age
+            mdbook
           ];
         };
       }

@@ -68,6 +68,10 @@ edit-secret file:
     export SOPS_AGE_KEY
     sops {{ file }}
 
+# build and serve docs
+docs:
+    mdbook serve docs --port 3000
+
 # sync flux with the defined git repo
 sync:
     flux reconcile source git flux-system -n flux-system --context {{ cluster }}

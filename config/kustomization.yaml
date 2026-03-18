@@ -5,3 +5,4 @@ resources:
   - ./cilium
   - ./flux
   - ./piraeus
+  # - ./tofu-controller
