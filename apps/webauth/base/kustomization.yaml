@@ -6,8 +6,8 @@ resources:
   - pocket-id/deployment.yaml
   - pocket-id/service.yaml
   - pocket-id/pvc.yaml
-  - oauth2-proxy/deployment.yaml
-  - oauth2-proxy/service.yaml
+  # - oauth2-proxy/deployment.yaml
+  # - oauth2-proxy/service.yaml
 
 labels:
   - pairs:

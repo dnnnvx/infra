@@ -7,6 +7,7 @@ resources:
   - ddns.yaml
   - adguard-home.yaml
   - webauth.yaml
+  - lightnvr.yaml
 
 configMapGenerator:
   - name: cilium-values

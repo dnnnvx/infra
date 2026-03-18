@@ -5,10 +5,10 @@ resources:
   - ../../base
   - httproute-pocket-id.yaml
   - pocket-id-secrets.yaml
-  - oauth2-proxy-secrets.yaml
-  - httproute-oauth2-proxy.yaml
+  # - httproute-oauth2-proxy.yaml
+  # - oauth2-proxy-secrets.yaml
 
 patches:
   - path: patch-pocket-id.yaml
-  - path: patch-oauth2-proxy.yaml
   - path: patch-storage.yaml
+  # - path: patch-oauth2-proxy.yaml

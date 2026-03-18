@@ -6,3 +6,4 @@ resources:
   - ./flux
   - ./metrics-server
   - ./piraeus
+  - ./tofu-controller

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lightnvr
+  namespace: lightnvr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lightnvr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lightnvr
+    spec:
+      containers:
+        - name: lightnvr
+          image: ghcr.io/opensensor/lightnvr:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/lightnvr/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: lightnvr-data
