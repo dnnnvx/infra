@@ -11,7 +11,7 @@ resource "cloudflare_dns_record" "apex" {
   name    = "@"
   content = "0.0.0.0"
   type    = "A"
-  ttl     = 60
+  ttl     = 1
   proxied = true
 
   lifecycle {

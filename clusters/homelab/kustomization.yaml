@@ -8,7 +8,7 @@ resources:
   - adguard-home.yaml
   - webauth.yaml
   - lightnvr.yaml
-  - ocular.yaml
+  - actual-budget.yaml
 
 configMapGenerator:
   - name: cilium-values

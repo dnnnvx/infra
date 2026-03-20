@@ -9,6 +9,6 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/part-of: ocular
+      app.kubernetes.io/part-of: actual-budget
     includeSelectors: false
     includeTemplates: true

@@ -1,8 +1,8 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: ocular
-  namespace: ocular
+  name: actual-budget
+  namespace: actual-budget
 spec:
   parentRefs:
     - name: homelab
@@ -12,5 +12,5 @@ spec:
     - budget.casasulgorgo.net
   rules:
     - backendRefs:
-        - name: ocular
-          port: 80
+        - name: actual-budget
+          port: 5006

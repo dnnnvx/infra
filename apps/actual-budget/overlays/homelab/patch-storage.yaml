@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ocular-data
-  namespace: ocular
+  name: actual-budget-data
+  namespace: actual-budget
 spec:
   storageClassName: piraeus
