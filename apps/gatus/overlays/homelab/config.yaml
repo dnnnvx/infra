@@ -44,6 +44,16 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
+  - name: Stalwart Mail
+    group: apps
+    url: http://stalwart.stalwart.svc.cluster.local:8080
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
   - name: Cilium Gateway
     group: infrastructure
     url: http://192.168.0.200

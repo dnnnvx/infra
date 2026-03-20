@@ -10,6 +10,7 @@ resources:
   - lightnvr.yaml
   - actual-budget.yaml
   - gatus.yaml
+  - stalwart.yaml
 
 configMapGenerator:
   - name: cilium-values

@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: stalwart
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infrastructure
+    - name: config
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/stalwart/overlays/homelab
+  prune: true
+  wait: true
