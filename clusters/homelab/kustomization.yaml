@@ -9,6 +9,7 @@ resources:
   - webauth.yaml
   - lightnvr.yaml
   - actual-budget.yaml
+  - gatus.yaml
 
 configMapGenerator:
   - name: cilium-values

@@ -1,0 +1,67 @@
+alerting:
+  telegram:
+    token: ${TELEGRAM_TOKEN}
+    id: ${TELEGRAM_CHAT_ID}
+
+endpoints:
+  - name: Home Assistant
+    group: apps
+    url: http://home-assistant.home-assistant.svc.cluster.local:8123
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: AdGuard Home
+    group: apps
+    url: http://adguard-home.adguard-home.svc.cluster.local:3000
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Pocket-ID
+    group: apps
+    url: http://pocket-id.webauth.svc.cluster.local:1411
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Actual Budget
+    group: apps
+    url: http://actual-budget.actual-budget.svc.cluster.local:5006
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Cilium Gateway
+    group: infrastructure
+    url: http://192.168.0.200
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Kubernetes API
+    group: infrastructure
+    url: https://192.168.0.100:6443
+    client:
+      insecure: true
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
