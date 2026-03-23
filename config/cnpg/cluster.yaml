@@ -4,6 +4,7 @@ metadata:
   name: postgres
   namespace: cnpg-system
 spec:
+  enableSuperuserAccess: true
   instances: 1
   postgresql:
     parameters:
