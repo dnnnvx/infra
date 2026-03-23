@@ -30,4 +30,4 @@ spec:
       volumes:
         - name: sql
           configMap:
-            name: init-db-sql
+            name: init-db
