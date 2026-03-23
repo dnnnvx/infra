@@ -12,7 +12,6 @@ resources:
   - lightnvr.yaml
   - actual-budget.yaml
   - gatus.yaml
-  - stalwart.yaml
 
 configMapGenerator:
   - name: cilium-values
@@ -42,4 +41,3 @@ configMapGenerator:
       - values.yaml=values/cert-manager.yaml
     options:
       disableNameSuffixHash: true
-
