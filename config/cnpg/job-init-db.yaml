@@ -14,7 +14,7 @@ spec:
           command:
             - sh
             - -c
-            - envsubst < /sql/init.sql | psql -h pooler-rw -U homelab -d homelab
+            - envsubst < /sql/init.sql | psql -h pooler -U homelab -d homelab
           envFrom:
             - secretRef:
                 name: credentials
