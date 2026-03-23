@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../apps/home-assistant/overlays/homelab
+  - ../../../apps/ddns/overlays/homelab
+  - ../../../apps/adguard-home/overlays/homelab
+  - ../../../apps/webauth/overlays/homelab
+  - ../../../apps/lightnvr/overlays/homelab
+  - ../../../apps/actual-budget/overlays/homelab
+  - ../../../apps/gatus/overlays/homelab
+  - ../../../apps/stalwart/overlays/homelab
+  - ../../../apps/memos/overlays/homelab

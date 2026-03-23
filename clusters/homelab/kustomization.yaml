@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - infrastructure.yaml
   - config.yaml
+  - apps.yaml
+  # step 2: remove these after apps.yaml has reconciled
   - home-assistant.yaml
   - ddns.yaml
   - adguard-home.yaml
@@ -11,7 +13,6 @@ resources:
   - actual-budget.yaml
   - gatus.yaml
   - stalwart.yaml
-  - memos.yaml
 
 configMapGenerator:
   - name: cilium-values
