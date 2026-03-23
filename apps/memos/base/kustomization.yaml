@@ -4,10 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - deployment.yaml
-  - deployment-postgres.yaml
   - service.yaml
-  - service-postgres.yaml
-  - pvc.yaml
 
 labels:
   - pairs:

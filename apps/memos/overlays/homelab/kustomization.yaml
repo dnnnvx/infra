@@ -5,5 +5,4 @@ resources:
   - httproute.yaml
   - secrets.yaml
 patches:
-  - path: patch-storage.yaml
-  - path: patch-memos.yaml
+  - path: patch-deployment.yaml
