@@ -4,12 +4,8 @@
 
 -- memos
 
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'memos') THEN
-    CREATE ROLE memos WITH LOGIN PASSWORD '${MEMOS_PASSWORD}';
-  END IF;
-END $$;
+SELECT 'CREATE ROLE memos WITH LOGIN PASSWORD ''${MEMOS_PASSWORD}'''
+WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'memos')\gexec
 
 SELECT 'CREATE DATABASE memos OWNER memos'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'memos')\gexec
