@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - deployment-postgres.yaml
+  - service.yaml
+  - service-postgres.yaml
+  - pvc.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: memos
+    includeSelectors: false
+    includeTemplates: true

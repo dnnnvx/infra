@@ -13,9 +13,17 @@ spec:
       labels:
         app.kubernetes.io/name: stalwart
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: stalwart
           image: stalwartlabs/stalwart:v0.15-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           ports:
             - containerPort: 25
               name: smtp

@@ -11,6 +11,7 @@ resources:
   - actual-budget.yaml
   - gatus.yaml
   - stalwart.yaml
+  - memos.yaml
 
 configMapGenerator:
   - name: cilium-values

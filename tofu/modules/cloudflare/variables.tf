@@ -27,3 +27,29 @@ variable "cname_subdomains" {
   type        = list(string)
   default     = []
 }
+
+variable "mail_subdomain" {
+  description = "Mail server subdomain"
+  type        = string
+  default     = "mail"
+}
+
+variable "dkim_ed25519_selector" {
+  description = "DKIM Ed25519 selector (e.g. 202603e)"
+  type        = string
+}
+
+variable "dkim_ed25519_pubkey" {
+  description = "DKIM Ed25519 public key"
+  type        = string
+}
+
+variable "dkim_rsa_selector" {
+  description = "DKIM RSA selector (e.g. 202603r)"
+  type        = string
+}
+
+variable "dkim_rsa_pubkey" {
+  description = "DKIM RSA public key"
+  type        = string
+}

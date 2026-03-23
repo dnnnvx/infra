@@ -165,8 +165,12 @@ module "cloudflare" {
   cloudflare_account_id = var.cloudflare_account_id
   zone_name             = "casasulgorgo.net"
   cloudflare_api_token  = var.cloudflare_api_token
-  cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "mail"]
+  cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "memos"]
   r2_buckets            = { "tofu-state" = {} }
+  dkim_ed25519_selector = "202603e"
+  dkim_ed25519_pubkey   = "4fateAYV8FqbeSPv8oXSKjPVNij9To2BzxkDN7UjWXg="
+  dkim_rsa_selector     = "202603r"
+  dkim_rsa_pubkey       = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtKzcMBcMRn7C5iAQNLnbJmEC158b1NmLZRBLniwmw/5MOqitJbVbRD3xe4W5JfUt058XJXYZA7hRo0PH7MM2XQTDKtMKemEVlAuyNSlQObnCa4+TMs9psR3uH9BJJiITRQ1lXw0YjRWfqSq0sGDikCH2Hq19Nio64ucYSLsIXI53NuYCyJIMTQ5kEm9Bb95XCjj+U/Q8cPbHJChuwkQi6jdxciQDz4tXNx1y4TmSk5WFEWnbAeOLFp06LqpOmw1pk3HvLpxm8CzvjXm7W5TgBxpPELfwNboGVtJDYuaVwkfC7ZMIYG9310EhAhlXMSiUeXxn+MLcQPofy/0oOPEJNwIDAQAB"
 }
 
 module "github" {
