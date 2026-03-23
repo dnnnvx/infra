@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-db
+  namespace: cnpg-system
+spec:
+  ttlSecondsAfterFinished: 86400 # 24h
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init-db
+          image: ghcr.io/cloudnative-pg/postgresql:17
+          command:
+            - sh
+            - -c
+            - envsubst < /sql/init.sql | psql -h pooler-rw -U homelab -d homelab
+          envFrom:
+            - secretRef:
+                name: credentials
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-app
+                  key: password
+          volumeMounts:
+            - name: sql
+              mountPath: /sql
+      volumes:
+        - name: sql
+          configMap:
+            name: init-db-sql

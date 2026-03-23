@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+  namespace: cnpg-system
+spec:
+  instances: 1
+  postgresql:
+    parameters:
+      shared_buffers: "128MB" # Reserved RAM for caching
+      max_connections: "50" # Limits overhead per connection
+      work_mem: "4MB" # Per-query sort memory
+      maintenance_work_mem: "64MB"
+  storage:
+    size: 5Gi
+    storageClass: piraeus
+  bootstrap:
+    initdb:
+      database: homelab
+      owner: homelab
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi # Hard cap to prevent OOM-killing the whole node

@@ -4,6 +4,8 @@ metadata:
   name: cnpg
   namespace: cnpg-system
 spec:
+  install:
+    createNamespace: true
   interval: 30m
   dependsOn:
     - name: cilium
