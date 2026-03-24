@@ -14,7 +14,7 @@ spec:
           command:
             - sh
             - -c
-            - apk add --no-cache gettext postgresql-client && envsubst < /sql/init.sql | psql -h postgres-rw -U homelab -d homelab
+            - apk add --no-cache gettext postgresql-client && envsubst < /sql/init.sql | psql -h postgres-rw -U postgres -d postgres
           envFrom:
             - secretRef:
                 name: credentials
