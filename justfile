@@ -75,6 +75,9 @@ docs:
 # sync flux with the defined git repo
 sync:
     flux reconcile source git flux-system -n flux-system --context {{ cluster }}
+    flux reconcile kustomization infrastructure
+    flux reconcile kustomization config
+    flux reconcile kustomization apps
 
 # validate all kustomize overlays and manifests
 validate:
