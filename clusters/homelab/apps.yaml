@@ -12,7 +12,7 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./clusters/homelab/apps
-  prune: true
+  prune: false
   wait: true
   decryption:
     provider: sops
