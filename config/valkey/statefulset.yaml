@@ -24,7 +24,7 @@ spec:
             - --maxmemory
             - 128mb
             - --maxmemory-policy
-            - allkeys-lru
+            - noeviction
             - --appendonly
             - "yes"
           volumeMounts:
