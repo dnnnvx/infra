@@ -6,4 +6,5 @@ resources:
   - ./flux
   - ./piraeus
   - ./cnpg
+  - ./dragonfly
   # - ./tofu-controller

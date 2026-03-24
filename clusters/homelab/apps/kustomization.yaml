@@ -9,4 +9,5 @@ resources:
   - ../../../apps/actual-budget/overlays/homelab
   - ../../../apps/gatus/overlays/homelab
   - ../../../apps/memos/overlays/homelab
+  - ../../../apps/norish/overlays/homelab
   # - ../../../apps/stalwart/overlays/homelab

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dragonfly
+  namespace: dragonfly
+spec:
+  selector:
+    app.kubernetes.io/name: dragonfly
+  ports:
+    - port: 6379
+      targetPort: redis
+      name: redis

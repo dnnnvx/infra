@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: norish-uploads
+  namespace: norish
+spec:
+  storageClassName: piraeus

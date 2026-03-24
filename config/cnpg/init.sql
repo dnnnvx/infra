@@ -13,3 +13,15 @@ SELECT 'CREATE DATABASE memos OWNER memos'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'memos')\gexec
 
 GRANT ALL PRIVILEGES ON DATABASE memos TO memos;
+
+-- norish
+
+SELECT 'CREATE ROLE norish WITH LOGIN PASSWORD ''$${NORISH_PASSWORD}'''
+WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'norish')\gexec
+
+ALTER ROLE norish WITH LOGIN PASSWORD '$${NORISH_PASSWORD}';
+
+SELECT 'CREATE DATABASE norish OWNER norish'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'norish')\gexec
+
+GRANT ALL PRIVILEGES ON DATABASE norish TO norish;
