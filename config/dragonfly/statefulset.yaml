@@ -25,6 +25,9 @@ spec:
             - "1"
             - --maxmemory
             - 256mb
+            - --cluster_mode
+            - emulated
+            - --lock_on_hashtags
           volumeMounts:
             - name: data
               mountPath: /data
