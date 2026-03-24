@@ -4,7 +4,7 @@ metadata:
   name: init-db
   namespace: cnpg-system
 spec:
-  ttlSecondsAfterFinished: 86400 # 24h
+  ttlSecondsAfterFinished: 120
   template:
     spec:
       restartPolicy: OnFailure
