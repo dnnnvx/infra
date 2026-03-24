@@ -39,6 +39,8 @@ spec:
                   key: database-url
             - name: REDIS_URL
               value: redis://valkey.valkey:6379
+            - name: CHROME_WS_ENDPOINT
+              value: ws://localhost:9222
             - name: MASTER_KEY
               valueFrom:
                 secretKeyRef:
@@ -47,6 +49,20 @@ spec:
           volumeMounts:
             - name: uploads
               mountPath: /app/uploads
+        - name: chrome-headless
+          image: zenika/alpine-chrome:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          args:
+            - "--no-sandbox"
+            - "--disable-gpu"
+            - "--disable-dev-shm-usage"
+            - "--disable-features=dbus"
+            - "--remote-debugging-address=0.0.0.0"
+            - "--remote-debugging-port=9222"
+            - "--headless"
       volumes:
         - name: uploads
           persistentVolumeClaim:
