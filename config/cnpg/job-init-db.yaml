@@ -22,7 +22,7 @@ spec:
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-app
+                  name: postgres-superuser
                   key: password
           volumeMounts:
             - name: sql
