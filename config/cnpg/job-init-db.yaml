@@ -3,6 +3,8 @@ kind: Job
 metadata:
   name: init-db
   namespace: cnpg-system
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
 spec:
   ttlSecondsAfterFinished: 120
   template:
