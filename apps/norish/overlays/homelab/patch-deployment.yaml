@@ -12,7 +12,7 @@ spec:
             - name: AUTH_URL
               value: https://recipes.casasulgorgo.net
             - name: OIDC_NAME
-              value: Pocket-ID
+              value: "Casa sul Gorgo"
             - name: OIDC_ISSUER
               value: https://auth.casasulgorgo.net
             - name: OIDC_WELLKNOWN
