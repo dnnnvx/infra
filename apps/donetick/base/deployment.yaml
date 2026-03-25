@@ -26,7 +26,7 @@ spec:
               value: selfhosted
           volumeMounts:
             - name: config
-              mountPath: /config
+              mountPath: /app/config
             - name: assets
               mountPath: /app/assets
       volumes:
