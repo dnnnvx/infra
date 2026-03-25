@@ -144,15 +144,15 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: LightNVR (external)
-    group: apps
-    url: https://nvr.casasulgorgo.net
-    interval: 5m
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: telegram
-        send-on-resolved: true
+  # - name: LightNVR (external)
+  #   group: apps
+  #   url: https://nvr.casasulgorgo.net
+  #   interval: 5m
+  #   conditions:
+  #     - "[STATUS] == 200"
+  #   alerts:
+  #     - type: telegram
+  #       send-on-resolved: true
 
   - name: Cilium Gateway
     group: infrastructure
