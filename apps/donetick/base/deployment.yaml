@@ -27,7 +27,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: donetick/donetick:latest
+          image: donetick/donetick:v0.1.75-beta.5
           ports:
             - containerPort: 2021
               name: http

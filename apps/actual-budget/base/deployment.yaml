@@ -27,7 +27,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: actualbudget/actual-server:latest
+          image: actualbudget/actual-server:26.3.0-alpine
           ports:
             - containerPort: 5006
               name: http

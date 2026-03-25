@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: norish
-          image: norishapp/norish:latest
+          image: norishapp/norish:v0.17.3-beta
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -50,7 +50,7 @@ spec:
             - name: uploads
               mountPath: /app/uploads
         - name: chrome-headless
-          image: zenika/alpine-chrome:latest
+          image: zenika/alpine-chrome:124
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

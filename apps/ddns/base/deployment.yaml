@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: cloudflare-ddns
-          image: favonia/cloudflare-ddns:latest
+          image: favonia/cloudflare-ddns:edge
           env:
             - name: CF_API_TOKEN
               value: ""
