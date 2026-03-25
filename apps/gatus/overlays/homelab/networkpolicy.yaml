@@ -19,9 +19,11 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    # gatus monitors internal services and external endpoints
+    # internal cluster services — no port restriction
     - toEntities:
         - cluster
+    # external endpoints (HTTPS only)
+    - toEntities:
         - world
       toPorts:
         - ports:
