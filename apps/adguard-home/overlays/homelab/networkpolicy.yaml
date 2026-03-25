@@ -26,18 +26,11 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    # home-assistant AdGuard integration (HTTP API)
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: home-assistant
-      toPorts:
-        - ports:
-            - port: "3000"
-              protocol: TCP
-    # gatus monitoring
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: gatus
+    # web UI — allow all cluster pods (covers gatus monitoring + home-assistant via SNAT)
+    # home-assistant uses hostNetwork so it SNATs through the node's CiliumInternalIP
+    # which appears as remote-node; fromEntities:cluster covers this
+    - fromEntities:
+        - cluster
       toPorts:
         - ports:
             - port: "3000"
