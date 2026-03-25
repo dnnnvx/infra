@@ -13,8 +13,18 @@ spec:
       labels:
         app.kubernetes.io/name: actual-budget
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: actual-budget
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: actualbudget/actual-server:latest
           ports:
             - containerPort: 5006

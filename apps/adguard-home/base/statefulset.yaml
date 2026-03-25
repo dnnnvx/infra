@@ -14,8 +14,16 @@ spec:
       labels:
         app.kubernetes.io/name: adguard-home
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: adguard-home
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_BIND_SERVICE"]
           image: adguard/adguardhome:v0.107.57
           args:
             - --config

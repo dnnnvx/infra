@@ -16,8 +16,15 @@ spec:
         app.kubernetes.io/name: home-assistant
     spec:
       serviceAccountName: home-assistant
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: home-assistant
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: ghcr.io/home-assistant/home-assistant:stable
           ports:
             - name: http

@@ -15,8 +15,18 @@ spec:
       labels:
         app.kubernetes.io/name: donetick
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: donetick
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: donetick/donetick:latest
           ports:
             - containerPort: 2021
@@ -26,7 +36,7 @@ spec:
               value: selfhosted
           volumeMounts:
             - name: config
-              mountPath: /app/config
+              mountPath: /config
             - name: assets
               mountPath: /app/assets
       volumes:

@@ -13,8 +13,15 @@ spec:
       labels:
         app.kubernetes.io/name: lightnvr
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: lightnvr
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: ghcr.io/opensensor/lightnvr:latest
           ports:
             - containerPort: 8080

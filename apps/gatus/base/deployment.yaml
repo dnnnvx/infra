@@ -13,8 +13,18 @@ spec:
       labels:
         app.kubernetes.io/name: gatus
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: gatus
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: twinproduction/gatus:v5.35.0
           ports:
             - containerPort: 8080

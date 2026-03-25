@@ -7,3 +7,4 @@
 - [Storage](./storage.md)
 - [OpenTofu](./opentofu.md)
 - [Secrets](./secrets.md)
+- [Security](./security.md)

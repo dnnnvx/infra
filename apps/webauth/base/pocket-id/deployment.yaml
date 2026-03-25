@@ -15,8 +15,18 @@ spec:
       labels:
         app.kubernetes.io/name: pocket-id
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: pocket-id
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           image: ghcr.io/pocket-id/pocket-id:v2
           ports:
             - name: http
