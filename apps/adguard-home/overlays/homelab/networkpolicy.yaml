@@ -9,9 +9,11 @@ spec:
     - fromEntities:
         - ingress
     # accept DNS queries from cluster pods/nodes and LAN clients
+    # LoadBalancer SNAT makes external traffic appear as host entity
     - fromEntities:
         - cluster
         - world
+        - host
       toPorts:
         - ports:
             - port: "53"
