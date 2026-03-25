@@ -14,6 +14,16 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
+  - name: Home Assistant (external)
+    group: apps
+    url: https://ha.casasulgorgo.net
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
   - name: AdGuard Home
     group: apps
     url: http://adguard-home.adguard-home.svc.cluster.local:3000
@@ -34,6 +44,16 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
+  - name: Pocket-ID (external)
+    group: apps
+    url: https://auth.casasulgorgo.net
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
   - name: Actual Budget
     group: apps
     url: http://actual-budget.actual-budget.svc.cluster.local:5006
@@ -44,10 +64,90 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Stalwart Mail
+  - name: Actual Budget (external)
     group: apps
-    url: http://stalwart.stalwart.svc.cluster.local:8080
+    url: https://budget.casasulgorgo.net
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Memos
+    group: apps
+    url: http://memos.memos.svc.cluster.local:5230
     interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Memos (external)
+    group: apps
+    url: https://memos.casasulgorgo.net
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Norish
+    group: apps
+    url: http://norish.norish.svc.cluster.local:3000
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Norish (external)
+    group: apps
+    url: https://recipes.casasulgorgo.net
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Donetick
+    group: apps
+    url: http://donetick.donetick.svc.cluster.local:2021
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: Donetick (external)
+    group: apps
+    url: https://tasks.casasulgorgo.net
+    interval: 5m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: LightNVR
+    group: apps
+    url: http://lightnvr.lightnvr.svc.cluster.local:8083
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: LightNVR (external)
+    group: apps
+    url: https://nvr.casasulgorgo.net
+    interval: 5m
     conditions:
       - "[STATUS] == 200"
     alerts:

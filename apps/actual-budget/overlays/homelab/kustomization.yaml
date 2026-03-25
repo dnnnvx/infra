@@ -4,6 +4,7 @@ resources:
   - ../../base
   - httproute.yaml
   - secrets.yaml
+  - networkpolicy.yaml
 patches:
   - path: patch-storage.yaml
   - path: patch-deployment.yaml

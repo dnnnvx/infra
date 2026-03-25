@@ -1,0 +1,29 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: webauth
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - ingress
+    # allow apps to call pocket-id for OIDC token exchange
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: donetick
+      toPorts:
+        - ports:
+            - port: "1411"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
