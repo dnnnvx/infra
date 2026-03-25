@@ -6,7 +6,7 @@ All workloads target the Kubernetes `restricted` Pod Security Standard. The foll
 
 ### Full restricted (stateless/standard apps)
 
-Used for: `memos`, `norish`, `donetick`, `actual-budget`, `gatus`, `pocket-id`
+Used for: `memos`, `norish`, `donetick`, `actual-budget`, `gatus`
 
 ```yaml
 spec:
@@ -25,7 +25,7 @@ spec:
 
 ### Partial (apps requiring root)
 
-Used for: `home-assistant`, `lightnvr` — these need root for hardware/device access.
+Used for: `home-assistant`, `lightnvr`, `pocket-id` — these need root for hardware/device access or internal privilege dropping (`su-exec`).
 
 ```yaml
 spec:
