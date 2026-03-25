@@ -26,3 +26,10 @@ spec:
     - toEntities:
         - world
         - host
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: adguard-home
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
