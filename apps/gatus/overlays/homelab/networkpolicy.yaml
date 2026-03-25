@@ -23,6 +23,9 @@ spec:
     - toEntities:
         - cluster
         - kube-apiserver
+    # kube-apiserver VIP (not matched by kube-apiserver entity)
+    - toCIDR:
+        - 192.168.0.100/32
     # external endpoints (HTTPS only)
     - toEntities:
         - world
