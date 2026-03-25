@@ -136,7 +136,7 @@ endpoints:
 
   - name: LightNVR
     group: apps
-    url: http://lightnvr.lightnvr.svc.cluster.local:8083
+    url: http://lightnvr.lightnvr.svc.cluster.local:8080
     interval: 1m
     conditions:
       - "[STATUS] == 200"
