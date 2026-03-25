@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: donetick
+  namespace: donetick
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: donetick
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: donetick
+    spec:
+      containers:
+        - name: donetick
+          image: donetick/donetick:latest
+          ports:
+            - containerPort: 2021
+              name: http
+          env:
+            - name: DT_ENV
+              value: selfhosted
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: assets
+              mountPath: /app/assets
+      volumes:
+        - name: config
+          secret:
+            secretName: config
+        - name: assets
+          persistentVolumeClaim:
+            claimName: assets

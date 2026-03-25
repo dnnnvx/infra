@@ -10,4 +10,5 @@ resources:
   - ../../../apps/gatus/overlays/homelab
   - ../../../apps/memos/overlays/homelab
   - ../../../apps/norish/overlays/homelab
+  - ../../../apps/donetick/overlays/homelab
   # - ../../../apps/stalwart/overlays/homelab
