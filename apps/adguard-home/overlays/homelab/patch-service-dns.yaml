@@ -5,3 +5,5 @@ metadata:
   namespace: adguard-home
   annotations:
     io.cilium/lb-ipam-ips: "192.168.0.201"
+spec:
+  externalTrafficPolicy: Local
