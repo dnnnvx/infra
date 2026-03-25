@@ -8,9 +8,10 @@ spec:
   ingress:
     - fromEntities:
         - ingress
-    # accept DNS queries from all cluster pods and nodes
+    # accept DNS queries from cluster pods/nodes and LAN clients
     - fromEntities:
         - cluster
+        - world
       toPorts:
         - ports:
             - port: "53"
