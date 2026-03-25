@@ -25,7 +25,7 @@ spec:
 
 ### Partial (apps requiring root)
 
-Used for: `home-assistant`, `lightnvr`, `pocket-id` — these need root for hardware/device access or internal privilege dropping (`su-exec`).
+Used for: `home-assistant`, `lightnvr` — these need root for hardware/device access.
 
 ```yaml
 spec:
@@ -40,6 +40,23 @@ spec:
 ```
 
 > `runAsNonRoot` is intentionally omitted. Add it back if the image ever supports non-root.
+
+### su-exec / privilege dropping apps
+
+Used for: `pocket-id` — uses `su-exec` internally to drop privileges after startup. Drop all capabilities then add back only what `su-exec` needs.
+
+```yaml
+spec:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+          add: ["SETUID", "SETGID", "CHOWN"]
+```
 
 ### Port 53 (DNS services)
 
