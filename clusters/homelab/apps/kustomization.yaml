@@ -11,4 +11,5 @@ resources:
   - ../../../apps/memos/overlays/homelab
   - ../../../apps/norish/overlays/homelab
   - ../../../apps/donetick/overlays/homelab
+  - ../../../apps/diun/overlays/homelab
   # - ../../../apps/stalwart/overlays/homelab
