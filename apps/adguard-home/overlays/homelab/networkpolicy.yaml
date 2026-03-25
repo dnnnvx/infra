@@ -17,9 +17,9 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    # accept DNS queries from LAN clients (covers SNAT'd LoadBalancer traffic too)
-    - fromCIDR:
-        - 192.168.0.0/24
+    # accept DNS queries from LAN clients via LoadBalancer (Cilium classifies as world)
+    - fromEntities:
+        - world
       toPorts:
         - ports:
             - port: "53"
