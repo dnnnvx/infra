@@ -144,25 +144,25 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Tangled
-    group: apps
-    url: http://tangled.tangled.svc.cluster.local:5555
-    interval: 1m
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: telegram
-        send-on-resolved: true
+  # - name: Tangled
+  #   group: apps
+  #   url: http://tangled.tangled.svc.cluster.local:5555
+  #   interval: 1m
+  #   conditions:
+  #     - "[STATUS] == 200"
+  #   alerts:
+  #     - type: telegram
+  #       send-on-resolved: true
 
-  - name: Tangled (external)
-    group: apps
-    url: https://git.casasulgorgo.net
-    interval: 5m
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: telegram
-        send-on-resolved: true
+  # - name: Tangled (external)
+  #   group: apps
+  #   url: https://git.casasulgorgo.net
+  #   interval: 5m
+  #   conditions:
+  #     - "[STATUS] == 200"
+  #   alerts:
+  #     - type: telegram
+  #       send-on-resolved: true
 
   # - name: LightNVR (external)
   #   group: apps
