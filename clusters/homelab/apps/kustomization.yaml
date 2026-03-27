@@ -13,4 +13,3 @@ resources:
   - ../../../apps/donetick/overlays/homelab
   - ../../../apps/diun/overlays/homelab
   # - ../../../apps/tangled/overlays/homelab
-  # - ../../../apps/stalwart/overlays/homelab

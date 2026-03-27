@@ -20,10 +20,6 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 5"
     }
-    github = {
-      source  = "integrations/github"
-      version = "~> 6.0"
-    }
     external = {
       source  = "hashicorp/external"
       version = "~> 2.0"
@@ -32,6 +28,8 @@ terraform {
 }
 
 locals {
+  atproto_did = "did:plc:qzac7ebdharodtvwlxb7wsof"
+
   client_certificate     = base64decode(module.talos.kubernetes_client_configuration.client_certificate)
   client_key             = base64decode(module.talos.kubernetes_client_configuration.client_key)
   cluster_ca_certificate = base64decode(module.talos.kubernetes_client_configuration.ca_certificate)
@@ -57,9 +55,8 @@ provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }
 
-provider "github" {
-  token = var.github_token
-  owner = var.github_owner
+data "external" "tangled_known_hosts" {
+  program = ["sh", "-c", "ssh-keyscan tangled.org 2>/dev/null | grep -v '^#' | jq -Rsc '{known_hosts: .}'"]
 }
 
 module "talos" {
@@ -167,15 +164,7 @@ module "cloudflare" {
   cloudflare_api_token  = var.cloudflare_api_token
   cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "memos", "recipes", "tasks", "git"]
   r2_buckets            = { "tofu-state" = {} }
-  atproto_did           = "did:plc:qzac7ebdharodtvwlxb7wsof"
-}
-
-module "github" {
-  source = "../modules/github"
-
-  owner          = "dnnnvx"
-  repository     = "infra"
-  deploy_key_pub = var.flux_deploy_key_pub
+  atproto_did           = local.atproto_did
 }
 
 module "k8s" {
@@ -196,7 +185,7 @@ module "k8s" {
       data = {
         identity       = var.flux_deploy_key
         "identity.pub" = var.flux_deploy_key_pub
-        known_hosts    = module.github.known_hosts
+        known_hosts    = data.external.tangled_known_hosts.result.known_hosts
       }
     },
     {

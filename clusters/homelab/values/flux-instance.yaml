@@ -2,7 +2,7 @@ instance:
   sync:
     interval: 1m
     kind: GitRepository
-    url: "ssh://git@github.com/dnnnvx/infra.git"
+    url: "ssh://git@tangled.org/casasulgorgo.net/infra"
     ref: "refs/heads/main"
     path: ./clusters/homelab
     pullSecret: flux-system
