@@ -8,3 +8,4 @@
 - [OpenTofu](./opentofu.md)
 - [Secrets](./secrets.md)
 - [Security](./security.md)
+- [Debugging](./debugging.md)
