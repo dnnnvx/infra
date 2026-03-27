@@ -167,6 +167,7 @@ module "cloudflare" {
   cloudflare_api_token  = var.cloudflare_api_token
   cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "memos", "recipes", "tasks", "git"]
   r2_buckets            = { "tofu-state" = {} }
+  atproto_did           = "did:plc:qzac7ebdharodtvwlxb7wsof"
 }
 
 module "github" {

@@ -26,6 +26,17 @@ resource "cloudflare_r2_bucket" "this" {
   location   = each.value.location
 }
 
+resource "cloudflare_dns_record" "atproto" {
+  count = var.atproto_did != "" ? 1 : 0
+
+  zone_id = data.cloudflare_zone.main.zone_id
+  name    = "_atproto"
+  content = "did=${var.atproto_did}"
+  type    = "TXT"
+  ttl     = 300
+  proxied = false
+}
+
 resource "cloudflare_dns_record" "cname_subdomains" {
   for_each = toset(var.cname_subdomains)
 

@@ -28,6 +28,12 @@ variable "cname_subdomains" {
   default     = []
 }
 
+variable "atproto_did" {
+  description = "AT Protocol DID for handle verification via _atproto TXT record (e.g. did:plc:xxxx). Leave empty to skip."
+  type        = string
+  default     = ""
+}
+
 variable "mail_subdomain" {
   description = "Mail server subdomain"
   type        = string
