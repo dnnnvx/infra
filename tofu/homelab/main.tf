@@ -165,7 +165,7 @@ module "cloudflare" {
   cloudflare_account_id = var.cloudflare_account_id
   zone_name             = "casasulgorgo.net"
   cloudflare_api_token  = var.cloudflare_api_token
-  cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "memos", "recipes", "tasks"]
+  cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "memos", "recipes", "tasks", "git"]
   r2_buckets            = { "tofu-state" = {} }
 }
 

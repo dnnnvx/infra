@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - httproute.yaml
+  - networkpolicy.yaml
+
+patches:
+  - path: patch-deployment.yaml
+  - path: patch-pvc.yaml
+  - path: patch-service-ssh.yaml
