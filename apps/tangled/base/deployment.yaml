@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: knot
-          image: tngl/knot:v1.12.0-alpha
+          image: tngl/knot:v1.10.0-alpha
           env:
             - name: KNOT_SERVER_DB_PATH
               value: /app/knotserver.db
