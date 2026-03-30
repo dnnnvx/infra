@@ -44,5 +44,12 @@ gatewayAPI:
   enableAppProtocol: true
 l2announcements:
   enabled: true
+MTU: 1450
+bpf:
+  masquerade: true
+bandwidthManager:
+  enabled: true
+  bbr: true
+bpfClockProbe: true
 k8sServiceHost: "192.168.0.100"
 k8sServicePort: "6443"
