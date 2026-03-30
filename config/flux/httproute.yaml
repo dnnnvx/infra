@@ -36,7 +36,7 @@ spec:
             value: /hook/
       backendRefs:
         - name: notification-controller
-          port: 9292
+          port: 80
     - backendRefs:
         - name: flux-operator
           port: 9080
