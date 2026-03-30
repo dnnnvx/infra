@@ -13,6 +13,13 @@ configMapGenerator:
     options:
       disableNameSuffixHash: true
 
+  - name: flux-operator-values
+    namespace: flux-system
+    files:
+      - values.yaml=values/flux-operator.yaml
+    options:
+      disableNameSuffixHash: true
+
   - name: flux-instance-values
     namespace: flux-system
     files:

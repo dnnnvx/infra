@@ -5,6 +5,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 30m
+  valuesFrom:
+    - kind: ConfigMap
+      name: flux-operator-values
+      valuesKey: values.yaml
+      optional: true
   chart:
     spec:
       chart: flux-operator
