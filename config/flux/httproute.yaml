@@ -30,7 +30,13 @@ spec:
   hostnames:
     - flux.casasulgorgo.net
   rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /hook/
+      backendRefs:
+        - name: notification-controller
+          port: 9292
     - backendRefs:
         - name: flux-operator
-          namespace: flux-system
           port: 9080

@@ -5,5 +5,7 @@ resources:
   - ciliumnetworkpolicy.yaml
   - clusterrolebinding.yaml
   - flux-web-config.yaml
+  - receiver.yaml
+  - receiver-token.yaml
   - telegram-secret.yaml
   - telegram.yaml

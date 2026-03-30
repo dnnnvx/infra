@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: receiver-token
+    namespace: flux-system
+stringData:
+    token: ENC[AES256_GCM,data:POIcccU8GZ3jOGGRrgF+lDfd5lVM/r5s/0IZa21qzG0aDA6nhgrWhg==,iv:pS6WSVnLmktNeWuByHGKhglP92XEnPuCzt81lFmhv3I=,tag:OoNIbgYRWo0VkuW9Vnxc7A==,type:str]
+sops:
+    age:
+        - recipient: age1ux5r4vxfwn0uyx7d77j6x449k4zl4y302taj4a73q4722c89jdrsr98r36
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBqcHBuOEZpaGR2Ly9USkZs
+            enl6ZzNqQVFDcUdqT2Nrcm5NZU50NXpaaHpNCkdxc2JDQlRwaXordzkxcVY2Qm55
+            bmZJYksvMGIxMS9DM1ppNUpJRzVnSGcKLS0tIG10MFJkcUJMclR2UHZLdStYYjJR
+            ZU5TV2FkZUF4aG1MNTI2bUpDYitCUHMK1XncSCuVcUhdSNO7Ktn6rFXAaSIfSnu9
+            0x8WAiV2yBS11Y8hqDX44IJlrTtSN7F9E23BoVRKHbCtHr5glFdkwQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-03-30T12:10:45Z"
+    mac: ENC[AES256_GCM,data:tOvUBPVB5mp6fv+yo2qv5KaRLkmZF8T341VcgnPNj45SCVBt2BKTZeAl0b+9lfdxIjFfR/d3pzZv0MDn3+CZ+jdnJdXf291wXcyF9bLA3nlSL17hi9O0jz3yQAyg87UvGVxmiZ9rgcO8yYCupuVMrIpygHSnShHTw8Z1WX26+UM=,iv:a1mhYrFcbrtBVplpPwOKtmWSdrxR9nxnCKZOVn4K+xU=,tag:jouJgIJBFRFmNuXkflKW0w==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.12.1
