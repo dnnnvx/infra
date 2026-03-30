@@ -4,9 +4,7 @@ metadata:
   name: tangled-push
   namespace: flux-system
 spec:
-  type: github
-  events:
-    - push
+  type: generic
   secretRef:
     name: receiver-token
   resources:
