@@ -44,7 +44,6 @@ gatewayAPI:
   enableAppProtocol: true
 l2announcements:
   enabled: true
-MTU: 1450
 bpf:
   masquerade: true
 bandwidthManager:

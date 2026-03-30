@@ -4,6 +4,23 @@ resource "helm_release" "flux_operator" {
   repository       = "oci://ghcr.io/controlplaneio-fluxcd/charts"
   chart            = "flux-operator"
   create_namespace = true
+
+  values = [yamlencode({
+    web = {
+      config = {
+        baseURL = "https://flux.casasulgorgo.net"
+        authentication = {
+          type = "OAuth2"
+          oauth2 = {
+            provider     = "OIDC"
+            issuerURL    = "https://auth.casasulgorgo.net"
+            clientID     = var.flux_web_client_id
+            clientSecret = var.flux_web_client_secret
+          }
+        }
+      }
+    }
+  })]
 }
 
 resource "helm_release" "flux_instance" {

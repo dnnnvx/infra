@@ -33,6 +33,19 @@ variable "sops_age_key" {
   default     = ""
 }
 
+variable "flux_web_client_id" {
+  description = "OAuth2 client ID for Flux web UI (OIDC client created in Pocket-ID)"
+  type        = string
+  default     = ""
+}
+
+variable "flux_web_client_secret" {
+  description = "OAuth2 client secret for Flux web UI"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "flux_substitutions" {
   description = "Key-value pairs exposed as Flux variable substitutions via the flux_substitutions Secret"
   type        = map(string)

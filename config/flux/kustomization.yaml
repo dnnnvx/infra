@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - httproute.yaml
   - ciliumnetworkpolicy.yaml
+  - clusterrolebinding.yaml
   - telegram-secret.yaml
   - telegram.yaml
