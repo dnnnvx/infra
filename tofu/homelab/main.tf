@@ -171,6 +171,7 @@ module "k8s" {
   source = "../modules/k8s"
 
   cilium_values          = file("${path.module}/../../clusters/homelab/values/cilium.yaml")
+  flux_operator_values   = file("${path.module}/../../clusters/homelab/values/flux-operator.yaml")
   flux_instance_values   = file("${path.module}/../../clusters/homelab/values/flux-instance.yaml")
 
 

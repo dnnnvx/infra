@@ -5,10 +5,7 @@ resource "helm_release" "flux_operator" {
   chart            = "flux-operator"
   create_namespace = true
 
-  set {
-    name  = "web.configSecretName"
-    value = "flux-web-config"
-  }
+  values = [var.flux_operator_values]
 }
 
 resource "helm_release" "flux_instance" {

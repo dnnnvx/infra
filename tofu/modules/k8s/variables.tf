@@ -4,6 +4,12 @@ variable "cilium_values" {
   default     = ""
 }
 
+variable "flux_operator_values" {
+  description = "YAML values for the flux-operator Helm chart"
+  type        = string
+  default     = ""
+}
+
 variable "flux_instance_values" {
   description = "YAML values for the flux-instance Helm chart (FluxInstance spec)"
   type        = string

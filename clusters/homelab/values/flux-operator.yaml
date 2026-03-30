@@ -1,0 +1,2 @@
+web:
+  configSecretName: flux-web-config
