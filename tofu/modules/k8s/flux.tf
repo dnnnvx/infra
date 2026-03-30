@@ -5,22 +5,10 @@ resource "helm_release" "flux_operator" {
   chart            = "flux-operator"
   create_namespace = true
 
-  values = [yamlencode({
-    web = {
-      config = {
-        baseURL = "https://flux.casasulgorgo.net"
-        authentication = {
-          type = "OAuth2"
-          oauth2 = {
-            provider     = "OIDC"
-            issuerURL    = "https://auth.casasulgorgo.net"
-            clientID     = var.flux_web_client_id
-            clientSecret = var.flux_web_client_secret
-          }
-        }
-      }
-    }
-  })]
+  set {
+    name  = "web.configSecretName"
+    value = "flux-web-config"
+  }
 }
 
 resource "helm_release" "flux_instance" {

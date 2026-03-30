@@ -16,19 +16,6 @@ variable "namespaces" {
   default     = []
 }
 
-variable "flux_web_client_id" {
-  description = "OAuth2 client ID for Flux web UI (OIDC client created in Pocket-ID)"
-  type        = string
-  default     = ""
-}
-
-variable "flux_web_client_secret" {
-  description = "OAuth2 client secret for Flux web UI"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
 variable "secrets" {
   description = "Kubernetes secrets to create (e.g. third-party credentials)"
   type = list(object({

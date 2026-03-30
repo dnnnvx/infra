@@ -4,5 +4,6 @@ resources:
   - httproute.yaml
   - ciliumnetworkpolicy.yaml
   - clusterrolebinding.yaml
+  - flux-web-config.yaml
   - telegram-secret.yaml
   - telegram.yaml

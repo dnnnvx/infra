@@ -172,8 +172,7 @@ module "k8s" {
 
   cilium_values          = file("${path.module}/../../clusters/homelab/values/cilium.yaml")
   flux_instance_values   = file("${path.module}/../../clusters/homelab/values/flux-instance.yaml")
-  flux_web_client_id     = var.flux_web_client_id
-  flux_web_client_secret = var.flux_web_client_secret
+
 
   namespaces = [
     "cert-manager",
