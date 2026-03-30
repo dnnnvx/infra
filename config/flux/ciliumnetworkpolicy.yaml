@@ -18,7 +18,7 @@ spec:
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: allow-gateway-notification-controller
+  name: allow-gateway-webhook-receiver
   namespace: flux-system
 spec:
   endpointSelector:
@@ -29,5 +29,5 @@ spec:
         - ingress
       toPorts:
         - ports:
-            - port: "80"
+            - port: "9292"
               protocol: TCP
