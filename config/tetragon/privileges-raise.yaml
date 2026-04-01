@@ -1,0 +1,48 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: process-creds-changed
+spec:
+  kprobes:
+    - call: "commit_creds"
+      syscall: false
+      args:
+        - index: 0
+          type: "cred"
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
+          matchActions:
+            - action: Post
+              rateLimit: "1m"
+    - call: "override_creds"
+      syscall: false
+      args:
+        - index: 0
+          type: "cred"
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
+          matchActions:
+            - action: Post
+              rateLimit: "1m"
+    - call: "revert_creds"
+      syscall: false
+      args:
+        - index: 0
+          type: "cred"
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
+          matchActions:
+            - action: Post
+              rateLimit: "1m"

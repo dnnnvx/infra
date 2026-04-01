@@ -1,0 +1,13 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: sys-mount
+spec:
+  kprobes:
+    - call: "sys_mount"
+      syscall: true
+      args:
+        - index: 0
+          type: "string"  # source device
+        - index: 1
+          type: "string"  # target mountpoint

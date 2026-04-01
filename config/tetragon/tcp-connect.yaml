@@ -1,0 +1,27 @@
+# Disabled: very high event volume — every outbound TCP connection from every pod.
+# Enable when you have a log aggregator (Vector, Loki) to absorb the volume,
+# or add matchNamespaces / matchBinaries selectors to narrow scope first.
+#
+# apiVersion: cilium.io/v1alpha1
+# kind: TracingPolicy
+# metadata:
+#   name: tcp-connect
+# spec:
+#   kprobes:
+#     - call: "tcp_connect"
+#       syscall: false
+#       args:
+#         - index: 0
+#           type: "sock"
+#     - call: "tcp_close"
+#       syscall: false
+#       args:
+#         - index: 0
+#           type: "sock"
+#     - call: "tcp_sendmsg"
+#       syscall: false
+#       args:
+#         - index: 0
+#           type: "sock"
+#         - index: 2
+#           type: "int"

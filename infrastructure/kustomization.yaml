@@ -7,4 +7,5 @@ resources:
   - ./metrics-server
   - ./piraeus
   - ./cnpg
+  - ./tetragon
   # - ./tofu-controller

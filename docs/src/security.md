@@ -1,5 +1,66 @@
 # Security
 
+## Runtime Security (Tetragon)
+
+[Tetragon](https://tetragon.io) provides eBPF-based runtime security observability. It runs as a DaemonSet in `kube-system` and applies `TracingPolicy` resources that hook into the Linux kernel to observe (and optionally enforce) security-relevant events.
+
+### Deployment
+
+- HelmRelease: `infrastructure/tetragon/` (depends on Cilium, uses `cilium` HelmRepository)
+- Helm values: `clusters/homelab/values/tetragon.yaml`
+- Policies: `config/tetragon/`
+
+Key values configured:
+
+| Value | Setting | Reason |
+|---|---|---|
+| `enableProcessCred` | `true` | Include uid/gid/capabilities in all events |
+| `enableProcessNs` | `true` | Include Linux namespace info in events |
+| `clusterName` | `homelab` | Tags all events with cluster name |
+| `exportFilename` | `""` | No on-disk log file; use `tetra` CLI |
+| `grpc.address` | `0.0.0.0:54321` | Reachable for `tetra getevents` |
+| `extraHostPathMounts` | `/sys/kernel/tracing` | Required on Talos Linux |
+
+### Active policies
+
+All policies are **observe-only** (`action: Post`). No enforcement is applied until behavior is well understood.
+
+| File | What it detects |
+|---|---|
+| `privileges-raise.yaml` | `commit_creds` / `override_creds` / `revert_creds` — any credential change in a container. Rate-limited 1/min |
+| `modules.yaml` | Kernel module auto-load requests, file reads for module loading, module init and unload |
+| `sys-mount.yaml` | Any `mount()` syscall (source + target path logged) |
+| `sys-ptrace.yaml` | Any `ptrace()` call (request type + target pid logged) |
+| `sensitive-files.yaml` | Writes and truncations to `/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `/etc/ssh/` |
+
+### Disabled policies (`.disabled` files)
+
+Kept in `config/tetragon/` as commented-out YAML for future reference:
+
+| File | Why disabled |
+|---|---|
+| `tcp-connect.yaml.disabled` | Very high volume — every outbound TCP connection from every pod. Enable once you have a log aggregator (Vector, Loki) to absorb the load, or add `matchBinaries` / `matchNamespaces` selectors to narrow scope |
+| `creds-capability-usage.yaml.disabled` | Medium volume — `cap_capable` fires on every capability check during normal operation. Enable with tight selectors if investigating a specific workload |
+
+### Viewing events
+
+```bash
+# Stream all events
+kubectl exec -it -n kube-system ds/tetragon -- tetra getevents
+
+# Filter to a specific namespace
+kubectl exec -it -n kube-system ds/tetragon -- tetra getevents --namespace default
+
+# Filter to a specific policy (e.g. kprobes only)
+kubectl exec -it -n kube-system ds/tetragon -- tetra getevents --output json | jq 'select(.process_kprobe != null)'
+```
+
+### Escalating a policy to enforcement
+
+To move a policy from observe to enforce, replace `action: Post` with `action: Sigkill` (kills the process) or `action: Override` with `argError: -1` (returns EPERM to the syscall). Test in a non-production namespace first using `matchNamespaces` selectors.
+
+---
+
 ## Pod Security Standards
 
 All workloads target the Kubernetes `restricted` Pod Security Standard. The following security context is applied to every app deployment.

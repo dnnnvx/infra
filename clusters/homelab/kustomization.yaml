@@ -40,3 +40,10 @@ configMapGenerator:
       - values.yaml=values/cert-manager.yaml
     options:
       disableNameSuffixHash: true
+
+  - name: tetragon-values
+    namespace: kube-system
+    files:
+      - values.yaml=values/tetragon.yaml
+    options:
+      disableNameSuffixHash: true

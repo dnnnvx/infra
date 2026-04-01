@@ -1,0 +1,21 @@
+tetragon:
+  enableProcessCred: true
+  enableProcessNs: true
+
+  clusterName: homelab
+
+  # Disable file export — use `tetra` CLI or Prometheus metrics instead
+  exportFilename: ""
+
+  # Filter out high-volume noise
+  exportDenyList: |
+    {"health_check":true}
+    {"namespace":["kube-system","cilium-secrets","cert-manager"]}
+
+  grpc:
+    address: "0.0.0.0:54321"
+
+# Required for Talos Linux — grants access to the tracing filesystem
+extraHostPathMounts:
+  - name: sys-kernel-tracing
+    mountPath: /sys/kernel/tracing

@@ -1,0 +1,13 @@
+apiVersion: cilium.io/v1alpha1
+kind: TracingPolicy
+metadata:
+  name: sys-ptrace
+spec:
+  kprobes:
+    - call: "sys_ptrace"
+      syscall: true
+      args:
+        - index: 0
+          type: "int"   # request (PTRACE_ATTACH, PTRACE_PEEKDATA, etc.)
+        - index: 1
+          type: "int"   # pid
