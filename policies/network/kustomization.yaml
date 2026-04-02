@@ -12,7 +12,7 @@ resources:
   - lightnvr.yaml
   - memos.yaml
   - norish.yaml
-  - tangled.yaml
+  # - tangled.yaml
   - webauth.yaml
   # Infrastructure namespaces
   - cert-manager.yaml

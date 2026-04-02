@@ -4,13 +4,19 @@ tetragon:
 
   clusterName: homelab
 
-  exportFilename: "/var/run/tetragon/tetragon.log"
+  exportFilename: tetragon.log
+  exportFilePerm: "640"
 
   exportDenyList: |
     {"health_check":true}
 
   grpc:
-    address: "0.0.0.0:54321"
+    enabled: false
+
+  # Mount the shared export emptyDir into the tetragon container
+  extraVolumeMounts:
+    - name: tetragon-export
+      mountPath: /var/run/cilium/tetragon
 
 # Required for Talos Linux — grants access to the tracing filesystem
 extraHostPathMounts:
@@ -18,6 +24,8 @@ extraHostPathMounts:
     mountPath: /sys/kernel/tracing
 
 extraVolumes:
+  - name: tetragon-export
+    emptyDir: {}
   - name: telegram-forwarder-script
     configMap:
       name: tetragon-telegram-forwarder
@@ -41,6 +49,8 @@ extraContainers:
             name: tetragon-telegram
             key: chat_id
     volumeMounts:
+      - name: tetragon-export
+        mountPath: /var/run/cilium/tetragon
       - name: telegram-forwarder-script
         mountPath: /scripts
     resources:

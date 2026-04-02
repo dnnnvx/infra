@@ -8,7 +8,6 @@ data:
     #!/bin/sh
     set -eu
 
-    EXPORT_FILE="/var/run/tetragon/tetragon.log"
     API="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
 
     log() { echo "[$(date -u +%H:%M:%S)] $*"; }
@@ -25,10 +24,12 @@ data:
       fi
     }
 
+    EXPORT_FILE="/var/run/cilium/tetragon/tetragon.log"
+
     log "Starting tetragon-telegram-forwarder"
     log "Waiting for export file: $EXPORT_FILE"
     while [ ! -f "$EXPORT_FILE" ]; do sleep 2; done
-    log "Export file found, tailing..."
+    log "Tailing $EXPORT_FILE"
 
     tail -F "$EXPORT_FILE" | while IFS= read -r line; do
       # Only process TracingPolicy hits
