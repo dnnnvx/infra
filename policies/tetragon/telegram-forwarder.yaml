@@ -11,16 +11,24 @@ data:
     EXPORT_FILE="/var/run/tetragon/tetragon.log"
     API="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
 
+    log() { echo "[$(date -u +%H:%M:%S)] $*"; }
+
     send() {
-      curl -sf -X POST "$API" \
+      log "Sending alert to Telegram: $1"
+      if curl -sf -X POST "$API" \
         -H "Content-Type: application/json" \
         -d "{\"chat_id\":\"${TELEGRAM_CHAT_ID}\",\"parse_mode\":\"HTML\",\"text\":\"$1\"}" \
-        > /dev/null
+        > /dev/null; then
+        log "Sent OK"
+      else
+        log "ERROR: curl failed (exit $?)"
+      fi
     }
 
-    echo "Waiting for export file..."
+    log "Starting tetragon-telegram-forwarder"
+    log "Waiting for export file: $EXPORT_FILE"
     while [ ! -f "$EXPORT_FILE" ]; do sleep 2; done
-    echo "Tailing $EXPORT_FILE"
+    log "Export file found, tailing..."
 
     tail -F "$EXPORT_FILE" | while IFS= read -r line; do
       # Only process TracingPolicy hits
@@ -33,6 +41,8 @@ data:
       ns=$(echo "$line"      | jq -r '.process_kprobe.process.pod.namespace // "host"')
       node=$(echo "$line"    | jq -r '.node_name // "?"')
       args=$(echo "$line"    | jq -r '[.process_kprobe.args[]?.value // ""] | join(" ")' 2>/dev/null || echo "")
+
+      log "Event: policy=${policy} fn=${func} binary=${binary} pod=${pod}/${ns} node=${node}"
 
       msg="&#x1F6A8; <b>Tetragon</b> [${node}]
       Policy: <code>${policy}</code>
