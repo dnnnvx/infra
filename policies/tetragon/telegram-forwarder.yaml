@@ -38,9 +38,12 @@ data:
       policy=$(echo "$line"  | jq -r '.process_kprobe.policy_name // "unknown"')
       func=$(echo "$line"    | jq -r '.process_kprobe.function_name // "unknown"')
       binary=$(echo "$line"  | jq -r '.process_kprobe.process.binary // "?"')
+      pargs=$(echo "$line"   | jq -r '.process_kprobe.process.arguments // ""')
+      uid=$(echo "$line"     | jq -r '.process_kprobe.process.uid // "?"')
       pod=$(echo "$line"     | jq -r '.process_kprobe.process.pod.name // "host"')
       ns=$(echo "$line"      | jq -r '.process_kprobe.process.pod.namespace // "host"')
       node=$(echo "$line"    | jq -r '.node_name // "?"')
+      parent=$(echo "$line"  | jq -r '.process_kprobe.parent.binary // ""')
       args=$(echo "$line"    | jq -r '[.process_kprobe.args[]?.value // ""] | join(" ")' 2>/dev/null || echo "")
 
       log "Event: policy=${policy} fn=${func} binary=${binary} pod=${pod}/${ns} node=${node}"
@@ -48,8 +51,10 @@ data:
       msg="&#x1F6A8; <b>Tetragon</b> [${node}]
       Policy: <code>${policy}</code>
       Fn: <code>${func}</code>
-      Binary: <code>${binary}</code>
-      Pod: <code>${pod}</code> / <code>${ns}</code>${args:+
+      Binary: <code>${binary}${pargs:+ ${pargs}}</code>
+      UID: <code>${uid}</code>
+      Pod: <code>${pod}</code> / <code>${ns}</code>${parent:+
+      Parent: <code>${parent}</code>}${args:+
       Args: <code>${args}</code>}"
 
       send "$msg"
