@@ -8,4 +8,6 @@ resources:
   - ./piraeus
   - ./cnpg
   - ./tetragon
+  - ./kyverno
+  - ./policy-reporter
   # - ./tofu-controller

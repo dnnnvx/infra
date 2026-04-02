@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - ./tetragon
   - ./network
-  # - ./kyverno
+  - ./kyverno

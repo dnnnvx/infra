@@ -48,3 +48,17 @@ configMapGenerator:
       - values.yaml=values/tetragon.yaml
     options:
       disableNameSuffixHash: true
+
+  - name: kyverno-values
+    namespace: kyverno
+    files:
+      - values.yaml=values/kyverno.yaml
+    options:
+      disableNameSuffixHash: true
+
+  - name: policy-reporter-values
+    namespace: kyverno
+    files:
+      - values.yaml=values/policy-reporter.yaml
+    options:
+      disableNameSuffixHash: true
