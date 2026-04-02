@@ -7,8 +7,10 @@ tetragon:
   exportFilename: tetragon.log
   exportFilePerm: "640"
 
+  # exclude tetragon itself (busibox from tetragon-* pods)
   exportDenyList: |
     {"health_check":true}
+    {"namespace":["kube-system"],"binary_regex":["/bin/busybox"]}
 
   grpc:
     enabled: false
