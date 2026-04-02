@@ -39,13 +39,12 @@ child:
         [db]
           mode = ram
           retention = 600
-    go.d:
+    go.d/prometheus.conf:
       enabled: true
       data: |
-        # Tetragon eBPF security metrics
-        - module: prometheus
-          name: tetragon
-          url: http://tetragon.kube-system.svc.cluster.local:2112/metrics
+        jobs:
+          - name: tetragon
+            url: http://tetragon.kube-system.svc.cluster.local:2112/metrics
 
 service:
   type: ClusterIP
