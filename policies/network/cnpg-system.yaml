@@ -25,6 +25,10 @@ spec:
     # Operator webhook called by kube-apiserver
     - fromEntities:
         - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "9443"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:
