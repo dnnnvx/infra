@@ -27,7 +27,7 @@ All policies are **observe-only** (`action: Post`). No enforcement is applied un
 
 | File | What it detects |
 |---|---|
-| `privileges-raise.yaml` | `commit_creds` / `override_creds` / `revert_creds` — any credential change in a container. Rate-limited 1/min |
+| `privileges-raise.yaml` | `commit_creds` — any credential change in a container. Rate-limited 1/min. (`override_creds`/`revert_creds` omitted — inlined in Talos kernel) |
 | `modules.yaml` | Kernel module auto-load requests, file reads for module loading, module init and unload |
 | `sys-mount.yaml` | Any `mount()` syscall (source + target path logged) |
 | `sys-ptrace.yaml` | Any `ptrace()` call (request type + target pid logged) |
@@ -42,17 +42,39 @@ Kept in `config/tetragon/` as commented-out YAML for future reference:
 | `tcp-connect.yaml.disabled` | Very high volume — every outbound TCP connection from every pod. Enable once you have a log aggregator (Vector, Loki) to absorb the load, or add `matchBinaries` / `matchNamespaces` selectors to narrow scope |
 | `creds-capability-usage.yaml.disabled` | Medium volume — `cap_capable` fires on every capability check during normal operation. Enable with tight selectors if investigating a specific workload |
 
-### Viewing events
+### Commands
 
 ```bash
+# List all policies and their load state
+kubectl exec -n kube-system ds/tetragon -c tetragon -- tetra tracingpolicy list
+
 # Stream all events
-kubectl exec -it -n kube-system ds/tetragon -- tetra getevents
+kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents
 
 # Filter to a specific namespace
-kubectl exec -it -n kube-system ds/tetragon -- tetra getevents --namespace default
+kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents --namespace default
 
-# Filter to a specific policy (e.g. kprobes only)
-kubectl exec -it -n kube-system ds/tetragon -- tetra getevents --output json | jq 'select(.process_kprobe != null)'
+# Only kprobe events (policy hits)
+kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents --output json \
+  | jq 'select(.process_kprobe != null)'
+
+# Compact view: policy name + binary + args
+kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents --output json \
+  | jq -c 'select(.process_kprobe != null) | {policy: .process_kprobe.policy_name, binary: .process_kprobe.process.binary, args: .process_kprobe.args}'
+
+# Stream events from a specific pod
+kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents \
+  --pod-name <pod> --namespace <ns>
+
+# Check raw pod logs (mixes operational + event output)
+kubectl logs -n kube-system ds/tetragon -c tetragon -f
+
+# Verify kptr_restrict is 1 on all nodes (required for kprobe symbol resolution)
+talosctl read /proc/sys/kernel/kptr_restrict -n 192.168.0.101,192.168.0.102,192.168.0.103,192.168.0.104
+
+# Restart Tetragon (e.g. after sysctl changes)
+kubectl rollout restart ds/tetragon -n kube-system
+kubectl rollout status ds/tetragon -n kube-system
 ```
 
 ### Escalating a policy to enforcement
