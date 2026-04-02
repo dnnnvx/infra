@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - ../../base
   - httproute.yaml
-  - networkpolicy.yaml
 
 patches:
   - path: patch-service-dns.yaml

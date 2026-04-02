@@ -1,0 +1,51 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: cnpg-system
+spec:
+  endpointSelector: {}
+  ingress:
+    # PostgreSQL access from app namespaces
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: memos
+        - matchLabels:
+            io.kubernetes.pod.namespace: donetick
+        - matchLabels:
+            io.kubernetes.pod.namespace: norish
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    # Internal: CNPG pods communicate for HA replication + operator webhooks
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: cnpg-system
+    # Operator webhook called by kube-apiserver
+    - fromEntities:
+        - kube-apiserver
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+    # Internal: HA replication between CNPG pods
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: cnpg-system
+    # Backup to S3/R2 if configured
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
