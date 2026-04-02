@@ -48,10 +48,3 @@ configMapGenerator:
       - values.yaml=values/tetragon.yaml
     options:
       disableNameSuffixHash: true
-
-  - name: netdata-values
-    namespace: kube-system
-    files:
-      - values.yaml=values/netdata.yaml
-    options:
-      disableNameSuffixHash: true

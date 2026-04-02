@@ -5,7 +5,6 @@ resources:
   - ./cilium
   - ./flux
   - ./metrics-server
-  - ./netdata
   - ./piraeus
   - ./cnpg
   - ./tetragon
