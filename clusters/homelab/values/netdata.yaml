@@ -1,0 +1,52 @@
+image:
+  tag: stable
+
+# Parent: central UI + aggregation, 3-day retention on disk
+parent:
+  replicaCount: 1
+  persistence:
+    enabled: true
+    storageclass: piraeus
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+  configs:
+    netdata:
+      enabled: true
+      data: |
+        [db]
+          mode = dbengine
+          retention = 3d
+        [web]
+          bind to = 0.0.0.0:19999
+
+# Child: DaemonSet on every node — RAM only, streams to parent
+child:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+  configs:
+    netdata:
+      enabled: true
+      data: |
+        [db]
+          mode = ram
+          retention = 600
+    go.d:
+      enabled: true
+      data: |
+        # Tetragon eBPF security metrics
+        - module: prometheus
+          name: tetragon
+          url: http://tetragon.kube-system.svc.cluster.local:2112/metrics
+
+service:
+  type: ClusterIP
+  port: 19999

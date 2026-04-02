@@ -7,4 +7,5 @@ resources:
   - ./piraeus
   - ./cnpg
   - ./valkey
+  - ./netdata
   # - ./tofu-controller
