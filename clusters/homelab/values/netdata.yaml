@@ -25,7 +25,11 @@ parent:
           bind to = 0.0.0.0:19999
 
 # Child: DaemonSet on every node — RAM only, streams to parent
+# go.d.plugin needs seccompProfile: Unconfined on Talos (default seccomp kills it)
 child:
+  podSecurityContext:
+    seccompProfile:
+      type: Unconfined
   resources:
     requests:
       cpu: 50m
