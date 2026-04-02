@@ -18,19 +18,34 @@ extraHostPathMounts:
   - name: sys-kernel-tracing
     mountPath: /sys/kernel/tracing
 
+# Mount the forwarder script into the pod
 extraVolumes:
   - name: telegram-forwarder-script
     configMap:
       name: tetragon-telegram-forwarder
       defaultMode: 0755
 
-extraContainers:
-  - name: telegram-forwarder
-    image: alpine:3.21
-    command: ["/bin/sh", "-c"]
-    args:
-      - "apk add --no-cache curl jq > /dev/null 2>&1 && exec /scripts/forward.sh"
-    env:
+# Repurpose the built-in export-stdout sidecar as the Telegram forwarder.
+# The chart doesn't support extraContainers; this is the only extensible sidecar slot.
+export:
+  mode: "stdout"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+  stdout:
+    image:
+      override: alpine:3.21
+    enabledCommand: true
+    commandOverride:
+      - /bin/sh
+    enabledArgs: true
+    argsOverride:
+      - -c
+      - apk add --no-cache curl jq > /dev/null 2>&1 && exec /scripts/forward.sh
+    extraEnv:
       - name: TELEGRAM_BOT_TOKEN
         valueFrom:
           secretKeyRef:
@@ -41,15 +56,6 @@ extraContainers:
           secretKeyRef:
             name: tetragon-telegram
             key: chat_id
-    volumeMounts:
-      # export-logs is the chart's existing hostPath volume for /var/run/cilium/tetragon
-      - name: export-logs
-        mountPath: /var/run/cilium/tetragon
+    extraVolumeMounts:
       - name: telegram-forwarder-script
         mountPath: /scripts
-    resources:
-      requests:
-        cpu: 10m
-        memory: 32Mi
-      limits:
-        memory: 64Mi
