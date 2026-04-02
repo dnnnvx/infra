@@ -11,9 +11,9 @@ parent:
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
-    limits:
       memory: 256Mi
+    limits:
+      memory: 512Mi
   configs:
     netdata:
       enabled: true
@@ -43,6 +43,8 @@ child:
         [db]
           mode = ram
           retention = 600
+        [plugins]
+          cgroup-network = no
     go.d/prometheus.conf:
       enabled: true
       data: |
