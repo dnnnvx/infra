@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tetragon-telegram-forwarder
+  namespace: kube-system
+data:
+  forward.sh: |
+    #!/bin/sh
+    set -eu
+
+    EXPORT_FILE="/var/run/tetragon/tetragon.log"
+    API="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
+
+    send() {
+      curl -sf -X POST "$API" \
+        -H "Content-Type: application/json" \
+        -d "{\"chat_id\":\"${TELEGRAM_CHAT_ID}\",\"parse_mode\":\"HTML\",\"text\":\"$1\"}" \
+        > /dev/null
+    }
+
+    echo "Waiting for export file..."
+    while [ ! -f "$EXPORT_FILE" ]; do sleep 2; done
+    echo "Tailing $EXPORT_FILE"
+
+    tail -F "$EXPORT_FILE" | while IFS= read -r line; do
+      # Only process TracingPolicy hits
+      echo "$line" | jq -e '.process_kprobe != null' > /dev/null 2>&1 || continue
+
+      policy=$(echo "$line"  | jq -r '.process_kprobe.policy_name // "unknown"')
+      func=$(echo "$line"    | jq -r '.process_kprobe.function_name // "unknown"')
+      binary=$(echo "$line"  | jq -r '.process_kprobe.process.binary // "?"')
+      pod=$(echo "$line"     | jq -r '.process_kprobe.process.pod.name // "host"')
+      ns=$(echo "$line"      | jq -r '.process_kprobe.process.pod.namespace // "host"')
+      node=$(echo "$line"    | jq -r '.node_name // "?"')
+      args=$(echo "$line"    | jq -r '[.process_kprobe.args[]?.value // ""] | join(" ")' 2>/dev/null || echo "")
+
+      msg="&#x1F6A8; <b>Tetragon</b> [${node}]
+      Policy: <code>${policy}</code>
+      Fn: <code>${func}</code>
+      Binary: <code>${binary}</code>
+      Pod: <code>${pod}</code> / <code>${ns}</code>${args:+
+      Args: <code>${args}</code>}"
+
+      send "$msg"
+    done

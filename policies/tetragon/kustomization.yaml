@@ -6,3 +6,5 @@ resources:
   - sys-mount.yaml
   - sys-ptrace.yaml
   - sensitive-files.yaml
+  - telegram-forwarder.yaml
+  - telegram-secret.yaml

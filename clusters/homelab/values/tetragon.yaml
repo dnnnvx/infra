@@ -4,13 +4,10 @@ tetragon:
 
   clusterName: homelab
 
-  # Disable file export — use `tetra` CLI or Prometheus metrics instead
-  exportFilename: ""
+  exportFilename: "/var/run/tetragon/tetragon.log"
 
-  # Filter out high-volume noise
   exportDenyList: |
     {"health_check":true}
-    {"namespace":["kube-system","cilium-secrets","cert-manager"]}
 
   grpc:
     address: "0.0.0.0:54321"
@@ -19,3 +16,36 @@ tetragon:
 extraHostPathMounts:
   - name: sys-kernel-tracing
     mountPath: /sys/kernel/tracing
+
+extraVolumes:
+  - name: telegram-forwarder-script
+    configMap:
+      name: tetragon-telegram-forwarder
+      defaultMode: 0755
+
+extraContainers:
+  - name: telegram-forwarder
+    image: alpine:3.21
+    command: ["/bin/sh", "-c"]
+    args:
+      - "apk add --no-cache curl jq > /dev/null 2>&1 && exec /scripts/forward.sh"
+    env:
+      - name: TELEGRAM_BOT_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: tetragon-telegram
+            key: bot_token
+      - name: TELEGRAM_CHAT_ID
+        valueFrom:
+          secretKeyRef:
+            name: tetragon-telegram
+            key: chat_id
+    volumeMounts:
+      - name: telegram-forwarder-script
+        mountPath: /scripts
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
