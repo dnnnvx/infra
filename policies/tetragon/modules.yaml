@@ -13,6 +13,12 @@ spec:
       returnArg:
         index: 0
         type: "int"
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
     - call: "security_kernel_read_file"
       syscall: false
       return: true
@@ -30,13 +36,30 @@ spec:
               operator: "Equal"
               values:
                 - "2"  # READING_MODULE
+          matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
     - call: "do_init_module"
       syscall: false
       args:
         - index: 0
           type: "module"
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
     - call: "free_module"
       syscall: false
       args:
         - index: 0
           type: "module"
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"

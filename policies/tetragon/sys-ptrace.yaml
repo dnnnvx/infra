@@ -11,3 +11,11 @@ spec:
           type: "int"   # request (PTRACE_ATTACH, PTRACE_PEEKDATA, etc.)
         - index: 1
           type: "int"   # pid
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
+          matchActions:
+            - action: Post

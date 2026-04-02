@@ -11,3 +11,11 @@ spec:
           type: "string"  # source device
         - index: 1
           type: "string"  # target mountpoint
+      selectors:
+        - matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
+          matchActions:
+            - action: Post

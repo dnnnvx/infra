@@ -29,6 +29,11 @@ spec:
               operator: "Equal"
               values:
                 - "2"  # MAY_WRITE only
+          matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
     - call: "security_path_truncate"
       syscall: false
       return: true
@@ -48,3 +53,8 @@ spec:
                 - "/etc/shadow"
                 - "/etc/sudoers"
                 - "/etc/ssh/"
+          matchNamespaces:
+            - namespace: Pid
+              operator: NotIn
+              values:
+                - "host_ns"
