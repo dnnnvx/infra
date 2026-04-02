@@ -35,9 +35,11 @@ spec:
             - name: DIUN_PROVIDERS_KUBERNETES_WATCHBYDEFAULT
               value: "true"
             - name: DIUN_WATCH_SCHEDULE
-              value: "0 9 * * 1"
+              value: "0 10 * * *"
             - name: DIUN_WATCH_JITTER
               value: 30s
+            - name: DIUN_WATCH_RUNONSTARTUP
+              value: "true"
             - name: DIUN_NOTIF_TELEGRAM_TOKEN
               valueFrom:
                 secretKeyRef:
