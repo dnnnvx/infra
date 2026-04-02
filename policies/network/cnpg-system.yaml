@@ -23,8 +23,12 @@ spec:
         - matchLabels:
             io.kubernetes.pod.namespace: cnpg-system
     # Operator webhook called by kube-apiserver
+    # kube-apiserver runs with hostNetwork on the control plane node so it
+    # appears as remote-node/host rather than the kube-apiserver entity
     - fromEntities:
         - kube-apiserver
+        - remote-node
+        - host
       toPorts:
         - ports:
             - port: "9443"
