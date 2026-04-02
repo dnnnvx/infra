@@ -78,6 +78,7 @@ sync:
     flux reconcile kustomization infrastructure
     flux reconcile kustomization config
     flux reconcile kustomization apps
+    flux reconcile kustomization policies
 
 # validate all kustomize overlays and manifests
 validate:
