@@ -13,19 +13,12 @@ tetragon:
   grpc:
     enabled: false
 
-  # Mount the shared export emptyDir into the tetragon container
-  extraVolumeMounts:
-    - name: tetragon-export
-      mountPath: /var/run/cilium/tetragon
-
 # Required for Talos Linux — grants access to the tracing filesystem
 extraHostPathMounts:
   - name: sys-kernel-tracing
     mountPath: /sys/kernel/tracing
 
 extraVolumes:
-  - name: tetragon-export
-    emptyDir: {}
   - name: telegram-forwarder-script
     configMap:
       name: tetragon-telegram-forwarder
@@ -49,7 +42,8 @@ extraContainers:
             name: tetragon-telegram
             key: chat_id
     volumeMounts:
-      - name: tetragon-export
+      # export-logs is the chart's existing hostPath volume for /var/run/cilium/tetragon
+      - name: export-logs
         mountPath: /var/run/cilium/tetragon
       - name: telegram-forwarder-script
         mountPath: /scripts
