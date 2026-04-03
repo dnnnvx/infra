@@ -1,7 +1,8 @@
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: kyverno-best-practices
+  name: kyverno-bp-check-deprecated-apis
   namespace: flux-system
 spec:
   interval: 1h
@@ -9,56 +10,217 @@ spec:
     kind: GitRepository
     name: kyverno-policies
     namespace: flux-system
-  path: ./best-practices
+  path: ./best-practices/check-deprecated-apis
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-disallow-cri-sock-mount
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/disallow-cri-sock-mount
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-disallow-default-namespace
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/disallow-default-namespace
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-disallow-helm-tiller
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/disallow-helm-tiller
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-disallow-latest-tag
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/disallow-latest-tag
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-require-drop-all
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/require-drop-all
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-require-labels
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/require-labels
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-require-pod-requests-limits
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/require-pod-requests-limits
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-require-probes
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/require-probes
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-require-ro-rootfs
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/require-ro-rootfs
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-restrict-node-port
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/restrict-node-port
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-restrict-service-external-ips
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/restrict-service-external-ips
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+---
+# Generates ResourceQuota (1 CPU / 4Gi) and LimitRange per new namespace
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-bp-add-ns-quota
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices/add-ns-quota
   prune: true
   wait: false
   dependsOn:
     - name: infrastructure
   patches:
-    # Generate policies — conflict with Cilium or not applicable
-    - patch: |-
-        $patch: delete
-        apiVersion: kyverno.io/v1
-        kind: ClusterPolicy
-        metadata:
-          name: add-networkpolicy
-      target:
-        kind: ClusterPolicy
-        name: add-networkpolicy
-    - patch: |-
-        $patch: delete
-        apiVersion: kyverno.io/v1
-        kind: ClusterPolicy
-        metadata:
-          name: add-networkpolicy-dns
-      target:
-        kind: ClusterPolicy
-        name: add-networkpolicy-dns
-    # Adds `cluster-autoscaler.kubernetes.io/safe-to-evict=true` to pods with
-    # emptyDir/hostPath volumes. Without a cluster autoscaler (we don't have one),
-    # this annotation is pure noise — does nothing. Clear skip.
-    - patch: |-
-        $patch: delete
-        apiVersion: kyverno.io/v1
-        kind: ClusterPolicy
-        metadata:
-          name: add-safe-to-evict
-      target:
-        kind: ClusterPolicy
-        name: add-safe-to-evict
-    # Creates an admin `RoleBinding` for the user who created the namespace.
-    # In a single-operator cluster where everything runs as cluster-admin via
-    # kubectl, this adds a useless RoleBinding to every namespace.
-    - patch: |-
-        $patch: delete
-        apiVersion: kyverno.io/v1
-        kind: ClusterPolicy
-        metadata:
-          name: add-rolebinding
-      target:
-        kind: ClusterPolicy
-        name: add-rolebinding
-    # Lower quota defaults for homelab NUCs
     - patch: |-
         - op: replace
           path: /spec/rules/0/generate/data/spec/hard/requests.cpu
@@ -75,13 +237,3 @@ spec:
       target:
         kind: ClusterPolicy
         name: add-ns-quota
-    # Requires allowlist maintenance — add later
-    - patch: |-
-        $patch: delete
-        apiVersion: kyverno.io/v1
-        kind: ClusterPolicy
-        metadata:
-          name: restrict-image-registries
-      target:
-        kind: ClusterPolicy
-        name: restrict-image-registries
