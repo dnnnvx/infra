@@ -22,6 +22,10 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+    # Internal: Kyverno components + Policy Reporter communicate with each other
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kyverno
   egress:
     - toEndpoints:
         - matchLabels:
