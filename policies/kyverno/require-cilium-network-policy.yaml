@@ -25,6 +25,8 @@ spec:
                 - kube-public
                 - kube-node-lease
                 - kyverno
+                - default
+                - cilium-secrets
       context:
         - name: cnpCount
           apiCall:

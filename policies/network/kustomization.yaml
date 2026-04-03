@@ -16,6 +16,7 @@ resources:
   - webauth.yaml
   # Infrastructure namespaces
   - cert-manager.yaml
+  - piraeus-datastore.yaml
   - kyverno.yaml
   - cnpg-system.yaml
   - flux-system.yaml

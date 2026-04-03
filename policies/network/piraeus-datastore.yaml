@@ -1,0 +1,46 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: piraeus-datastore
+spec:
+  endpointSelector: {}
+  ingress:
+    # Operator webhook called by kube-apiserver
+    - fromEntities:
+        - kube-apiserver
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "9443"
+              protocol: TCP
+    # LINSTOR controller API + DRBD replication between nodes
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: piraeus-datastore
+    # LINSTOR satellites run on all nodes via hostNetwork
+    - fromEntities:
+        - remote-node
+        - host
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+    # Internal: LINSTOR controller + satellites + DRBD replication
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: piraeus-datastore
+    # DRBD replication to other nodes (hostNetwork)
+    - toEntities:
+        - remote-node
+        - host
