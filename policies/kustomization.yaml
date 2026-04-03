@@ -4,3 +4,4 @@ resources:
   - ./tetragon
   - ./network
   - ./kyverno
+  - kyverno-pss.yaml
