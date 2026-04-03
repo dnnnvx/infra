@@ -4,9 +4,36 @@ admissionController:
 
 backgroundController:
   replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
 
 cleanupController:
   replicas: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 20m
+      memory: 64Mi
 
 reportsController:
   replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+config:
+  # Reduce background scan frequency — default is 1h, this scans every 12h
+  backgroundScanInterval: 12h
+  # Stagger report aggregation to avoid thundering herd
+  aggregateReports: true
