@@ -158,6 +158,56 @@ spec:
           add: ["NET_BIND_SERVICE"]
 ```
 
+## Kyverno Policy Engine
+
+[Kyverno](https://kyverno.io) runs as an admission controller and background scanner, enforcing and auditing policies across the cluster. All policies run in **Audit** mode — violations are reported but workloads are not blocked. Enforce mode can be enabled per-policy once violations are resolved.
+
+### Deployment
+
+- HelmRelease: `infrastructure/kyverno/` + `infrastructure/policy-reporter/`
+- Helm values: `clusters/homelab/values/kyverno.yaml`, `clusters/homelab/values/policy-reporter.yaml`
+- Custom policies: `policies/kyverno/`
+- Upstream policies: synced from `github.com/kyverno/policies` via Flux Kustomizations in `policies/`
+- UI: `kyverno.home` (Policy Reporter)
+
+### Upstream policies (via GitRepository)
+
+Pulled from `github.com/kyverno/policies`, applied as individual Flux Kustomizations:
+
+| Kustomization | Path | What it covers |
+|---|---|---|
+| `kyverno-pss` | `pod-security/restricted` | Full Kubernetes Pod Security Standards restricted profile |
+| `kyverno-bp-*` | `best-practices/*` | Deprecated API checks, CRI socket mounts, default namespace, latest tag, drop-all caps, labels, resource limits, probes, read-only rootfs, NodePort, externalIPs, namespace quotas |
+| `kyverno-flux-*` | `flux/*` | Flux image signature verification (Cosign), Git repository source validation |
+| `kyverno-cm-*` | `cert-manager/*` | Certificate duration limits |
+
+### Custom policies
+
+| Policy | What it checks |
+|---|---|
+| `require-cilium-network-policy` | Every namespace must have at least one `CiliumNetworkPolicy` |
+| `disallow-extra-mutable-tags` | Rejects image tags: `edge`, `stable`, `dev`, `master`, `main` (upstream handles `latest`) |
+| `verify-flux-sources` | GitRepositories must be on github.com or tangled.org; HelmRepositories must use known registries |
+| `cert-manager-restrict-issuer` | Certificates for `*.casasulgorgo.net` must use the `letsencrypt-prod` ClusterIssuer |
+
+### Exceptions
+
+`policies/kyverno/exceptions.yaml` — `piraeus-datastore` is fully exempt from PSS policies (storage daemons require elevated privileges).
+
+### Testing policies locally
+
+```bash
+just test-policies   # runs kyverno test policies/kyverno/
+```
+
+Each custom policy has a `.kyverno-test/` directory with pass/fail fixtures. API call context (e.g. `cnpCount`) is mocked via `values.yaml`.
+
+### Policy Reporter
+
+Aggregates policy results and sends Telegram notifications for violations at `warning` severity or above. Reports are visible at `kyverno.home`.
+
+---
+
 ## Pod Security Admission (PSA)
 
 All namespaces are labeled with PSA `warn` and `audit` mode to surface violations without blocking workloads. Once all images are confirmed compliant, enforce mode can be enabled per namespace.
