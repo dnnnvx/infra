@@ -9,5 +9,6 @@ resources:
   - ./cnpg
   - ./tetragon
   - ./kyverno
+  - ./kyverno-pss
   - ./policy-reporter
   # - ./tofu-controller

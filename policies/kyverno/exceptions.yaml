@@ -1,0 +1,17 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: piraeus-datastore-pss
+  namespace: piraeus-datastore
+spec:
+  exceptions:
+    - policyName: "*"
+      ruleNames:
+        - "*"
+  match:
+    any:
+      - resources:
+          namespaces:
+            - piraeus-datastore
+          kinds:
+            - Pod

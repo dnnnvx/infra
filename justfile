@@ -82,7 +82,7 @@ sync:
 
 # test kyverno policies locally against test fixtures
 test-policies:
-    kyverno test policies/kyverno/tests/
+    kyverno test policies/kyverno/
 
 # validate all kustomize overlays and manifests
 validate:
