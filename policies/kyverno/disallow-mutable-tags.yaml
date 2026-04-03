@@ -72,8 +72,8 @@ spec:
               conditions:
                 all:
                   - key: "{{ element.image }}"
-                    operator: NotContains
-                    value: ":"
+                    operator: NotEquals
+                    value: "*:*"
                   - key: "{{ element.image }}"
-                    operator: NotContains
-                    value: "@"
+                    operator: NotEquals
+                    value: "*@*"
