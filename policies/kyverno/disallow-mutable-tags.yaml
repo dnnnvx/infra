@@ -26,9 +26,7 @@ spec:
                 - kube-public
                 - kube-node-lease
       validate:
-        message: >-
-          Image "{{ element.image }}" uses a mutable or missing tag.
-          Use a specific version tag (e.g. :1.2.3) or digest (@sha256:...).
+        message: "An image uses a mutable tag (latest, edge, stable, dev, master, main). Use a specific version tag or digest."
         foreach:
           - list: "request.object.spec.initContainers | request.object.spec.containers"
             deny:
@@ -67,9 +65,7 @@ spec:
                 - kube-public
                 - kube-node-lease
       validate:
-        message: >-
-          Image "{{ element.image }}" has no tag or digest — implicit latest.
-          Use a specific version tag (e.g. :1.2.3) or digest (@sha256:...).
+        message: "An image has no tag or digest (implicit latest). Use a specific version tag or digest."
         foreach:
           - list: "request.object.spec.initContainers | request.object.spec.containers"
             deny:
