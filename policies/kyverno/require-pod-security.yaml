@@ -1,0 +1,115 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-pod-security
+  annotations:
+    policies.kyverno.io/title: Require Pod Security Controls
+    policies.kyverno.io/description: >-
+      Enforces baseline pod security: no root, no privilege escalation,
+      no privileged containers, and capabilities dropped.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: no-privileged
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - piraeus-datastore
+      validate:
+        message: "Privileged containers are not allowed."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.securityContext.privileged || false }}"
+                    operator: Equals
+                    value: true
+
+    - name: no-privilege-escalation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - piraeus-datastore
+      validate:
+        message: "allowPrivilegeEscalation must be set to false."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.securityContext.allowPrivilegeEscalation || true }}"
+                    operator: Equals
+                    value: true
+
+    - name: run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - piraeus-datastore
+      validate:
+        message: "Containers must not run as root. Set runAsNonRoot: true or runAsUser > 0."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ element.securityContext.runAsNonRoot || request.object.spec.securityContext.runAsNonRoot || false }}"
+                    operator: Equals
+                    value: false
+                  - key: "{{ element.securityContext.runAsUser || request.object.spec.securityContext.runAsUser || 0 }}"
+                    operator: Equals
+                    value: 0
+
+    - name: drop-capabilities
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - piraeus-datastore
+      validate:
+        message: "Containers must drop ALL capabilities."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.securityContext.capabilities.drop || '' }}"
+                    operator: NotContains
+                    value: ALL

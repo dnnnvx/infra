@@ -1,0 +1,83 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-mutable-tags
+  annotations:
+    policies.kyverno.io/title: Disallow Mutable Image Tags
+    policies.kyverno.io/description: >-
+      Images must use a specific version tag or digest.
+      Mutable tags (latest, edge, stable, dev, master, main) are rejected.
+      Untagged images (implicit latest) are also rejected.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-mutable-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+      validate:
+        message: >-
+          Image "{{ element.image }}" uses a mutable or missing tag.
+          Use a specific version tag (e.g. :1.2.3) or digest (@sha256:...).
+        foreach:
+          - list: "request.object.spec.initContainers | request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:latest"
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:edge"
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:stable"
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:dev"
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:master"
+                  - key: "{{ element.image }}"
+                    operator: Equals
+                    value: "*:main"
+
+    - name: check-untagged-image
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+      validate:
+        message: >-
+          Image "{{ element.image }}" has no tag or digest — implicit latest.
+          Use a specific version tag (e.g. :1.2.3) or digest (@sha256:...).
+        foreach:
+          - list: "request.object.spec.initContainers | request.object.spec.containers"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ element.image }}"
+                    operator: NotContains
+                    value: ":"
+                  - key: "{{ element.image }}"
+                    operator: NotContains
+                    value: "@"
