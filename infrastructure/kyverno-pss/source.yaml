@@ -9,5 +9,7 @@ spec:
   ref:
     branch: main
   ignore: |
-    # exclude ArtifactHub metadata — not valid Kubernetes resources
+    # exclude ArtifactHub metadata and test directories — not valid Kubernetes resources
     **/artifacthub-pkg.yml
+    **/.kyverno-test/**
+    **/.chainsaw-test/**
