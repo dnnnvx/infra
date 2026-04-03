@@ -36,6 +36,7 @@
             sops
             age
             mdbook
+            kyverno
           ];
         };
       }

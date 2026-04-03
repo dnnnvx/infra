@@ -1,0 +1,69 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: require-pod-security
+policies:
+  - ../../require-pod-security.yaml
+resources:
+  - resource.yaml
+results:
+  - kind: Pod
+    policy: require-pod-security
+    rule: no-privileged
+    resources:
+      - pod-privileged
+    result: fail
+  - kind: Pod
+    policy: require-pod-security
+    rule: no-privileged
+    resources:
+      - pod-compliant
+    result: pass
+  - kind: Pod
+    policy: require-pod-security
+    rule: no-privilege-escalation
+    resources:
+      - pod-privilege-escalation
+    result: fail
+  - kind: Pod
+    policy: require-pod-security
+    rule: no-privilege-escalation
+    resources:
+      - pod-compliant
+    result: pass
+  - kind: Pod
+    policy: require-pod-security
+    rule: run-as-non-root
+    resources:
+      - pod-root
+    result: fail
+  - kind: Pod
+    policy: require-pod-security
+    rule: run-as-non-root
+    resources:
+      - pod-compliant
+    result: pass
+  - kind: Pod
+    policy: require-pod-security
+    rule: no-root-user
+    resources:
+      - pod-runasuser-zero
+    result: fail
+  - kind: Pod
+    policy: require-pod-security
+    rule: no-root-user
+    resources:
+      - pod-compliant
+    result: pass
+  - kind: Pod
+    policy: require-pod-security
+    rule: drop-all-capabilities
+    resources:
+      - pod-no-drop
+    result: fail
+  - kind: Pod
+    policy: require-pod-security
+    rule: drop-all-capabilities
+    resources:
+      - pod-compliant
+    result: pass

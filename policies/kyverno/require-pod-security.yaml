@@ -5,37 +5,12 @@ metadata:
   annotations:
     policies.kyverno.io/title: Require Pod Security Controls
     policies.kyverno.io/description: >-
-      Enforces baseline pod security: no root, no privilege escalation,
-      no privileged containers, and capabilities dropped.
+      Enforces baseline pod security: no privileged containers, no privilege
+      escalation, non-root user, and all capabilities dropped.
 spec:
   validationFailureAction: Audit
   background: true
   rules:
-    - name: require-security-context
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-      exclude:
-        any:
-          - resources:
-              namespaces:
-                - kube-system
-                - kube-public
-                - kube-node-lease
-                - piraeus-datastore
-      validate:
-        message: "Containers must define a securityContext."
-        foreach:
-          - list: "request.object.spec.containers"
-            deny:
-              conditions:
-                any:
-                  - key: "{{ element.securityContext }}"
-                    operator: Equals
-                    value: null
-
     - name: no-privileged
       match:
         any:
@@ -50,10 +25,15 @@ spec:
                 - kube-public
                 - kube-node-lease
                 - piraeus-datastore
+      preconditions:
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: NotEquals
+            value: DELETE
       validate:
         message: "Privileged containers are not allowed."
         foreach:
-          - list: "request.object.spec.containers"
+          - list: request.object.spec.[ephemeralContainers, initContainers, containers][]
             deny:
               conditions:
                 any:
@@ -75,10 +55,15 @@ spec:
                 - kube-public
                 - kube-node-lease
                 - piraeus-datastore
+      preconditions:
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: NotEquals
+            value: DELETE
       validate:
         message: "allowPrivilegeEscalation must be set to false."
         foreach:
-          - list: "request.object.spec.containers"
+          - list: request.object.spec.[ephemeralContainers, initContainers, containers][]
             deny:
               conditions:
                 any:
@@ -100,18 +85,40 @@ spec:
                 - kube-public
                 - kube-node-lease
                 - piraeus-datastore
+      preconditions:
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: NotEquals
+            value: DELETE
       validate:
-        message: "Containers must not run as root. Set runAsNonRoot: true on the container or pod securityContext."
-        foreach:
-          - list: "request.object.spec.containers"
-            deny:
-              conditions:
-                all:
-                  - key: "{{ element.securityContext.runAsNonRoot || request.object.spec.securityContext.runAsNonRoot || false }}"
-                    operator: Equals
-                    value: false
+        message: >-
+          Running as root is not allowed. Set runAsNonRoot: true on the pod or
+          container securityContext.
+        anyPattern:
+          - spec:
+              securityContext:
+                runAsNonRoot: true
+              =(ephemeralContainers):
+                - =(securityContext):
+                    =(runAsNonRoot): true
+              =(initContainers):
+                - =(securityContext):
+                    =(runAsNonRoot): true
+              containers:
+                - =(securityContext):
+                    =(runAsNonRoot): true
+          - spec:
+              =(ephemeralContainers):
+                - securityContext:
+                    runAsNonRoot: true
+              =(initContainers):
+                - securityContext:
+                    runAsNonRoot: true
+              containers:
+                - securityContext:
+                    runAsNonRoot: true
 
-    - name: no-explicit-root-user
+    - name: no-root-user
       match:
         any:
           - resources:
@@ -125,21 +132,26 @@ spec:
                 - kube-public
                 - kube-node-lease
                 - piraeus-datastore
+      preconditions:
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: NotEquals
+            value: DELETE
       validate:
         message: "runAsUser: 0 explicitly sets the container to run as root."
         foreach:
-          - list: "request.object.spec.containers"
+          - list: request.object.spec.[ephemeralContainers, initContainers, containers][]
             deny:
               conditions:
                 any:
-                  - key: "{{ element.securityContext.runAsUser }}"
+                  - key: "{{ element.securityContext.runAsUser || `9999` }}"
                     operator: Equals
                     value: 0
-                  - key: "{{ request.object.spec.securityContext.runAsUser }}"
+                  - key: "{{ request.object.spec.securityContext.runAsUser || `9999` }}"
                     operator: Equals
                     value: 0
 
-    - name: drop-capabilities
+    - name: drop-all-capabilities
       match:
         any:
           - resources:
@@ -153,13 +165,18 @@ spec:
                 - kube-public
                 - kube-node-lease
                 - piraeus-datastore
+      preconditions:
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: NotEquals
+            value: DELETE
       validate:
         message: "Containers must drop ALL capabilities."
         foreach:
-          - list: "request.object.spec.containers"
+          - list: request.object.spec.[ephemeralContainers, initContainers, containers][]
             deny:
               conditions:
-                any:
-                  - key: "{{ element.securityContext.capabilities.drop || '' }}"
-                    operator: NotContains
-                    value: ALL
+                all:
+                  - key: ALL
+                    operator: AnyNotIn
+                    value: "{{ element.securityContext.capabilities.drop[] || `[]` }}"

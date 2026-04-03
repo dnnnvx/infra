@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-no-tag
+  namespace: default
+spec:
+  containers:
+    - name: app
+      image: nginx
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-mutable-tag
+  namespace: default
+spec:
+  containers:
+    - name: app
+      image: nginx:latest
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-versioned-tag
+  namespace: default
+spec:
+  containers:
+    - name: app
+      image: nginx:1.25.0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-digest
+  namespace: default
+spec:
+  containers:
+    - name: app
+      image: nginx@sha256:abc123def456

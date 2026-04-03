@@ -6,13 +6,12 @@ metadata:
     policies.kyverno.io/title: Disallow Mutable Image Tags
     policies.kyverno.io/description: >-
       Images must use a specific version tag or digest.
-      Mutable tags (latest, edge, stable, dev, master, main) are rejected.
-      Untagged images (implicit latest) are also rejected.
+      Mutable tags (latest, edge, stable, dev, master, main) and untagged images are rejected.
 spec:
   validationFailureAction: Audit
   background: true
   rules:
-    - name: check-mutable-tag
+    - name: require-image-tag
       match:
         any:
           - resources:
@@ -26,9 +25,35 @@ spec:
                 - kube-public
                 - kube-node-lease
       validate:
-        message: "An image uses a mutable tag (latest, edge, stable, dev, master, main). Use a specific version tag or digest."
+        message: "An image tag or digest is required."
         foreach:
-          - list: "request.object.spec.initContainers | request.object.spec.containers"
+          - list: "request.object.spec.initContainers"
+            pattern:
+              image: "*:* | *@*"
+          - list: "request.object.spec.containers"
+            pattern:
+              image: "*:* | *@*"
+          - list: "request.object.spec.ephemeralContainers"
+            pattern:
+              image: "*:* | *@*"
+
+    - name: disallow-mutable-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+      validate:
+        message: "Mutable image tags (latest, edge, stable, dev, master, main) are not allowed."
+        foreach:
+          - list: "request.object.spec.[ephemeralContainers, initContainers, containers][]"
             deny:
               conditions:
                 any:
@@ -50,30 +75,3 @@ spec:
                   - key: "{{ element.image }}"
                     operator: Equals
                     value: "*:main"
-
-    - name: check-untagged-image
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-      exclude:
-        any:
-          - resources:
-              namespaces:
-                - kube-system
-                - kube-public
-                - kube-node-lease
-      validate:
-        message: "An image has no tag or digest (implicit latest). Use a specific version tag or digest."
-        foreach:
-          - list: "request.object.spec.initContainers | request.object.spec.containers"
-            deny:
-              conditions:
-                all:
-                  - key: "{{ element.image }}"
-                    operator: NotEquals
-                    value: "*:*"
-                  - key: "{{ element.image }}"
-                    operator: NotEquals
-                    value: "*@*"
