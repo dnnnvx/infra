@@ -7,8 +7,8 @@ resources:
   - ./metrics-server
   - ./piraeus
   - ./cnpg
-  - ./tetragon
   - ./kyverno
   - ./kyverno-pss
   - ./policy-reporter
+  # - ./tetragon
   # - ./tofu-controller
