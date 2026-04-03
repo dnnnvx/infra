@@ -1,17 +1,17 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: disallow-mutable-tags
+  name: disallow-extra-mutable-tags
   annotations:
-    policies.kyverno.io/title: Disallow Mutable Image Tags
+    policies.kyverno.io/title: Disallow Extra Mutable Image Tags
     policies.kyverno.io/description: >-
-      Images must use a specific version tag or digest.
-      Mutable tags (latest, edge, stable, dev, master, main) and untagged images are rejected.
+      Extends the upstream disallow-latest-tag policy to also reject other
+      commonly used mutable tags: edge, stable, dev, master, main.
 spec:
   validationFailureAction: Audit
   background: true
   rules:
-    - name: require-image-tag
+    - name: disallow-extra-mutable-tag
       match:
         any:
           - resources:
@@ -25,41 +25,12 @@ spec:
                 - kube-public
                 - kube-node-lease
       validate:
-        message: "An image tag or digest is required."
-        foreach:
-          - list: "request.object.spec.initContainers"
-            pattern:
-              image: "*:* | *@*"
-          - list: "request.object.spec.containers"
-            pattern:
-              image: "*:* | *@*"
-          - list: "request.object.spec.ephemeralContainers"
-            pattern:
-              image: "*:* | *@*"
-
-    - name: disallow-mutable-tag
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-      exclude:
-        any:
-          - resources:
-              namespaces:
-                - kube-system
-                - kube-public
-                - kube-node-lease
-      validate:
-        message: "Mutable image tags (latest, edge, stable, dev, master, main) are not allowed."
+        message: "Mutable image tags (edge, stable, dev, master, main) are not allowed."
         foreach:
           - list: "request.object.spec.[ephemeralContainers, initContainers, containers][]"
             deny:
               conditions:
                 any:
-                  - key: "{{ element.image }}"
-                    operator: Equals
-                    value: "*:latest"
                   - key: "{{ element.image }}"
                     operator: Equals
                     value: "*:edge"

@@ -1,0 +1,53 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-flux-sources
+  annotations:
+    policies.kyverno.io/title: Verify Flux Sources
+    policies.kyverno.io/category: Flux
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Ensures Flux GitRepositories and HelmRepositories only reference known,
+      trusted sources. Prevents accidental use of untrusted external repositories.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: flux-git-repositories
+      match:
+        any:
+          - resources:
+              kinds:
+                - GitRepository
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - flux-system
+      validate:
+        message: "GitRepository must reference a source on github.com or tangled.org."
+        pattern:
+          spec:
+            url: "https://github.com/?* | ssh://git@github.com/?* | https://tangled.org/?* | ssh://git@tangled.org/?*"
+
+    - name: flux-helm-repositories
+      match:
+        any:
+          - resources:
+              kinds:
+                - HelmRepository
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - flux-system
+      validate:
+        message: "HelmRepository URL is not in the approved list."
+        pattern:
+          spec:
+            url: >-
+              https://*.github.io/* |
+              https://charts.jetstack.io* |
+              https://helm.cilium.io/* |
+              https://piraeus.io/* |
+              oci://ghcr.io/*

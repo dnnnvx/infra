@@ -1,0 +1,25 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: disallow-extra-mutable-tags
+policies:
+  - ../disallow-extra-mutable-tags.yaml
+resources:
+  - resource.yaml
+results:
+  - kind: Pod
+    policy: disallow-extra-mutable-tags
+    rule: disallow-extra-mutable-tag
+    resources:
+      - pod-versioned-tag
+      - pod-digest
+      - pod-latest
+    result: pass
+  - kind: Pod
+    policy: disallow-extra-mutable-tags
+    rule: disallow-extra-mutable-tag
+    resources:
+      - pod-edge
+      - pod-stable
+      - pod-dev
+    result: fail

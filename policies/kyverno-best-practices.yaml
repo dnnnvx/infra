@@ -1,0 +1,87 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kyverno-best-practices
+  namespace: flux-system
+spec:
+  interval: 1h
+  sourceRef:
+    kind: GitRepository
+    name: kyverno-policies
+    namespace: flux-system
+  path: ./best-practices
+  prune: true
+  wait: false
+  dependsOn:
+    - name: infrastructure
+  patches:
+    # Generate policies — conflict with Cilium or not applicable
+    - patch: |-
+        $patch: delete
+        apiVersion: kyverno.io/v1
+        kind: ClusterPolicy
+        metadata:
+          name: add-networkpolicy
+      target:
+        kind: ClusterPolicy
+        name: add-networkpolicy
+    - patch: |-
+        $patch: delete
+        apiVersion: kyverno.io/v1
+        kind: ClusterPolicy
+        metadata:
+          name: add-networkpolicy-dns
+      target:
+        kind: ClusterPolicy
+        name: add-networkpolicy-dns
+    # Adds `cluster-autoscaler.kubernetes.io/safe-to-evict=true` to pods with
+    # emptyDir/hostPath volumes. Without a cluster autoscaler (we don't have one),
+    # this annotation is pure noise — does nothing. Clear skip.
+    - patch: |-
+        $patch: delete
+        apiVersion: kyverno.io/v1
+        kind: ClusterPolicy
+        metadata:
+          name: add-safe-to-evict
+      target:
+        kind: ClusterPolicy
+        name: add-safe-to-evict
+    # Creates an admin `RoleBinding` for the user who created the namespace.
+    # In a single-operator cluster where everything runs as cluster-admin via
+    # kubectl, this adds a useless RoleBinding to every namespace.
+    - patch: |-
+        $patch: delete
+        apiVersion: kyverno.io/v1
+        kind: ClusterPolicy
+        metadata:
+          name: add-rolebinding
+      target:
+        kind: ClusterPolicy
+        name: add-rolebinding
+    # Lower quota defaults for homelab NUCs
+    - patch: |-
+        - op: replace
+          path: /spec/rules/0/generate/data/spec/hard/requests.cpu
+          value: "1"
+        - op: replace
+          path: /spec/rules/0/generate/data/spec/hard/limits.cpu
+          value: "1"
+        - op: replace
+          path: /spec/rules/0/generate/data/spec/hard/requests.memory
+          value: 4Gi
+        - op: replace
+          path: /spec/rules/0/generate/data/spec/hard/limits.memory
+          value: 4Gi
+      target:
+        kind: ClusterPolicy
+        name: add-ns-quota
+    # Requires allowlist maintenance — add later
+    - patch: |-
+        $patch: delete
+        apiVersion: kyverno.io/v1
+        kind: ClusterPolicy
+        metadata:
+          name: restrict-image-registries
+      target:
+        kind: ClusterPolicy
+        name: restrict-image-registries
