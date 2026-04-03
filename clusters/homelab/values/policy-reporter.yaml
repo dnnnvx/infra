@@ -8,6 +8,11 @@ ui:
         sectionName: http
     hostnames:
       - kyverno.home
+  plugins:
+    kyverno: true
+
+kyvernoPlugin:
+  enabled: true
 
 target:
   telegram:
