@@ -47,7 +47,7 @@ locals {
       # Allow scheduling on control planes
       yamlencode({
         cluster = {
-          allowSchedulingOnControlPlanes = true
+          allowSchedulingOnControlPlanes = false
         }
       }),
       # Disable cluster discovery
