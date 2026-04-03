@@ -8,3 +8,6 @@ spec:
   url: https://github.com/kyverno/policies
   ref:
     branch: main
+  ignore: |
+    # exclude ArtifactHub metadata — not valid Kubernetes resources
+    **/artifacthub-pkg.yml
