@@ -9,7 +9,7 @@ spec:
     kind: GitRepository
     name: kyverno-policies
     namespace: flux-system
-  path: ./cert-manager/cert-manager-limit-duration
+  path: ./cert-manager/limit-duration
   prune: true
   wait: false
   dependsOn:
