@@ -11,6 +11,31 @@ spec:
   validationFailureAction: Audit
   background: true
   rules:
+    - name: require-security-context
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - piraeus-datastore
+      validate:
+        message: "Containers must define a securityContext."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.securityContext }}"
+                    operator: Equals
+                    value: null
+
     - name: no-privileged
       match:
         any:
@@ -76,7 +101,7 @@ spec:
                 - kube-node-lease
                 - piraeus-datastore
       validate:
-        message: "Containers must not run as root. Set runAsNonRoot: true or runAsUser > 0."
+        message: "Containers must not run as root. Set runAsNonRoot: true on the container or pod securityContext."
         foreach:
           - list: "request.object.spec.containers"
             deny:
@@ -85,7 +110,32 @@ spec:
                   - key: "{{ element.securityContext.runAsNonRoot || request.object.spec.securityContext.runAsNonRoot || false }}"
                     operator: Equals
                     value: false
-                  - key: "{{ element.securityContext.runAsUser || request.object.spec.securityContext.runAsUser || 0 }}"
+
+    - name: no-explicit-root-user
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - piraeus-datastore
+      validate:
+        message: "runAsUser: 0 explicitly sets the container to run as root."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.securityContext.runAsUser }}"
+                    operator: Equals
+                    value: 0
+                  - key: "{{ request.object.spec.securityContext.runAsUser }}"
                     operator: Equals
                     value: 0
 
