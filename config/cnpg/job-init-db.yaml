@@ -12,7 +12,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: init-db
-          image: alpine:3.21
+          image: alpine:3.23.3
           command:
             - sh
             - -c
