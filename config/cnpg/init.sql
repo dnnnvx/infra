@@ -25,15 +25,3 @@ SELECT 'CREATE DATABASE norish OWNER norish'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'norish')\gexec
 
 GRANT ALL PRIVILEGES ON DATABASE norish TO norish;
-
--- donetick
-
-SELECT 'CREATE ROLE donetick WITH LOGIN PASSWORD ''$${DONETICK_PASSWORD}'''
-WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'donetick')\gexec
-
-ALTER ROLE donetick WITH LOGIN PASSWORD '$${DONETICK_PASSWORD}';
-
-SELECT 'CREATE DATABASE donetick OWNER donetick'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'donetick')\gexec
-
-GRANT ALL PRIVILEGES ON DATABASE donetick TO donetick;
