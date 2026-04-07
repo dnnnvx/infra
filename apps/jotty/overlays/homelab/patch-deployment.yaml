@@ -10,6 +10,6 @@ spec:
         - name: jotty
           env:
             - name: APP_URL
-              value: https://todo.casasulgorgo.net
+              value: https://task.casasulgorgo.net
             - name: OIDC_ISSUER
               value: https://auth.casasulgorgo.net

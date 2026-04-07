@@ -9,7 +9,7 @@ spec:
       namespace: kube-system
       sectionName: https
   hostnames:
-    - todo.casasulgorgo.net
+    - task.casasulgorgo.net
   rules:
     - backendRefs:
         - name: jotty
