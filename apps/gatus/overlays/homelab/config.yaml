@@ -114,9 +114,9 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Donetick
+  - name: Jotty
     group: apps
-    url: http://donetick.donetick.svc.cluster.local:2021
+    url: http://jotty.jotty.svc.cluster.local:3000
     interval: 1m
     conditions:
       - "[STATUS] == 200"
@@ -124,9 +124,9 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Donetick (external)
+  - name: Jotty (external)
     group: apps
-    url: https://tasks.casasulgorgo.net
+    url: https://task.casasulgorgo.net
     interval: 5m
     conditions:
       - "[STATUS] == 200"

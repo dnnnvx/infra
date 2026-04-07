@@ -2,7 +2,7 @@ apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: default
-  namespace: donetick
+  namespace: jotty
 spec:
   endpointSelector: {}
   ingress:
@@ -21,20 +21,6 @@ spec:
             - port: "53"
               protocol: UDP
             - port: "53"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: cnpg-system
-      toPorts:
-        - ports:
-            - port: "5432"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: webauth
-      toPorts:
-        - ports:
-            - port: "1411"
               protocol: TCP
     - toEntities:
         - world

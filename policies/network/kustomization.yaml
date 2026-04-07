@@ -3,10 +3,10 @@ kind: Kustomization
 resources:
   # App namespaces
   - actual-budget.yaml
+  - jotty.yaml
   - adguard-home.yaml
   - ddns.yaml
   - diun.yaml
-  - donetick.yaml
   - gatus.yaml
   - home-assistant.yaml
   - lightnvr.yaml

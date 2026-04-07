@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jotty
+  namespace: jotty
+spec:
+  template:
+    spec:
+      containers:
+        - name: jotty
+          env:
+            - name: APP_URL
+              value: https://todo.casasulgorgo.net
+            - name: OIDC_ISSUER
+              value: https://auth.casasulgorgo.net

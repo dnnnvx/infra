@@ -162,7 +162,7 @@ module "cloudflare" {
   cloudflare_account_id = var.cloudflare_account_id
   zone_name             = "casasulgorgo.net"
   cloudflare_api_token  = var.cloudflare_api_token
-  cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "memos", "recipes", "tasks", "git", "flux"]
+  cname_subdomains      = ["ha", "auth", "oauth", "budget", "uptime", "memos", "recipes", "task", "git", "flux"]
   r2_buckets            = { "tofu-state" = {} }
   atproto_did           = local.atproto_did
 }
@@ -170,9 +170,9 @@ module "cloudflare" {
 module "k8s" {
   source = "../modules/k8s"
 
-  cilium_values          = file("${path.module}/../../clusters/homelab/values/cilium.yaml")
-  flux_operator_values   = file("${path.module}/../../clusters/homelab/values/flux-operator.yaml")
-  flux_instance_values   = file("${path.module}/../../clusters/homelab/values/flux-instance.yaml")
+  cilium_values        = file("${path.module}/../../clusters/homelab/values/cilium.yaml")
+  flux_operator_values = file("${path.module}/../../clusters/homelab/values/flux-operator.yaml")
+  flux_instance_values = file("${path.module}/../../clusters/homelab/values/flux-instance.yaml")
 
 
   namespaces = [

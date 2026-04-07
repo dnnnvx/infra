@@ -1,16 +1,16 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: donetick
-  namespace: donetick
+  name: jotty
+  namespace: jotty
 spec:
   parentRefs:
     - name: homelab
       namespace: kube-system
       sectionName: https
   hostnames:
-    - tasks.casasulgorgo.net
+    - todo.casasulgorgo.net
   rules:
     - backendRefs:
-        - name: donetick
-          port: 2021
+        - name: jotty
+          port: 3000

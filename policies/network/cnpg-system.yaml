@@ -11,8 +11,6 @@ spec:
         - matchLabels:
             io.kubernetes.pod.namespace: memos
         - matchLabels:
-            io.kubernetes.pod.namespace: donetick
-        - matchLabels:
             io.kubernetes.pod.namespace: norish
       toPorts:
         - ports:

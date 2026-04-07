@@ -89,7 +89,7 @@ All workloads target the Kubernetes `restricted` Pod Security Standard. The foll
 
 ### Full restricted (stateless/standard apps)
 
-Used for: `memos`, `norish`, `donetick`, `actual-budget`, `gatus`
+Used for: `memos`, `norish`, `jotty`, `actual-budget`, `gatus`
 
 ```yaml
 spec:
@@ -239,19 +239,7 @@ All namespaces have a `CiliumNetworkPolicy` with `endpointSelector: {}` (applies
 
 - **DNS egress** — every namespace allows egress to `kube-system/kube-dns` on UDP/TCP 53
 - **Gateway ingress** — apps with an HTTPRoute allow `fromEntities: [ingress]` (Cilium's reserved entity for the Envoy proxy). A standard `namespaceSelector: {}` does **not** cover Gateway traffic
-- **Cross-namespace egress** — apps explicitly allow egress to the namespaces they need:
-
-| App | Cross-namespace egress |
-|-----|----------------------|
-| memos | `cnpg-system:5432`, `world:443/80` (link previews) |
-| norish | `cnpg-system:5432`, `valkey:6379`, `world:443/80` |
-| donetick | `cnpg-system:5432`, `webauth:1411`, `world:443` (Telegram) |
-| actual-budget | `world:443` (OIDC discovery) |
-| gatus | `cluster` (monitors internal services only) |
-| diun | `kube-apiserver`, `world:443` (registry checks) |
-| adguard-home | `world:53/443` (upstream DNS resolvers) |
-| lightnvr | `world/host:554` (RTSP camera streams) |
-| valkey | ingress from `norish` only |
+- **Cross-namespace egress** — apps explicitly allow egress to the namespaces they need.
 
 ### Adding a new app
 

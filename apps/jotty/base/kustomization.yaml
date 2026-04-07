@@ -9,6 +9,6 @@ resources:
 
 labels:
   - pairs:
-      app.kubernetes.io/part-of: donetick
+      app.kubernetes.io/part-of: jotty
     includeSelectors: false
     includeTemplates: true

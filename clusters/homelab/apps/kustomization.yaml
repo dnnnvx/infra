@@ -10,7 +10,7 @@ resources:
   - ../../../apps/gatus/overlays/homelab
   - ../../../apps/memos/overlays/homelab
   - ../../../apps/norish/overlays/homelab
-  - ../../../apps/donetick/overlays/homelab
+  - ../../../apps/jotty/overlays/homelab
   - ../../../apps/diun/overlays/homelab
   - ../../../apps/valkey/overlays/homelab
   # - ../../../apps/tangled/overlays/homelab
