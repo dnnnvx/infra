@@ -119,7 +119,7 @@ endpoints:
     url: http://jotty.jotty.svc.cluster.local:3000
     interval: 1m
     conditions:
-      - "[STATUS] == 200"
+      - "[STATUS] < 500"
     alerts:
       - type: telegram
         send-on-resolved: true
@@ -129,7 +129,7 @@ endpoints:
     url: https://task.casasulgorgo.net
     interval: 5m
     conditions:
-      - "[STATUS] == 200"
+      - "[STATUS] < 500"
     alerts:
       - type: telegram
         send-on-resolved: true
