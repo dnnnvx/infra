@@ -6,7 +6,6 @@ resources:
   - jotty.yaml
   - adguard-home.yaml
   - ddns.yaml
-  - diun.yaml
   - gatus.yaml
   - home-assistant.yaml
   - lightnvr.yaml
