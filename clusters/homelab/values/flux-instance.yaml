@@ -1,6 +1,6 @@
 instance:
   sync:
-    interval: 1m
+    interval: 30m
     kind: GitRepository
     url: "ssh://git@tangled.org/casasulgorgo.net/infra"
     ref: "refs/heads/main"
