@@ -27,7 +27,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: ghcr.io/fccview/jotty:1.21.1
+          image: ghcr.io/fccview/jotty:1.22.0
           ports:
             - containerPort: 3000
               name: http
