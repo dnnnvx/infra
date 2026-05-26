@@ -12,6 +12,11 @@ spec:
     initdb:
       database: norish
       owner: norish
+      postInitApplicationSQL:
+        - CREATE SCHEMA IF NOT EXISTS drizzle
+        - ALTER SCHEMA drizzle OWNER TO norish
+        - GRANT ALL ON ALL TABLES IN SCHEMA drizzle TO norish
+        - GRANT ALL ON ALL SEQUENCES IN SCHEMA drizzle TO norish
   resources:
     requests:
       memory: 256Mi
