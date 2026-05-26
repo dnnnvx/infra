@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookorbit
+  namespace: bookorbit
+spec:
+  template:
+    spec:
+      containers:
+        - name: bookorbit
+          env:
+            - name: APP_URL
+              value: https://books.casasulgorgo.net
