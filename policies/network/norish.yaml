@@ -11,6 +11,12 @@ spec:
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: gatus
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: norish
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: cnpg-system
   egress:
     - toEndpoints:
         - matchLabels:
@@ -24,18 +30,9 @@ spec:
               protocol: TCP
     - toEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: cnpg-system
-      toPorts:
-        - ports:
-            - port: "5432"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: valkey
-      toPorts:
-        - ports:
-            - port: "6379"
-              protocol: TCP
+            io.kubernetes.pod.namespace: norish
+    - toEntities:
+        - kube-apiserver
     - toEntities:
         - world
       toPorts:

@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   # App namespaces
   - actual-budget.yaml
+  - bookorbit.yaml
   - jotty.yaml
   - adguard-home.yaml
   - ddns.yaml
