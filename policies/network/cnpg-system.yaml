@@ -6,11 +6,6 @@ metadata:
 spec:
   endpointSelector: {}
   ingress:
-    # PostgreSQL access from app namespaces
-      toPorts:
-        - ports:
-            - port: "5432"
-              protocol: TCP
     # Internal: CNPG pods communicate for HA replication + operator webhooks
     - fromEndpoints:
         - matchLabels:
