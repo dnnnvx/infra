@@ -47,6 +47,16 @@ spec:
                 secretKeyRef:
                   name: bookorbit-secrets
                   key: SETUP_BOOTSTRAP_TOKEN
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
           volumeMounts:
             - name: books
               mountPath: /books
