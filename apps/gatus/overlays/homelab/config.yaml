@@ -54,46 +54,6 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Actual Budget
-    group: apps
-    url: http://actual-budget.actual-budget.svc.cluster.local:5006
-    interval: 1m
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: telegram
-        send-on-resolved: true
-
-  - name: Actual Budget (external)
-    group: apps
-    url: https://budget.casasulgorgo.net
-    interval: 5m
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: telegram
-        send-on-resolved: true
-
-  - name: Memos
-    group: apps
-    url: http://memos.memos.svc.cluster.local:5230
-    interval: 1m
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: telegram
-        send-on-resolved: true
-
-  - name: Memos (external)
-    group: apps
-    url: https://memos.casasulgorgo.net
-    interval: 5m
-    conditions:
-      - "[STATUS] == 200"
-    alerts:
-      - type: telegram
-        send-on-resolved: true
-
   - name: Norish
     group: apps
     url: http://norish.norish.svc.cluster.local:3000
@@ -143,36 +103,6 @@ endpoints:
     alerts:
       - type: telegram
         send-on-resolved: true
-
-  # - name: Tangled
-  #   group: apps
-  #   url: http://tangled.tangled.svc.cluster.local:5555
-  #   interval: 1m
-  #   conditions:
-  #     - "[STATUS] == 200"
-  #   alerts:
-  #     - type: telegram
-  #       send-on-resolved: true
-
-  # - name: Tangled (external)
-  #   group: apps
-  #   url: https://git.casasulgorgo.net
-  #   interval: 5m
-  #   conditions:
-  #     - "[STATUS] == 200"
-  #   alerts:
-  #     - type: telegram
-  #       send-on-resolved: true
-
-  # - name: LightNVR (external)
-  #   group: apps
-  #   url: https://nvr.casasulgorgo.net
-  #   interval: 5m
-  #   conditions:
-  #     - "[STATUS] == 200"
-  #   alerts:
-  #     - type: telegram
-  #       send-on-resolved: true
 
   - name: Cilium Gateway
     group: infrastructure

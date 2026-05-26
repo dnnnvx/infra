@@ -89,7 +89,7 @@ All workloads target the Kubernetes `restricted` Pod Security Standard. The foll
 
 ### Full restricted (stateless/standard apps)
 
-Used for: `memos`, `norish`, `jotty`, `actual-budget`, `gatus`
+Used for: `norish`, `jotty`, `gatus`
 
 ```yaml
 spec:

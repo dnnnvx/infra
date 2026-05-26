@@ -7,11 +7,6 @@ spec:
   endpointSelector: {}
   ingress:
     # PostgreSQL access from app namespaces
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: memos
-        - matchLabels:
-            io.kubernetes.pod.namespace: norish
       toPorts:
         - ports:
             - port: "5432"
