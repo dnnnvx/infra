@@ -8,9 +8,9 @@ resources:
   - ../../../apps/lightnvr/overlays/homelab
   - ../../../apps/actual-budget/overlays/homelab
   - ../../../apps/gatus/overlays/homelab
-  - ../../../apps/memos/overlays/homelab
+  # - ../../../apps/memos/overlays/homelab
   - ../../../apps/norish/overlays/homelab
   - ../../../apps/jotty/overlays/homelab
-  - ../../../apps/valkey/overlays/homelab
+  # - ../../../apps/valkey/overlays/homelab
   - ../../../apps/bookorbit/overlays/homelab
   # - ../../../apps/tangled/overlays/homelab

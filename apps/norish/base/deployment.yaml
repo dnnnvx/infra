@@ -35,10 +35,10 @@ spec:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: norish-secrets
-                  key: database-url
+                  name: norish-postgres-app
+                  key: uri
             - name: REDIS_URL
-              value: redis://valkey.valkey:6379
+              value: redis://valkey.norish:6379
             - name: CHROME_WS_ENDPOINT
               value: ws://localhost:9222
             - name: MASTER_KEY
