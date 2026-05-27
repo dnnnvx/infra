@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: flux-operator
-      version: 0.45.x
+      version: 0.50.x
       sourceRef:
         kind: HelmRepository
         name: flux-operator
