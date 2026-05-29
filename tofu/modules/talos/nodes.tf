@@ -60,12 +60,12 @@ locals {
       }),
     ],
     [
-      # Allow Tetragon to read kernel symbol addresses from /proc/kallsyms.
+      # To allow Tetragon to read kernel symbol addresses from /proc/kallsyms, set it to 1.
       # Talos defaults to kptr_restrict=2 (hidden even from root); 1 allows root to read them.
       yamlencode({
         machine = {
           sysctls = {
-            "kernel.kptr_restrict" = "1"
+            "kernel.kptr_restrict" = "2"
           }
         }
       }),

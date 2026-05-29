@@ -9,6 +9,8 @@ resources:
   # - oauth2-proxy/deployment.yaml
   # - oauth2-proxy/service.yaml
 
+  - ciliumnetworkpolicy.yaml
+
 labels:
   - pairs:
       app.kubernetes.io/part-of: webauth

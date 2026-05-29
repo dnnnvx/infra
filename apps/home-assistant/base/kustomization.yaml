@@ -11,6 +11,8 @@ resources:
   - matter-server-service.yaml
   - matter-server-deployment.yaml
 
+  - ciliumnetworkpolicy.yaml
+
 labels:
   - pairs:
       app.kubernetes.io/part-of: home-assistant

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+configMapGenerator:
+  - name: flux-operator-values
+    namespace: flux-system
+    files:
+      - values.yaml=values-operator.yaml
+    options:
+      disableNameSuffixHash: true
+  - name: flux-instance-values
+    namespace: flux-system
+    files:
+      - values.yaml=values-instance.yaml
+    options:
+      disableNameSuffixHash: true

@@ -9,6 +9,8 @@ resources:
   - deployment.yaml
   - service.yaml
 
+  - ciliumnetworkpolicy.yaml
+
 labels:
   - pairs:
       app.kubernetes.io/part-of: bookorbit

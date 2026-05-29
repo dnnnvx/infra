@@ -1,0 +1,13 @@
+instance:
+  sync:
+    interval: 30m
+    kind: GitRepository
+    url: "ssh://git@tangled.org/casasulgorgo.net/infra"
+    ref: "refs/heads/main"
+    path: ./clusters/production
+    pullSecret: flux-system
+  cluster:
+    type: kubernetes
+    multitenant: false
+    networkPolicy: true
+    domain: cluster.local

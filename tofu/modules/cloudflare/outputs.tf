@@ -1,5 +1,5 @@
 output "cluster_api_token" {
-  description = "Cloudflare API token for cluster services (cert-manager, external-dns, DDNS)"
+  description = "Cloudflare API token for cluster services (cert-manager, DDNS)"
   value       = var.cloudflare_api_token
   sensitive   = true
 }

@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - kyverno-policies-source.yaml
+  - kyverno-pss.yaml
+  - kyverno-best-practices.yaml
+  - kyverno-flux.yaml
+  - kyverno-cert-manager.yaml
+configMapGenerator:
+  - name: kyverno-values
+    namespace: kyverno
+    files:
+      - values.yaml=values.yaml
+    options:
+      disableNameSuffixHash: true

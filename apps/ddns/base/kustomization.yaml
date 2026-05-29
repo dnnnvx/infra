@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - deployment.yaml
 
+  - ciliumnetworkpolicy.yaml
+
 labels:
   - pairs:
       app.kubernetes.io/part-of: cloudflare-ddns

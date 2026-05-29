@@ -26,7 +26,6 @@ infrastructure/          # Base HelmReleases (reusable, values optional)
 ├── flux/                # Flux operator + instance
 ├── metrics-server/      # Resource metrics
 ├── piraeus/             # LINSTOR storage (DRBD)
-└── tofu-controller/     # Flux-managed OpenTofu (GitOps for IaC, disabled)
 
 config/                  # Post-install configuration (CRDs must exist)
 ├── cert-manager/        # ClusterIssuer (Let's Encrypt DNS-01) + wildcard Certificate
