@@ -174,7 +174,6 @@ module "k8s" {
   flux_operator_values = file("${path.module}/../../infrastructure/flux/overlays/production/values-operator.yaml")
   flux_instance_values = file("${path.module}/../../infrastructure/flux/overlays/production/values-instance.yaml")
 
-
   namespaces = [
     "cert-manager",
     "ddns",
