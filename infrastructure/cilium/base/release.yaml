@@ -20,4 +20,4 @@ spec:
     - kind: ConfigMap
       name: cilium-values
       valuesKey: values.yaml
-      optional: true
+      optional: false
