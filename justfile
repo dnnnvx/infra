@@ -1,4 +1,4 @@
-cluster := "production"
+cluster := "homelab"
 node-1 := "192.168.0.101"
 node-2 := "192.168.0.102"
 node-3 := "192.168.0.103"
