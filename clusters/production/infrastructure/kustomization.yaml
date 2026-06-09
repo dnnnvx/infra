@@ -7,5 +7,3 @@ resources:
   - ../../../infrastructure/metrics-server/overlays/production
   - ../../../infrastructure/piraeus/overlays/production
   - ../../../infrastructure/cnpg/base/overlays/production
-  - ../../../infrastructure/kyverno/overlays/production
-  - ../../../infrastructure/policy-reporter/overlays/production

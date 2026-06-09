@@ -1,8 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - require-cilium-network-policy/require-cilium-network-policy.yaml
-  - disallow-extra-mutable-tags/disallow-extra-mutable-tags.yaml
-  - verify-flux-sources/verify-flux-sources.yaml
-  - cert-manager-restrict-issuer/cert-manager-restrict-issuer.yaml
-  - exceptions.yaml

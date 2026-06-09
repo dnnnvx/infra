@@ -80,10 +80,6 @@ sync:
     flux reconcile kustomization apps
     flux reconcile kustomization policies
 
-# test kyverno policies locally against test fixtures
-test-policies:
-    kyverno test policies/kyverno/
-
 # validate all kustomize overlays and manifests
 validate:
     #!/usr/bin/env bash
