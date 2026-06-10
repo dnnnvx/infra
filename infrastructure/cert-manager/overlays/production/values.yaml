@@ -2,6 +2,9 @@ installCRDs: true
 crds:
   enabled: true
 dns01RecursiveNameserversOnly: true
-dns01RecursiveNameservers: "192.168.0.1:53,1.1.1.1:53,8.8.8.8:53"
+# 192.168.0.1 (consumer modem) can't resolve external TXT records, which
+# stalls the DNS-01 self-check; use public resolvers that query Cloudflare's
+# authoritative NS directly
+dns01RecursiveNameservers: "1.1.1.1:53,8.8.8.8:53"
 config:
   enableGatewayAPI: true
