@@ -12,5 +12,5 @@ spec:
     - chat.casasulgorgo.net
   rules:
     - backendRefs:
-        - name: llama-cpp
-          port: 8080
+        - name: oauth2-proxy
+          port: 4180
