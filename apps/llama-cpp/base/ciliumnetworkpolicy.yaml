@@ -15,6 +15,15 @@ spec:
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: gatus
+    # norish calls the OpenAI-compatible API directly (server-to-server, no auth proxy)
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: norish
+            app.kubernetes.io/name: norish
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:

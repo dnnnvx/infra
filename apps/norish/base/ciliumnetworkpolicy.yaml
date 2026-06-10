@@ -31,6 +31,15 @@ spec:
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: norish
+    # llama-cpp OpenAI-compatible API (cross-namespace → must name the namespace)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: llama-cpp
+            app.kubernetes.io/name: llama-cpp
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     - toEntities:
         - kube-apiserver
     - toEntities:
