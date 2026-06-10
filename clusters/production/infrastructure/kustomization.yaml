@@ -6,4 +6,4 @@ resources:
   - ../../../infrastructure/flux/overlays/production
   - ../../../infrastructure/metrics-server/overlays/production
   - ../../../infrastructure/piraeus/overlays/production
-  - ../../../infrastructure/cnpg/base/overlays/production
+  - ../../../infrastructure/cnpg/overlays/production
