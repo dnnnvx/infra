@@ -7,16 +7,16 @@ OpenTofu provisions the cluster (Talos nodes, Cilium, Flux, namespaces, secrets)
 State is stored remotely in Cloudflare R2 (S3-compatible object storage).
 
 - **Bucket**: `tofu-state` (created by Tofu itself via `cloudflare_r2_bucket`)
-- **Config**: `tofu/homelab/backend.tfbackend` (tracked in git — contains endpoint + skip flags)
-- **Credentials**: `tofu/homelab/.env` (gitignored — contains `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`)
+- **Config**: `tofu/production/backend.tfbackend` (tracked in git — contains endpoint + skip flags)
+- **Credentials**: `tofu/production/.env` (gitignored — contains `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`)
 
 The R2 API token (S3 credentials) is separate from the Cloudflare API token. Create it in the Cloudflare dashboard under **R2 > Manage R2 API Tokens** with Object Read & Write on the `tofu-state` bucket.
 
 ## Usage
 
 ```bash
-source tofu/homelab/.env
-cd tofu/homelab
+source tofu/production/.env
+cd tofu/production
 tofu init -backend-config=backend.tfbackend
 tofu plan
 tofu apply

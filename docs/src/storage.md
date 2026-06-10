@@ -22,7 +22,7 @@ The node labels are set by Tofu via the Talos machine config.
 
 ## HDD pool prerequisites (nuc-102)
 
-The HDD pool requires the `dm_thin_pool` kernel module, loaded via the Talos machine config in `tofu/homelab/main.tf` → `extra_config_patches`. If the module is missing (`modprobe: FATAL: Module dm-thin-pool not found`), add it to the kernel modules list and run `tofu apply`.
+The HDD pool requires the `dm_thin_pool` kernel module, loaded via the Talos machine config in `tofu/production/main.tf` → `extra_config_patches`. If the module is missing (`modprobe: FATAL: Module dm-thin-pool not found`), add it to the kernel modules list and run `tofu apply`.
 
 The VG `linstor-hdd-vg` and thin pool `linstor-hdd-thinpool` are created automatically by the `LinstorSatelliteConfiguration` when the satellite pod starts with the correct kernel module and node label.
 

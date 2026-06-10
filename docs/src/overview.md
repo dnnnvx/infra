@@ -6,7 +6,7 @@ Kubernetes homelab running on Intel NUCs with Talos Linux, managed by OpenTofu a
 
 ```
 FluxInstance (tofu bootstrap)
-  └── clusters/homelab (Flux Kustomization: flux-system)
+  └── clusters/production (Flux Kustomization: flux-system)
         ├── infrastructure (Flux Kustomization, prune: false)
         │   └── Cilium → cert-manager, Flux, metrics-server, Piraeus
         ├── config (Flux Kustomization, dependsOn: infrastructure)

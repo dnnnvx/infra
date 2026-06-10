@@ -2,22 +2,22 @@
 
 ```
 tofu/                    # OpenTofu (Terraform) — provisions the cluster
-├── homelab/             # Cluster definition (nodes, IPs, extensions)
+├── production/          # Cluster definition (nodes, IPs, extensions)
 └── modules/
     ├── talos/           # Talos Linux cluster provisioning
     ├── k8s/             # Bootstrap (Cilium, Flux, namespaces, secrets)
     ├── cloudflare/      # DNS records (apex A + subdomain CNAMEs), R2 buckets
     └── github/          # Deploy key + pinned SSH known_hosts
 
-clusters/homelab/        # Flux entry point (synced by FluxInstance)
+clusters/production/     # Flux entry point (synced by FluxInstance)
 ├── kustomization.yaml   # ConfigMapGenerators for Helm values
 ├── infrastructure.yaml  # Flux Kustomization → ./infrastructure
 ├── config.yaml          # Flux Kustomization → ./config (dependsOn infrastructure)
-├── home-assistant.yaml  # Flux Kustomization → ./apps/home-assistant/overlays/homelab
-├── ddns.yaml            # Flux Kustomization → ./apps/ddns/overlays/homelab
-├── adguard-home.yaml    # Flux Kustomization → ./apps/adguard-home/overlays/homelab
-├── webauth.yaml         # Flux Kustomization → ./apps/webauth/overlays/homelab
-├── lightnvr.yaml        # Flux Kustomization → ./apps/lightnvr/overlays/homelab
+├── home-assistant.yaml  # Flux Kustomization → ./apps/home-assistant/overlays/production
+├── ddns.yaml            # Flux Kustomization → ./apps/ddns/overlays/production
+├── adguard-home.yaml    # Flux Kustomization → ./apps/adguard-home/overlays/production
+├── webauth.yaml         # Flux Kustomization → ./apps/webauth/overlays/production
+├── lightnvr.yaml        # Flux Kustomization → ./apps/lightnvr/overlays/production
 └── values/              # Cluster-specific Helm values
 
 infrastructure/          # Base HelmReleases (reusable, values optional)
@@ -35,18 +35,18 @@ config/                  # Post-install configuration (CRDs must exist)
 
 apps/                    # User-facing applications
 ├── home-assistant/
-│   ├── base/            # Deployment, Service, PVC, Matter Server
-│   └── overlays/homelab # HTTPRoutes (internal + external), NetworkPolicy, patches
+│   ├── base/               # Deployment, Service, PVC, Matter Server
+│   └── overlays/production # HTTPRoutes (internal + external), NetworkPolicy, patches
 ├── ddns/
-│   ├── base/            # favonia/cloudflare-ddns Deployment
-│   └── overlays/homelab # Homelab-specific env (domain, secret ref)
+│   ├── base/               # favonia/cloudflare-ddns Deployment
+│   └── overlays/production # Homelab-specific env (domain, secret ref)
 ├── adguard-home/
-│   ├── base/            # StatefulSet, DNS + Web Services
-│   └── overlays/homelab # HTTPRoute, storage patches
+│   ├── base/               # StatefulSet, DNS + Web Services
+│   └── overlays/production # HTTPRoute, storage patches
 ├── webauth/
-│   ├── base/            # Pocket-ID (OIDC IdP, passkey auth), OAuth2 Proxy (disabled)
-│   └── overlays/homelab # HTTPRoute, SOPS-encrypted secrets
+│   ├── base/               # Pocket-ID (OIDC IdP, passkey auth), OAuth2 Proxy (disabled)
+│   └── overlays/production # HTTPRoute, SOPS-encrypted secrets
 └── lightnvr/
-    ├── base/            # Deployment, Service, PVC (recordings)
-    └── overlays/homelab # HTTPRoute (nvr.home), piraeus-hdd storage
+    ├── base/               # Deployment, Service, PVC (recordings)
+    └── overlays/production # HTTPRoute (nvr.home), piraeus-hdd storage
 ```

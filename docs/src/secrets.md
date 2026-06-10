@@ -34,7 +34,7 @@ Both commands prompt for the Age private key interactively.
 
 | File                          | Contents                        |
 |-------------------------------|----------------------------------|
-| `tofu/homelab/terraform.tfvars` | All Tofu variables (tokens, keys) |
-| `tofu/homelab/.env`            | R2 S3 credentials (`AWS_*`)     |
+| `tofu/production/terraform.tfvars` | All Tofu variables (tokens, keys) |
+| `tofu/production/.env`            | R2 S3 credentials (`AWS_*`)     |
 | `*.tfvars`, `*.tfvars.json`   | Matched by `.gitignore`          |
 | `.env*`                       | Matched by `.gitignore`          |

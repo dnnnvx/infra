@@ -7,7 +7,7 @@
 ### Deployment
 
 - HelmRelease: `infrastructure/tetragon/` (depends on Cilium, uses `cilium` HelmRepository)
-- Helm values: `clusters/homelab/values/tetragon.yaml`
+- Helm values: `clusters/production/values/tetragon.yaml`
 - Policies: `config/tetragon/`
 
 Key values configured:
@@ -193,7 +193,7 @@ All namespaces have a `CiliumNetworkPolicy` with `endpointSelector: {}` (applies
 
 ### Adding a new app
 
-1. Create `apps/<name>/overlays/homelab/networkpolicy.yaml`
+1. Create `apps/<name>/overlays/production/networkpolicy.yaml`
 2. Allow DNS egress + gateway ingress as a minimum
 3. Add cross-namespace rules for postgres, valkey, etc. as needed
 4. Add to the overlay `kustomization.yaml` resources
