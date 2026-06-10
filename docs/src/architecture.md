@@ -16,7 +16,7 @@ clusters/production/     # Flux entry point (synced by FluxInstance)
 ├── home-assistant.yaml  # Flux Kustomization → ./apps/home-assistant/overlays/production
 ├── ddns.yaml            # Flux Kustomization → ./apps/ddns/overlays/production
 ├── adguard-home.yaml    # Flux Kustomization → ./apps/adguard-home/overlays/production
-├── webauth.yaml         # Flux Kustomization → ./apps/webauth/overlays/production
+├── pocket-id.yaml       # Flux Kustomization → ./apps/pocket-id/overlays/production
 ├── lightnvr.yaml        # Flux Kustomization → ./apps/lightnvr/overlays/production
 └── values/              # Cluster-specific Helm values
 
@@ -43,7 +43,7 @@ apps/                    # User-facing applications
 ├── adguard-home/
 │   ├── base/               # StatefulSet, DNS + Web Services
 │   └── overlays/production # HTTPRoute, storage patches
-├── webauth/
+├── pocket-id/
 │   ├── base/               # Pocket-ID (OIDC IdP, passkey auth), OAuth2 Proxy (disabled)
 │   └── overlays/production # HTTPRoute, SOPS-encrypted secrets
 └── lightnvr/

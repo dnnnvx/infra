@@ -4,7 +4,7 @@ resources:
   - ../../../apps/home-assistant/overlays/production
   - ../../../apps/ddns/overlays/production
   - ../../../apps/adguard-home/overlays/production
-  - ../../../apps/webauth/overlays/production
+  - ../../../apps/pocket-id/overlays/production
   - ../../../apps/lightnvr/overlays/production
   - ../../../apps/gatus/overlays/production
   - ../../../apps/norish/overlays/production

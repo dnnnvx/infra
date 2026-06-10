@@ -25,7 +25,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: twinproduction/gatus:v5.35.0
+          image: twinproduction/gatus:v5.36.0
           ports:
             - containerPort: 8080
               name: http

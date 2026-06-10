@@ -14,6 +14,6 @@ FluxInstance (tofu bootstrap)
         ├── apps/home-assistant (Flux Kustomization, dependsOn: infrastructure + config)
         ├── ddns
         ├── adguard-home
-        ├── webauth
+        ├── pocket-id
         └── lightnvr
 ```

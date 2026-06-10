@@ -3,11 +3,9 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - pocket-id/deployment.yaml
-  - pocket-id/service.yaml
-  - pocket-id/pvc.yaml
-  # - oauth2-proxy/deployment.yaml
-  # - oauth2-proxy/service.yaml
+  - deployment.yaml
+  - service.yaml
+  - pvc.yaml
 
   - ciliumnetworkpolicy.yaml
 
