@@ -45,3 +45,14 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # Reach CNPG instance pods in app namespaces (any ns with cnpg.io/cluster)
+    - toEndpoints:
+        - matchExpressions:
+            - key: cnpg.io/cluster
+              operator: Exists
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+            - port: "5432"
+              protocol: TCP
