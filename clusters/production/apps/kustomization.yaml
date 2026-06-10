@@ -10,3 +10,4 @@ resources:
   - ../../../apps/norish/overlays/production
   - ../../../apps/jotty/overlays/production
   - ../../../apps/bookorbit/overlays/production
+  - ../../../apps/llama-cpp/overlays/production
