@@ -45,11 +45,12 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # Reach CNPG instance pods in app namespaces (any ns with cnpg.io/cluster)
+    # so list each app namespace that hosts a CNPG cluster here
     - toEndpoints:
-        - matchExpressions:
-            - key: cnpg.io/cluster
-              operator: Exists
+        - matchLabels:
+            io.kubernetes.pod.namespace: bookorbit
+        - matchLabels:
+            io.kubernetes.pod.namespace: norish
       toPorts:
         - ports:
             - port: "8000"
