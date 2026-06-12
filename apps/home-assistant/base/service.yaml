@@ -12,3 +12,5 @@ spec:
       port: 8123
       targetPort: http
       protocol: TCP
+      # HA's UI is websocket-driven
+      appProtocol: kubernetes.io/ws
