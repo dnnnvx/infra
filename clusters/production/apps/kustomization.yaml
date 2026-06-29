@@ -11,4 +11,3 @@ resources:
   - ../../../apps/jotty/overlays/production
   - ../../../apps/bookorbit/overlays/production
   - ../../../apps/llama-cpp/overlays/production
-  - ../../../apps/calyx/overlays/production
