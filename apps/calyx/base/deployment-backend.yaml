@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: calyx-backend
-          image: ghcr.io/stefexec/calyx-backend:latest
+          image: ghcr.io/stefexec/calyx-backend:v1.2.3
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
