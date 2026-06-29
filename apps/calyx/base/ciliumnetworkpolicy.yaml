@@ -1,0 +1,81 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: calyx-frontend
+  namespace: calyx
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: calyx-frontend
+  ingress:
+    - fromEntities:
+        - ingress
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: calyx
+            app.kubernetes.io/name: calyx-backend
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: calyx-backend
+  namespace: calyx
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: calyx-backend
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: calyx
+            app.kubernetes.io/name: calyx-frontend
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # HA integration and ntfy notifications
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "80"
+              protocol: TCP
+    # HA in-cluster (home-assistant namespace)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: home-assistant
+      toPorts:
+        - ports:
+            - port: "8123"
+              protocol: TCP
