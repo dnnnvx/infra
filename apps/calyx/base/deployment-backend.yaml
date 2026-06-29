@@ -16,14 +16,11 @@ spec:
         app.kubernetes.io/name: calyx-backend
     spec:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: calyx-backend
-          image: ghcr.io/stefexec/calyx-backend:v1.2.3
+          image: git.gurk.dev/gurk/calyx-backend:latest
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
