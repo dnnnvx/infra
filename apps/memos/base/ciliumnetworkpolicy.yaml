@@ -33,6 +33,9 @@ spec:
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: memos
+    # CNPG instance-manager (in the postgres pod) reports status to the apiserver
+    - toEntities:
+        - kube-apiserver
     # pocket-id OIDC (auth.casasulgorgo.net → gateway LB, world-classified)
     - toEntities:
         - world
