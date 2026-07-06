@@ -74,9 +74,9 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Jotty
+  - name: Memos
     group: apps
-    url: http://jotty.jotty.svc.cluster.local:3000
+    url: http://memos.memos.svc.cluster.local:3000
     interval: 1m
     conditions:
       - "[STATUS] < 500"
@@ -84,9 +84,9 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Jotty (external)
+  - name: Memos (external)
     group: apps
-    url: https://task.casasulgorgo.net
+    url: https://memos.casasulgorgo.net
     interval: 5m
     conditions:
       - "[STATUS] < 500"

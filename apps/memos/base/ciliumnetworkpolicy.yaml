@@ -2,7 +2,7 @@ apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: default
-  namespace: jotty
+  namespace: memos
 spec:
   endpointSelector: {}
   ingress:
@@ -11,6 +11,13 @@ spec:
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: gatus
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: memos
+    # CNPG operator scrapes instance status
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: cnpg-system
   egress:
     - toEndpoints:
         - matchLabels:
@@ -22,6 +29,11 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
+    # in-namespace: memos → CNPG postgres rw service
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: memos
+    # pocket-id OIDC (auth.casasulgorgo.net → gateway LB, world-classified)
     - toEntities:
         - world
       toPorts:

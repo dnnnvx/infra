@@ -8,6 +8,6 @@ resources:
   - ../../../apps/lightnvr/overlays/production
   - ../../../apps/gatus/overlays/production
   - ../../../apps/norish/overlays/production
-  - ../../../apps/jotty/overlays/production
+  - ../../../apps/memos/overlays/production
   - ../../../apps/bookorbit/overlays/production
   - ../../../apps/llama-cpp/overlays/production
