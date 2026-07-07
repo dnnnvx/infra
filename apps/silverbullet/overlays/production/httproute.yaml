@@ -1,16 +1,16 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: memos
-  namespace: memos
+  name: silverbullet
+  namespace: silverbullet
 spec:
   parentRefs:
     - name: homelab
       namespace: kube-system
       sectionName: https
   hostnames:
-    - memos.casasulgorgo.net
+    - notes.casasulgorgo.net
   rules:
     - backendRefs:
-        - name: memos
-          port: 5230
+        - name: oauth2-proxy
+          port: 4180

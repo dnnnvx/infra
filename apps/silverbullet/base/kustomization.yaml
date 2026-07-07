@@ -3,14 +3,16 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - cnpg-cluster.yaml
+  - pvc.yaml
   - deployment.yaml
   - service.yaml
+  - oauth2-proxy-deployment.yaml
+  - oauth2-proxy-service.yaml
 
   - ciliumnetworkpolicy.yaml
 
 labels:
   - pairs:
-      app.kubernetes.io/part-of: memos
+      app.kubernetes.io/part-of: silverbullet
     includeSelectors: false
     includeTemplates: true

@@ -3,5 +3,4 @@ kind: Kustomization
 resources:
   - ../../base
   - httproute.yaml
-patches:
-  - path: patch-deployment.yaml
+  - oauth2-proxy-secret.yaml

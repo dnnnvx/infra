@@ -1,0 +1,80 @@
+# SilverBullet is NOT publicly exposed — only oauth2-proxy (and gatus) may reach it.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: silverbullet
+  namespace: silverbullet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: silverbullet
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: oauth2-proxy
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # federation / plug (library) fetches over https
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# oauth2-proxy is the public entry point (gateway → :4180), authenticates against
+# pocket-id (auth.casasulgorgo.net) and proxies to SilverBullet.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: oauth2-proxy
+  namespace: silverbullet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: oauth2-proxy
+  ingress:
+    - fromEntities:
+        - ingress
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # upstream SilverBullet
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: silverbullet
+            app.kubernetes.io/name: silverbullet
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    # pocket-id OIDC (auth.casasulgorgo.net → gateway LB, world-classified)
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

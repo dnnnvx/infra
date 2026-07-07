@@ -74,9 +74,9 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Memos
+  - name: Silverbullet
     group: apps
-    url: http://memos.memos.svc.cluster.local:3000
+    url: http://silverbullet.silverbullet.svc.cluster.local:3000
     interval: 1m
     conditions:
       - "[STATUS] < 500"
@@ -84,9 +84,9 @@ endpoints:
       - type: telegram
         send-on-resolved: true
 
-  - name: Memos (external)
+  - name: Silverbullet (external)
     group: apps
-    url: https://memos.casasulgorgo.net
+    url: https://notes.casasulgorgo.net
     interval: 5m
     conditions:
       - "[STATUS] < 500"
