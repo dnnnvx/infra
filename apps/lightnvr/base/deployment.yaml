@@ -24,7 +24,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: ghcr.io/opensensor/lightnvr:0.35.1
+          image: ghcr.io/opensensor/lightnvr:0.36.5
           ports:
             - containerPort: 8080
               name: http

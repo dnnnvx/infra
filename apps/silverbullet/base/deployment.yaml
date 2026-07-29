@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: silverbullet
-          image: ghcr.io/silverbulletmd/silverbullet:2.9.0
+          image: ghcr.io/silverbulletmd/silverbullet:2.10.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

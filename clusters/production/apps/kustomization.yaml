@@ -9,5 +9,5 @@ resources:
   - ../../../apps/gatus/overlays/production
   - ../../../apps/norish/overlays/production
   - ../../../apps/bookorbit/overlays/production
-  - ../../../apps/llama-cpp/overlays/production
   - ../../../apps/silverbullet/overlays/production
+  # - ../../../apps/llama-cpp/overlays/production

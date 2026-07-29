@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: bookorbit
-          image: ghcr.io/bookorbit/bookorbit:2.1.0
+          image: ghcr.io/bookorbit/bookorbit:2.3.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

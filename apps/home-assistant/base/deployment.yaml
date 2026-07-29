@@ -25,7 +25,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-          image: ghcr.io/home-assistant/home-assistant:2026.6
+          image: ghcr.io/home-assistant/home-assistant:2026.7
           ports:
             - name: http
               containerPort: 8123
