@@ -6,7 +6,7 @@ alerting:
 endpoints:
   - name: Home Assistant
     group: apps
-    url: http://home-assistant.home-assistant.svc.cluster.local:8123
+    url: http://home-assistant.home-assistant.svc.cluster.local:80
     interval: 1m
     conditions:
       - "[STATUS] == 200"
@@ -87,6 +87,26 @@ endpoints:
   - name: Silverbullet (external)
     group: apps
     url: https://notes.casasulgorgo.net
+    interval: 5m
+    conditions:
+      - "[STATUS] < 500"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: RomM
+    group: apps
+    url: http://romm.romm.svc.cluster.local:8080/api/heartbeat
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: telegram
+        send-on-resolved: true
+
+  - name: RomM (external)
+    group: apps
+    url: https://romm.casasulgorgo.net
     interval: 5m
     conditions:
       - "[STATUS] < 500"

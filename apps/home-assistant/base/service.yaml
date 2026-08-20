@@ -9,7 +9,7 @@ spec:
     app.kubernetes.io/name: home-assistant
   ports:
     - name: http
-      port: 8123
+      port: 80
       targetPort: http
       protocol: TCP
       # HA's UI is websocket-driven
