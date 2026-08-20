@@ -114,19 +114,19 @@ module "talos" {
       cpu-class    = "J3455"
       gpu-class    = "HD500"
     }
-    "nuc-102" = {
-      machine_type = "worker"
-      ip           = "192.168.0.102"
-      # endpoint     = "192.168.0.19"
-      gateway      = "192.168.0.1"
-      install_disk = "/dev/nvme0n1"
-      region       = "production"
-      zone         = "office"
-      node-type    = "nuc"
-      cpu-class    = "i3-7100U"
-      gpu-class    = "HD620"
-      storage      = "hdd"
-    }
+    # "nuc-102" = {
+    #   machine_type = "worker"
+    #   ip           = "192.168.0.102"
+    #   # endpoint     = "192.168.0.19"
+    #   gateway      = "192.168.0.1"
+    #   install_disk = "/dev/nvme0n1"
+    #   region       = "production"
+    #   zone         = "office"
+    #   node-type    = "nuc"
+    #   cpu-class    = "i3-7100U"
+    #   gpu-class    = "HD620"
+    #   storage      = "hdd"
+    # }
     "nuc-103" = {
       machine_type = "worker"
       ip           = "192.168.0.103"
