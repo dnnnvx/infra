@@ -5,9 +5,9 @@ resources:
   - ../../../apps/ddns/overlays/production
   - ../../../apps/adguard-home/overlays/production
   - ../../../apps/pocket-id/overlays/production
-  - ../../../apps/lightnvr/overlays/production
   - ../../../apps/gatus/overlays/production
   - ../../../apps/norish/overlays/production
   - ../../../apps/bookorbit/overlays/production
   - ../../../apps/silverbullet/overlays/production
   # - ../../../apps/llama-cpp/overlays/production
+  # - ../../../apps/lightnvr/overlays/production
