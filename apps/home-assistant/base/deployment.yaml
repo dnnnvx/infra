@@ -28,7 +28,7 @@ spec:
           image: ghcr.io/home-assistant/home-assistant:2026.8
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8123
               protocol: TCP
           startupProbe:
             httpGet:
