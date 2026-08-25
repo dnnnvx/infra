@@ -1,0 +1,19 @@
+# On `piraeus` (file-thin, placementCount 2) rather than `piraeus-hdd`, because
+# nuc-102 — the only `storage: hdd` node — was removed from the cluster, leaving
+# that pool with no backing node (lightnvr has been unschedulable since).
+# Costs 40Gi raw for a 20Gi library; revisit if nuc-102 comes back.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: romm-data
+  namespace: romm
+spec:
+  storageClassName: piraeus
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: romm-redis
+  namespace: romm
+spec:
+  storageClassName: piraeus
