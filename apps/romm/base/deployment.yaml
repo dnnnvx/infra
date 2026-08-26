@@ -56,22 +56,8 @@ spec:
                 secretKeyRef:
                   name: romm-secrets
                   key: ROMM_AUTH_SECRET_KEY
-            # ScreenScraper is the only metadata provider with credentials here;
-            # Hasheous needs none.
-            - name: SCREENSCRAPER_USER
-              valueFrom:
-                secretKeyRef:
-                  name: romm-secrets
-                  key: SCREENSCRAPER_USER
-            - name: SCREENSCRAPER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: romm-secrets
-                  key: SCREENSCRAPER_PASSWORD
             - name: HASHEOUS_API_ENABLED
               value: "true"
-          # Migrations plus the startup script run before gunicorn binds, so give
-          # the first boot plenty of room rather than crash-looping.
           startupProbe:
             httpGet:
               path: /api/heartbeat
