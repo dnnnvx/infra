@@ -162,7 +162,7 @@ module "cloudflare" {
   cloudflare_account_id = var.cloudflare_account_id
   zone_name             = "casasulgorgo.net"
   cloudflare_api_token  = var.cloudflare_api_token
-  cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "chat"]
+  cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "romm"]
   r2_buckets            = { "tofu-state" = {} }
   atproto_did           = local.atproto_did
 }
