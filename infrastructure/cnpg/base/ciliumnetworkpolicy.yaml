@@ -51,6 +51,8 @@ spec:
             io.kubernetes.pod.namespace: bookorbit
         - matchLabels:
             io.kubernetes.pod.namespace: norish
+        - matchLabels:
+            io.kubernetes.pod.namespace: romm
       toPorts:
         - ports:
             - port: "8000"
