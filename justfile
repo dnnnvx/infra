@@ -1,4 +1,6 @@
-cluster := "homelab"
+environment := "homelab"
+context     := "homelab"
+
 node-1 := "192.168.0.101"
 node-2 := "192.168.0.102"
 node-3 := "192.168.0.103"
@@ -15,34 +17,34 @@ dev:
 
 # merge talosconfig from state into ~/.talos/config
 add-talosconfig:
-    tofu -chdir=tofu/{{ cluster }} output -raw talosconfig > ~/.talos/config-{{ cluster }}
-    talosctl config merge ~/.talos/config-{{ cluster }}
-    rm ~/.talos/config-{{ cluster }}
+    tofu -chdir=tofu/{{ environment }} output -raw talosconfig > ~/.talos/config-{{ context }}
+    talosctl config merge ~/.talos/config-{{ context }}
+    rm ~/.talos/config-{{ context }}
 
 # remove talosconfig context from ~/.talos/config
 rm-talosconfig:
-    yq -i 'del(.contexts.{{ cluster }})' ~/.talos/config
-    @echo "Removed context '{{ cluster }}' from ~/.talos/config"
+    yq -i 'del(.contexts.{{ context }})' ~/.talos/config
+    @echo "Removed context '{{ context }}' from ~/.talos/config"
 
 # merge kubeconfig from state into ~/.kube/config, rename context to cluster name
 add-kubeconfig:
-    tofu -chdir=tofu/{{ cluster }} output -raw kubeconfig > ~/.kube/config-{{ cluster }}
-    kubectl config --kubeconfig ~/.kube/config-{{ cluster }} rename-context admin@{{ cluster }} {{ cluster }}
-    KUBECONFIG=~/.kube/config:~/.kube/config-{{ cluster }} kubectl config view --flatten > ~/.kube/config-merged
+    tofu -chdir=tofu/{{ environment }} output -raw kubeconfig > ~/.kube/config-{{ context }}
+    kubectl config --kubeconfig ~/.kube/config-{{ context }} rename-context admin@{{ context }} {{ context }}
+    KUBECONFIG=~/.kube/config:~/.kube/config-{{ context }} kubectl config view --flatten > ~/.kube/config-merged
     mv ~/.kube/config-merged ~/.kube/config
-    rm ~/.kube/config-{{ cluster }}
+    rm ~/.kube/config-{{ context }}
 
-# remove kubeconfig context/cluster/user from ~/.kube/config
+# remove kubeconfig context from ~/.kube/config
 rm-kubeconfig:
-    kubectl config delete-context {{ cluster }} || true
-    kubectl config delete-cluster {{ cluster }} || true
-    kubectl config delete-user admin@{{ cluster }} || true
-    @echo "Removed context '{{ cluster }}' from ~/.kube/config"
+    kubectl config delete-context {{ context }} || true
+    kubectl config delete-cluster {{ context }} || true
+    kubectl config delete-user admin@{{ context }} || true
+    @echo "Removed context '{{ context }}' from ~/.kube/config"
 
 # apply and upgrade node images (needs machine full reboot)
 upgrade-nodes:
     #!/usr/bin/env bash
-    IMAGE=$(cd tofu/{{ cluster }} && tofu output -raw installer_image)
+    IMAGE=$(cd tofu/{{ environment }} && tofu output -raw installer_image)
     for node in {{ nodes }}; do
       echo "Upgrading $node..."
       talosctl -n $node upgrade --image "$IMAGE" --wait
@@ -74,7 +76,7 @@ docs:
 
 # sync flux with the defined git repo
 sync:
-    flux reconcile source git flux-system -n flux-system --context {{ cluster }}
+    flux reconcile source git flux-system -n flux-system --context {{ context }}
     flux reconcile kustomization infrastructure
     flux reconcile kustomization config
     flux reconcile kustomization apps
@@ -86,7 +88,7 @@ validate:
     errors=0
 
     overlays=$(find apps -path "*/overlays/*" -maxdepth 4 -name "kustomization.yaml" -exec dirname {} \; | sort)
-    for dir in clusters/{{ cluster }} infrastructure config $overlays; do
+    for dir in clusters/{{ environment }} infrastructure config $overlays; do
       echo "==> Building $dir..."
       output=$(kustomize build "$dir" 2>&1) || {
         echo "    ✗ kustomize build FAILED:"
