@@ -1,4 +1,4 @@
-environment := "homelab"
+environment := "production"
 context     := "homelab"
 
 node-1 := "192.168.0.101"
