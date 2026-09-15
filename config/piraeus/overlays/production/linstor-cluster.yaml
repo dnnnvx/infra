@@ -3,4 +3,28 @@ kind: LinstorCluster
 metadata:
   name: linstorcluster
   namespace: piraeus-datastore
-spec: {}
+spec:
+  # Both values match what the cluster already runs, so applying these is a
+  # no-op today — they are pinned so a future Piraeus/LINSTOR upgrade can't
+  # silently change them.
+  properties:
+    # Volumes are created with placementCount 2 (see storage-class.yaml). With
+    # quorum=majority a 2-member volume needs *both* members, so losing one node
+    # suspends I/O. This setting makes LINSTOR add a third, diskless voter
+    # (a "TieBreaker", typically on nuc-101, which holds no storage pool) so a
+    # single node can go down without losing quorum.
+    #
+    # It fires at resource *creation* only and never backfills: when nuc-102 was
+    # removed from LINSTOR (2026-09-15), 13 pre-existing volumes that had been
+    # relying on it as their third member silently dropped to 2 and had to have
+    # diskless voters added by hand. Unlike the properties below, nothing else
+    # declares this — it is a bare LINSTOR default.
+    - name: DrbdOptions/auto-add-quorum-tiebreaker
+      value: "True"
+    # What happens when a volume does lose quorum. suspend-io blocks I/O (pods
+    # hang) rather than returning errors, which is the safe choice for the
+    # Postgres instances but means a quorum loss looks like a freeze, not a
+    # crash. Set by the piraeus-operator as a default; pinned here to document
+    # the failure mode we rely on.
+    - name: DrbdOptions/Resource/on-no-quorum
+      value: suspend-io
