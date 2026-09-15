@@ -66,9 +66,9 @@ module "talos" {
   cluster_name = "production"
   cluster_vip  = "192.168.0.100"
 
-  talos_version      = "v1.12"
-  talos_version_full = "v1.12.4"
-  kubernetes_version = "v1.35.0"
+  talos_version      = "v1.13"
+  talos_version_full = "v1.13.10"
+  kubernetes_version = "v1.36.4"
 
   # waits for all nodes to be healthy after apply (blocks if a node is down)
   health_check_enabled = false

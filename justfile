@@ -2,7 +2,7 @@ environment := "production"
 context     := "homelab"
 
 node-1 := "192.168.0.101"
-node-2 := "192.168.0.102"
+# node-2 := "192.168.0.102"
 node-3 := "192.168.0.103"
 node-4 := "192.168.0.104"
 nodes := node-1 + " " + node-2 + " " + node-3 + " " + node-4
@@ -44,10 +44,11 @@ rm-kubeconfig:
 # apply and upgrade node images (needs machine full reboot)
 upgrade-nodes:
     #!/usr/bin/env bash
+    set -euo pipefail
     IMAGE=$(cd tofu/{{ environment }} && tofu output -raw installer_image)
     for node in {{ nodes }}; do
       echo "Upgrading $node..."
-      talosctl -n $node upgrade --image "$IMAGE" --wait
+      talosctl --context {{ context }} -n "$node" upgrade --image "$IMAGE" --wait
       echo "$node upgraded, waiting for health..."
       sleep 10
     done
