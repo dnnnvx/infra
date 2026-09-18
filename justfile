@@ -5,7 +5,7 @@ node-1 := "192.168.0.101"
 # node-2 := "192.168.0.102"
 node-3 := "192.168.0.103"
 node-4 := "192.168.0.104"
-nodes := node-1 + " " + node-2 + " " + node-3 + " " + node-4
+nodes := node-1  + " " + node-3 + " " + node-4
 
 # print available commands
 default:

@@ -76,10 +76,10 @@ endpoints:
 
   - name: Silverbullet
     group: apps
-    url: http://silverbullet.silverbullet.svc.cluster.local:3000
+    url: http://silverbullet.silverbullet.svc.cluster.local:3000/.instance
     interval: 1m
     conditions:
-      - "[STATUS] < 500"
+      - "[STATUS] == 200"
     alerts:
       - type: telegram
         send-on-resolved: true
