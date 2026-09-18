@@ -41,13 +41,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
-            # 2.11 still honours a /space mount and would stay in legacy
-            # single-space mode. Park the old volume somewhere neutral so /data
-            # is the only space root the server sees, then copy the contents
-            # into the space folder the setup wizard creates.
-            - name: space
-              mountPath: /old-space
-              readOnly: true
           livenessProbe:
             httpGet:
               path: /.instance
@@ -64,6 +57,3 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: data
-        - name: space
-          persistentVolumeClaim:
-            claimName: space

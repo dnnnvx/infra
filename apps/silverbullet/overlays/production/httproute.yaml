@@ -12,5 +12,5 @@ spec:
     - notes.casasulgorgo.net
   rules:
     - backendRefs:
-        - name: oauth2-proxy
-          port: 4180
+        - name: silverbullet
+          port: 3000
