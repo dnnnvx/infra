@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: silverbullet
-          image: ghcr.io/silverbulletmd/silverbullet:2.10.0
+          image: ghcr.io/silverbulletmd/silverbullet:2.11.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -39,8 +39,15 @@ spec:
             - name: PGID
               value: "1000"
           volumeMounts:
+            - name: data
+              mountPath: /data
+            # 2.11 still honours a /space mount and would stay in legacy
+            # single-space mode. Park the old volume somewhere neutral so /data
+            # is the only space root the server sees, then copy the contents
+            # into the space folder the setup wizard creates.
             - name: space
-              mountPath: /space
+              mountPath: /old-space
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /
@@ -52,6 +59,9 @@ spec:
               port: http
             initialDelaySeconds: 5
       volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
         - name: space
           persistentVolumeClaim:
             claimName: space
