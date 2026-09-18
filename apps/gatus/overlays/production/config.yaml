@@ -86,10 +86,10 @@ endpoints:
 
   - name: Silverbullet (external)
     group: apps
-    url: https://notes.casasulgorgo.net
+    url: https://notes.casasulgorgo.net/.instance
     interval: 5m
     conditions:
-      - "[STATUS] < 500"
+      - "[STATUS] == 200"
     alerts:
       - type: telegram
         send-on-resolved: true
