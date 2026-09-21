@@ -82,6 +82,25 @@ sync:
     flux reconcile kustomization config
     flux reconcile kustomization apps
 
+# rewrite pinned versions in-place to the latest available, then show the diff
+updates:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+      echo "Working tree is dirty — commit or stash first, so the diff below is only Renovate's."
+      exit 1
+    fi
+    # local platform edits files but never branches or pushes; review, then commit
+    LOG_LEVEL=warn renovate --platform=local --dry-run=false
+    echo
+    if git diff --quiet; then
+      echo "Everything is up to date."
+    else
+      git --no-pager diff --stat
+      echo
+      echo "Review with 'git diff', then 'just validate' before committing."
+    fi
+
 # validate all kustomize overlays and manifests
 validate:
     #!/usr/bin/env bash

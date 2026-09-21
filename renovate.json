@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "ignorePaths": ["**/.terraform/**"],
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^apps/.+\\.ya?ml$/",
+      "/^infrastructure/.+\\.ya?ml$/",
+      "/^config/.+\\.ya?ml$/"
+    ]
+  },
+  "flux": {
+    "managerFilePatterns": [
+      "/^infrastructure/.+\\.ya?ml$/",
+      "/^config/.+\\.ya?ml$/",
+      "/^clusters/.+\\.ya?ml$/"
+    ]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Remote kustomize bases pinned in a release-asset URL (gateway-api, piraeus-operator). The built-in kustomize manager only understands git-style refs, not these.",
+      "managerFilePatterns": ["/(^|/)kustomization\\.ya?ml$/"],
+      "matchStrings": [
+        "https://github\\.com/(?<depName>[^/\\s]+/[^/\\s]+)/releases/download/(?<currentValue>v[^/\\s]+)/"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Cilium gates the k8s version and needs a matching Gateway API version, so never let them move independently. Check Cilium's e2e k8s matrix before taking a minor.",
+      "groupName": "cilium and gateway-api",
+      "matchPackageNames": [
+        "cilium",
+        "quay.io/cilium/cilium",
+        "kubernetes-sigs/gateway-api"
+      ]
+    },
+    {
+      "description": "zenika/alpine-chrome only publishes major tags, so treat 124 as the release granularity rather than chasing a patch that does not exist.",
+      "matchPackageNames": ["zenika/alpine-chrome"],
+      "versioning": "loose"
+    }
+  ]
+}

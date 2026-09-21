@@ -53,6 +53,7 @@
             sops
             age
             mdbook
+            renovate
           ];
         };
       }
