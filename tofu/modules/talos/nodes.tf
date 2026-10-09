@@ -66,6 +66,8 @@ locals {
         machine = {
           sysctls = {
             "kernel.kptr_restrict" = "2"
+            # Rootless BuildKit (Tekton buildkit Task) needs user namespaces; Talos defaults to 0
+            "user.max_user_namespaces" = "11255"
           }
         }
       }),
