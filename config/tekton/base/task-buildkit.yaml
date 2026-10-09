@@ -67,7 +67,7 @@ spec:
         names=""
         for tag in $(params.tags); do
           [ -n "$names" ] && names="$names,"
-          names="$names$(params.image):$tag"
+          names="$names""$(params.image):$tag"
         done
         # zot is reached over plain HTTP on its in-cluster Service, hence registry.insecure
         buildctl-daemonless.sh build \
