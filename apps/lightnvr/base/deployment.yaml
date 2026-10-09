@@ -28,10 +28,10 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-          volumeMounts:
-            - name: data
-              mountPath: /var/lib/lightnvr/data
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: lightnvr-data
+      #     volumeMounts:
+      #       - name: data
+      #         mountPath: /var/lib/lightnvr/data
+      # volumes:
+      #   - name: data
+      #     persistentVolumeClaim:
+      #       claimName: lightnvr-data
