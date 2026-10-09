@@ -86,7 +86,7 @@ sync:
 renovate:
     #!/usr/bin/env bash
     set -euo pipefail
-    LOG_LEVEL=debug LOG_FORMAT=json renovate --platform=local 2>/dev/null > /tmp/renovate.json
+    RENOVATE_GITHUB_COM_TOKEN=$(gh auth token) LOG_LEVEL=debug LOG_FORMAT=json renovate --platform=local 2>/dev/null > /tmp/renovate.json
     jq -r 'select(.msg=="packageFiles with updates")
       | .config | to_entries[] | .value[]
       | .packageFile as $f | .deps[] | select((.updates|length)>0)
