@@ -77,3 +77,22 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+---
+# Dashboard UI: reachable through the Gateway only (tekton.home, LAN). Egress
+# (DNS, kube-apiserver) is already covered by the namespace policy above.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: dashboard
+  namespace: tekton-pipelines
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: tekton-dashboard
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "9097"
+              protocol: TCP

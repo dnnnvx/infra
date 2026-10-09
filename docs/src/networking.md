@@ -8,6 +8,7 @@
 | `hubble.home` | Hubble UI      |
 | `flux.home`   | Flux Operator  |
 | `nvr.home`    | LightNVR       |
+| `tekton.home` | Tekton Dashboard (read-only) |
 
 All internal services share a single Cilium Gateway at `192.168.0.200` (HTTP, port 80).
 DNS is handled by AdGuard Home (`192.168.0.201`), configured via DHCP on the router. Each `*.home` hostname resolves to `192.168.0.200`.

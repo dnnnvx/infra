@@ -35,7 +35,7 @@ so they don't clutter the real repositories.
 
 | Path | What |
 |------|------|
-| `infrastructure/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner: upstream release manifests, versions bumped by Renovate |
+| `infrastructure/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Dashboard (read-only, `tekton.home`): upstream release manifests, versions bumped by Renovate |
 | `infrastructure/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
 | `config/tekton/base/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor |
 | `config/tekton/overlays/production/` | Webhook HTTPRoute, push credentials, webhook HMAC secret |
