@@ -4,6 +4,6 @@ namespace: kube-system
 resources:
   # controller requires the TLSRoute CRD, which is experimental-only
   # Cilium 1.20 requires Gateway API >= v1.6.1
-  - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.2/experimental-install.yaml
+  - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.3/experimental-install.yaml
   - repository.yaml
   - release.yaml
