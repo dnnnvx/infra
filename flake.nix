@@ -40,9 +40,9 @@
             (writeShellScriptBin "k" ''exec kubectl "$@"'')
             opentofu
             kubectl
-            k9s
             kubie
             talosctl
+            just
             kubernetes-helm
             kustomize
             kubeconform
