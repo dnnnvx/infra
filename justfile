@@ -83,23 +83,16 @@ sync:
     flux reconcile kustomization apps
 
 # rewrite pinned versions in-place to the latest available, then show the diff
-updates:
+renovate:
     #!/usr/bin/env bash
     set -euo pipefail
-    if ! git diff --quiet || ! git diff --cached --quiet; then
-      echo "Working tree is dirty — commit or stash first, so the diff below is only Renovate's."
-      exit 1
-    fi
-    # local platform edits files but never branches or pushes; review, then commit
-    RENOVATE_GITHUB_COM_TOKEN=$(gh auth token) LOG_LEVEL=info renovate --platform=local
-    echo
-    if git diff --quiet; then
-      echo "Everything is up to date."
-    else
-      git --no-pager diff --stat
-      echo
-      echo "Review with 'git diff', then 'just validate' before committing."
-    fi
+    LOG_LEVEL=debug LOG_FORMAT=json renovate --platform=local 2>/dev/null > /tmp/renovate.json
+    jq -r 'select(.msg=="packageFiles with updates")
+      | .config | to_entries[] | .value[]
+      | .packageFile as $f | .deps[] | select((.updates|length)>0)
+      | . as $d | .updates[]
+      | [$f, $d.depName, $d.currentValue, .newValue, .updateType] | @tsv' \
+      /tmp/renovate.json | column -t
 
 # validate all kustomize overlays and manifests
 validate:

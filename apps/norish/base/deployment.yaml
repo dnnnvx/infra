@@ -23,7 +23,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: norish
-          image: norishapp/norish:v0.19.1-beta
+          image: norishapp/norish:v0.24.0-beta
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
