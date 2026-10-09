@@ -18,6 +18,7 @@ terraform.rc
 
 # *.dot
 .*
+!.gitignore
 !.sourceignore
 !.sops.yaml
 !.envrc
