@@ -1,0 +1,13 @@
+# Finished PipelineRuns keep their volumeClaimTemplate PVCs alive, so prune
+# them aggressively instead of the upstream default (keep 100, no TTL)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tekton-pruner-default-spec
+  namespace: tekton-pipelines
+data:
+  global-config: |-
+    enforcedConfigLevel: global
+    ttlSecondsAfterFinished: 604800
+    successfulHistoryLimit: 5
+    failedHistoryLimit: 5

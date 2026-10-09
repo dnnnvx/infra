@@ -1,0 +1,28 @@
+# Rewrites `# {"$imagepolicy": ...}` markers under ./apps when an ImagePolicy
+# picks a newer tag, then pushes the commit to main. Needs push access with the
+# flux-system SSH key.
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: apps
+  namespace: flux-system
+spec:
+  interval: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxcdbot
+        email: fluxcdbot@casasulgorgo.net
+      messageTemplate: |
+        chore(images): update {{ range .Changed.Changes }}{{ .OldValue }} → {{ .NewValue }} {{ end }}
+    push:
+      branch: main
+  update:
+    path: ./apps
+    strategy: Setters

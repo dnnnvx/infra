@@ -27,6 +27,14 @@ spec:
             # SSH git sync to tangled.org
             - port: "22"
               protocol: TCP
+    # image-reflector-controller scans zot over its in-cluster Service
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: zot
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
 ---
 # Flux web UI (flux-operator)
 apiVersion: cilium.io/v2

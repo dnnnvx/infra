@@ -1,0 +1,41 @@
+# Public UI only (login via Pocket-ID). Image traffic never goes through the
+# Gateway: Tekton, Flux and containerd all talk to the in-cluster Service, so the
+# distribution API (/v2/<repo>/...) is bounced here; the UI only needs the /v2/
+# status ping and the /v2/_zot/ extensions (search, mgmt, userprefs).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: zot
+  namespace: zot
+spec:
+  parentRefs:
+    - name: homelab
+      namespace: kube-system
+      sectionName: https
+  hostnames:
+    - registry.casasulgorgo.net
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /v2/
+        - path:
+            type: PathPrefix
+            value: /v2/_zot/
+      backendRefs:
+        - name: zot
+          port: 5000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /v2/
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /
+            statusCode: 302
+    - backendRefs:
+        - name: zot
+          port: 5000

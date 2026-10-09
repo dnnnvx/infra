@@ -7,3 +7,5 @@ resources:
   - ../../../infrastructure/metrics-server/overlays/production
   - ../../../infrastructure/piraeus/overlays/production
   - ../../../infrastructure/cnpg/overlays/production
+  - ../../../infrastructure/tekton/overlays/production
+  - ../../../infrastructure/zot/overlays/production

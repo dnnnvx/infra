@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: buildkit
+  namespace: tekton-ci
+spec:
+  description: Builds a Dockerfile with rootless BuildKit and pushes it under several tags, with a registry build cache.
+  params:
+    - name: image
+      type: string
+      description: Image repository to push to, without tag.
+    - name: tags
+      type: string
+      description: Space-separated tags to push (e.g. "<sha> latest production").
+    - name: cache-image
+      type: string
+      description: Image reference used for the registry build cache.
+    - name: context
+      type: string
+      default: source
+      description: Build context, relative to the source workspace.
+    - name: dockerfile
+      type: string
+      default: Dockerfile
+      description: Dockerfile path, relative to the context.
+  workspaces:
+    - name: source
+      readOnly: true
+  results:
+    - name: digest
+  volumes:
+    - name: buildkit-state
+      emptyDir: {}
+    - name: registry-auth
+      secret:
+        secretName: registry-push
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+  steps:
+    - name: build-and-push
+      image: moby/buildkit:v0.34.0-rootless
+      workingDir: $(workspaces.source.path)/$(params.context)
+      env:
+        # No nested PID namespace: needed to run without privileged
+        - name: BUILDKITD_FLAGS
+          value: --oci-worker-no-process-sandbox
+        - name: DOCKER_CONFIG
+          value: /docker-config
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: Unconfined
+        appArmorProfile:
+          type: Unconfined
+      volumeMounts:
+        - name: buildkit-state
+          mountPath: /home/user/.local/share/buildkit
+        - name: registry-auth
+          mountPath: /docker-config
+          readOnly: true
+      script: |
+        #!/bin/sh
+        set -eu
+        # Avoid dollar-brace syntax here: Flux post-build substitution would eat it
+        names=""
+        for tag in $(params.tags); do
+          [ -n "$names" ] && names="$names,"
+          names="$names$(params.image):$tag"
+        done
+        # zot is reached over plain HTTP on its in-cluster Service, hence registry.insecure
+        buildctl-daemonless.sh build \
+          --frontend dockerfile.v0 \
+          --local context=. \
+          --local dockerfile="$(dirname "$(params.dockerfile)")" \
+          --opt filename="$(basename "$(params.dockerfile)")" \
+          --import-cache "type=registry,ref=$(params.cache-image),registry.insecure=true" \
+          --export-cache "type=registry,ref=$(params.cache-image),mode=max,image-manifest=true,oci-mediatypes=true,registry.insecure=true" \
+          --output "type=image,\"name=$names\",push=true,registry.insecure=true" \
+          --metadata-file /tmp/metadata.json
+        sed -n 's/.*"containerimage.digest": *"\([^"]*\)".*/\1/p' /tmp/metadata.json | tr -d '\n' > "$(results.digest.path)"
+        echo "Pushed $names @ $(cat "$(results.digest.path)")"

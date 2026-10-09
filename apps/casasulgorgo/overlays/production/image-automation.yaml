@@ -1,0 +1,31 @@
+# Lives in flux-system: ImageUpdateAutomation only sees policies in its own namespace.
+# Tekton moves the `production` tag on every main build; Flux follows its
+# digest and pins it in kustomization.yaml, so each rollout is a git commit.
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: casasulgorgo-web
+  namespace: flux-system
+spec:
+  image: zot.zot.svc.cluster.local:5000/casasulgorgo/web
+  interval: 5m
+  insecure: true
+  secretRef:
+    name: zot-pull
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: casasulgorgo-web
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: casasulgorgo-web
+  filterTags:
+    pattern: '^production$'
+  policy:
+    alphabetical:
+      order: asc
+  # The tag is mutable: re-check its digest on every interval
+  digestReflectionPolicy: Always
+  interval: 5m

@@ -5,6 +5,7 @@
 - [Hardware](./hardware.md)
 - [Networking](./networking.md)
 - [Storage](./storage.md)
+- [CI/CD](./cicd.md)
 - [OpenTofu](./opentofu.md)
 - [Secrets](./secrets.md)
 - [Security](./security.md)

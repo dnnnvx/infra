@@ -5,3 +5,4 @@ resources:
   - ../../../config/cilium/overlays/production
   - ../../../config/flux/overlays/production
   - ../../../config/piraeus/overlays/production
+  - ../../../config/tekton/overlays/production

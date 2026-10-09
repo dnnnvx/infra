@@ -1,0 +1,46 @@
+# Push to main on tangled.org/casasulgorgo.net/casasulgorgo → casasulgorgo/web
+# tagged <commit sha>, latest and production (main is the production branch).
+# Everything except the image name comes from the payload, which is trusted
+# once the tangled interceptor has verified its HMAC signature.
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: casasulgorgo-web
+  namespace: tekton-ci
+  labels:
+    ci.casasulgorgo.net/eventlistener: tangled
+spec:
+  interceptors:
+    - name: verify-signature
+      ref:
+        name: tangled
+        kind: ClusterInterceptor
+    - name: filter
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: filter
+          value: >-
+            header.match('X-Tangled-Event', 'push') &&
+            body.repository.name == 'casasulgorgo' &&
+            body.ref == 'refs/heads/main' &&
+            body.after.matches('^[0-9a-f]{40}$') &&
+            body.after != '0000000000000000000000000000000000000000'
+        - name: overlays
+          value:
+            - key: tags
+              expression: "body.after + ' latest production'"
+  bindings:
+    - name: project
+      value: $(body.repository.name)
+    - name: image-name
+      value: web
+    - name: repo-url
+      value: $(body.repository.clone_url)
+    - name: revision
+      value: $(body.after)
+    - name: tags
+      value: $(extensions.tags)
+  template:
+    ref: build-image

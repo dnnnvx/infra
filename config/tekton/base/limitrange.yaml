@@ -1,0 +1,19 @@
+# Steps declare no resources; cap them so a runaway build can't starve the
+# apps on the same node (Tekton spreads these across a TaskRun's steps)
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: build-limits
+  namespace: tekton-ci
+spec:
+  limits:
+    - type: Container
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: "2"
+        memory: 2Gi
+      max:
+        cpu: "3"
+        memory: 4Gi

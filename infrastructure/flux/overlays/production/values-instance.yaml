@@ -1,4 +1,12 @@
 instance:
+  # Defaults plus image automation (scan zot for new tags, commit them back to git)
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+    - image-reflector-controller
+    - image-automation-controller
   sync:
     interval: 30m
     kind: GitRepository

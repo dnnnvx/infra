@@ -1,0 +1,64 @@
+# Images are <registry>/<project>/<image>, e.g. zot.zot.svc.cluster.local:5000/casasulgorgo/web.
+# Build caches live apart under <registry>/cache/<project>/<image> so they
+# don't show up as tags of the real image.
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: build-image
+  namespace: tekton-ci
+spec:
+  params:
+    - name: registry
+      default: zot.zot.svc.cluster.local:5000
+    - name: project
+    - name: image-name
+    - name: repo-url
+    - name: revision
+    - name: tags
+    - name: dockerfile
+      default: Dockerfile
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: $(tt.params.project)-$(tt.params.image-name)-
+        labels:
+          ci.casasulgorgo.net/project: $(tt.params.project)
+          ci.casasulgorgo.net/image: $(tt.params.image-name)
+      spec:
+        pipelineRef:
+          name: build-image
+        params:
+          - name: repo-url
+            value: $(tt.params.repo-url)
+          - name: revision
+            value: $(tt.params.revision)
+          - name: image
+            value: $(tt.params.registry)/$(tt.params.project)/$(tt.params.image-name)
+          - name: tags
+            value: $(tt.params.tags)
+          - name: cache-image
+            value: $(tt.params.registry)/cache/$(tt.params.project)/$(tt.params.image-name):buildcache
+          - name: dockerfile
+            value: $(tt.params.dockerfile)
+        taskRunTemplate:
+          serviceAccountName: pipeline-runner
+          podTemplate:
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              runAsGroup: 1000
+              fsGroup: 1000
+              seccompProfile:
+                type: RuntimeDefault
+        workspaces:
+          # Deleted with the PipelineRun (see the Tekton pruner config)
+          - name: source
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: piraeus-scratch
+                resources:
+                  requests:
+                    storage: 2Gi

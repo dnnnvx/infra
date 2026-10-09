@@ -1,0 +1,27 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: casasulgorgo
+  namespace: casasulgorgo
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: casasulgorgo
+  ingress:
+    - fromEntities:
+        - ingress
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+  # Static landing page: no egress beyond DNS
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP

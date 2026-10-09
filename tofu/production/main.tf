@@ -1,5 +1,19 @@
 terraform {
-  backend "s3" {}
+  backend "s3" {
+    bucket                      = "tofu-state"
+    encrypt                     = true
+    endpoint                    = "https://997f91bd76e7456df317ac9ac3fff92b.r2.cloudflarestorage.com"
+    key                         = "homelab/terraform.tfstate"
+    region                      = "auto"
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
+    use_path_style              = true
+    # access_key                  = "<redacted>"
+    # secret_key                  = "<redacted>"
+  }
 
   encryption {
     key_provider "pbkdf2" "this" {
@@ -55,6 +69,16 @@ provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }
 
+locals {
+  # Talos default service CIDR (kube-apiserver --service-cluster-ip-range).
+  # zot gets a pinned ClusterIP from the static band at its start, because
+  # containerd on the nodes can't resolve *.svc.cluster.local. Single source of
+  # truth: fed to the Talos registry mirror below and, via flux-substitutions,
+  # to the zot Service (ZOT_CLUSTER_IP in infrastructure/zot/overlays/production/values.yaml).
+  service_cidr   = "10.96.0.0/12"
+  zot_cluster_ip = cidrhost(local.service_cidr, 50)
+}
+
 data "external" "tangled_known_hosts" {
   program = ["sh", "-c", "ssh-keyscan tangled.org 2>/dev/null | grep -v '^#' | jq -Rsc '{known_hosts: .}'"]
 }
@@ -96,6 +120,22 @@ module "talos" {
           ]
         }
       }
+    }),
+    # Images are referenced by zot's in-cluster name, which the node can't
+    # resolve: point containerd at zot's pinned ClusterIP over plain HTTP.
+    yamlencode({
+      apiVersion   = "v1alpha1"
+      kind         = "RegistryMirrorConfig"
+      name         = "zot.zot.svc.cluster.local:5000"
+      endpoints    = [{ url = "http://${local.zot_cluster_ip}:5000" }]
+      skipFallback = true
+    }),
+    yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "RegistryAuthConfig"
+      name       = "${local.zot_cluster_ip}:5000"
+      username   = "puller"
+      password   = var.zot_pull_password
     }),
   ]
 
@@ -162,7 +202,7 @@ module "cloudflare" {
   cloudflare_account_id = var.cloudflare_account_id
   zone_name             = "casasulgorgo.net"
   cloudflare_api_token  = var.cloudflare_api_token
-  cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "romm"]
+  cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "romm", "ci", "registry"]
   r2_buckets            = { "tofu-state" = {} }
   atproto_did           = local.atproto_did
 }
@@ -197,7 +237,7 @@ module "k8s" {
     {
       name      = "flux-substitutions"
       namespace = "flux-system"
-      data      = var.flux_substitutions
+      data      = merge(var.flux_substitutions, { ZOT_CLUSTER_IP = local.zot_cluster_ip })
     },
     {
       name      = "cloudflare-api-token"

@@ -1,0 +1,13 @@
+# Single replica on the SSD pool, for throwaway volumes (CI workspaces):
+# no point paying DRBD replication for a checkout that lives a few minutes
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: piraeus-scratch
+provisioner: linstor.csi.linbit.com
+parameters:
+  linstor.csi.linbit.com/storagePool: file-thin
+  linstor.csi.linbit.com/placementCount: "1"
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete

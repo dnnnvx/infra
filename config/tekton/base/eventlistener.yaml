@@ -1,0 +1,12 @@
+# Picks up every Trigger labelled for it, so each repo is just one Trigger file
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: tangled
+  namespace: tekton-ci
+spec:
+  serviceAccountName: tekton-triggers
+  triggerSelector:
+    labelSelector:
+      matchLabels:
+        ci.casasulgorgo.net/eventlistener: tangled

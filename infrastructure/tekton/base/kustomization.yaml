@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://github.com/tektoncd/pipeline/releases/download/v1.17.0/release.yaml
+  - https://github.com/tektoncd/triggers/releases/download/v0.37.1/release.yaml
+  - https://github.com/tektoncd/triggers/releases/download/v0.37.1/interceptors.yaml
+  - https://github.com/tektoncd/pruner/releases/download/v0.4.3/release.yaml
+  - ciliumnetworkpolicy.yaml

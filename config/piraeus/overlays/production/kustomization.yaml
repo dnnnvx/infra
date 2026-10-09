@@ -8,3 +8,4 @@ resources:
   - storage-class.yaml
   - storage-pool-hdd.yaml
   - storage-class-hdd.yaml
+  - storage-class-scratch.yaml

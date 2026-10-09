@@ -1,0 +1,51 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: git-clone
+  namespace: tekton-ci
+spec:
+  description: Shallow-clones a single revision into a subdirectory of the source workspace.
+  params:
+    - name: url
+      type: string
+    - name: revision
+      type: string
+      description: Commit SHA (or branch/tag) to fetch.
+    - name: subdirectory
+      type: string
+      default: source
+      description: Clone target inside the workspace (the volume root has lost+found).
+  workspaces:
+    - name: source
+  results:
+    - name: commit
+    - name: short-commit
+    - name: commit-timestamp
+      description: Committer date as unix seconds, used to build sortable image tags.
+  steps:
+    - name: clone
+      image: alpine/git:v2.54.0
+      env:
+        - name: HOME
+          value: /tmp
+        # The volume root is owned by root (fsGroup only grants group access)
+        - name: GIT_CONFIG_COUNT
+          value: "1"
+        - name: GIT_CONFIG_KEY_0
+          value: safe.directory
+        - name: GIT_CONFIG_VALUE_0
+          value: "*"
+      script: |
+        #!/bin/sh
+        set -eu
+        dir="$(workspaces.source.path)/$(params.subdirectory)"
+        mkdir -p "$dir"
+        cd "$dir"
+        git init -q
+        git remote add origin "$(params.url)"
+        git fetch -q --depth 1 origin "$(params.revision)"
+        git -c advice.detachedHead=false checkout -q FETCH_HEAD
+        printf %s "$(git rev-parse HEAD)" > "$(results.commit.path)"
+        printf %s "$(git rev-parse --short=7 HEAD)" > "$(results.short-commit.path)"
+        printf %s "$(git log -1 --format=%ct)" > "$(results.commit-timestamp.path)"
+        echo "Checked out $(git rev-parse HEAD)"

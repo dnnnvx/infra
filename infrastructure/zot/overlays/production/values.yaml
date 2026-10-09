@@ -1,0 +1,90 @@
+service:
+  type: ClusterIP
+  port: 5000
+  # Pinned so containerd (Talos registry mirror) can reach it from the host.
+  # Substituted by Flux from the tofu-managed flux-substitutions Secret
+  # (local.zot_cluster_ip in tofu/production/main.tf).
+  clusterIP: ${ZOT_CLUSTER_IP}
+
+# RWO volume: a rolling update would deadlock on the PVC
+strategy:
+  type: Recreate
+
+persistence: true
+pvc:
+  create: true
+  storage: 20Gi
+  storageClassName: piraeus
+
+# zot-auth is SOPS-encrypted in secrets.yaml (htpasswd, OIDC client, session keys).
+# Machine users: tekton (push), puller (containerd on the nodes + Flux tag scans)
+externalSecrets:
+  - secretName: zot-auth
+    mountPath: /secret/zot
+
+mountConfig: true
+configFiles:
+  config.json: |-
+    {
+      "distSpecVersion": "1.1.1",
+      "storage": {
+        "rootDirectory": "/var/lib/registry",
+        "dedupe": true,
+        "gc": true,
+        "gcDelay": "1h",
+        "gcInterval": "24h",
+        "retention": {
+          "delay": "24h",
+          "policies": [
+            {
+              "repositories": ["**"],
+              "deleteReferrers": true,
+              "deleteUntagged": true,
+              "keepTags": [{ "mostRecentlyPushedCount": 10 }]
+            }
+          ]
+        }
+      },
+      "http": {
+        "address": "0.0.0.0",
+        "port": "5000",
+        "externalUrl": "https://registry.casasulgorgo.net",
+        "realm": "zot",
+        "auth": {
+          "htpasswd": { "path": "/secret/zot/htpasswd" },
+          "sessionKeysFile": "/secret/zot/session-keys.json",
+          "apikey": true,
+          "openid": {
+            "providers": {
+              "oidc": {
+                "name": "Pocket ID",
+                "issuer": "https://auth.casasulgorgo.net",
+                "credentialsFile": "/secret/zot/oidc-credentials.json",
+                "scopes": ["openid", "profile", "email", "groups"],
+                "claimMapping": { "username": "preferred_username" }
+              }
+            }
+          },
+          "failDelay": 5
+        },
+        "accessControl": {
+          "repositories": {
+            "**": {
+              "defaultPolicy": ["read"],
+              "policies": [
+                { "users": ["tekton"], "actions": ["read", "create", "update"] }
+              ]
+            }
+          },
+          "adminPolicy": {
+            "groups": ["registry_admins"],
+            "actions": ["read", "create", "update", "delete"]
+          }
+        }
+      },
+      "log": { "level": "info" },
+      "extensions": {
+        "search": { "enable": true },
+        "ui": { "enable": true }
+      }
+    }

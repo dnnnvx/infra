@@ -18,6 +18,11 @@ DNS is handled by AdGuard Home (`192.168.0.201`), configured via DHCP on the rou
 |-------------------------|----------------|
 | `ha.casasulgorgo.net`   | Home Assistant |
 | `auth.casasulgorgo.net` | Pocket-ID      |
+| `casasulgorgo.net`      | Landing page   |
+| `ci.casasulgorgo.net`   | Tekton EventListener (Tangled webhooks) |
+| `registry.casasulgorgo.net` | zot UI only (no push/pull) |
+
+Image traffic never leaves the cluster: everything uses `zot.zot.svc.cluster.local:5000`, and nodes reach it through a Talos registry mirror on a pinned ClusterIP (see [CI/CD](./cicd.md)).
 
 External access via Cloudflare proxy (orange cloud) → port-forward 443 → Cilium Gateway (HTTPS, port 443).
 TLS terminated at the Gateway using a Let's Encrypt wildcard cert (`*.casasulgorgo.net`) issued via DNS-01.

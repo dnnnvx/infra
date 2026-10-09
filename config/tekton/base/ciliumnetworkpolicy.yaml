@@ -1,0 +1,72 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: tekton-ci
+spec:
+  endpointSelector: {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # EventListener creates PipelineRuns
+    - toEntities:
+        - kube-apiserver
+    # EventListener → interceptors (core: CEL; custom: tangled signature check)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: tekton-pipelines
+      toPorts:
+        - ports:
+            - port: "8443"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+    # BuildKit → zot (push image + build cache)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: zot
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
+    # git clone over HTTPS, base images + Dockerfile frontend from public
+    # registries. Public internet only: builds run arbitrary Dockerfile RUN
+    # steps, so the LAN (router, nodes, other devices) stays off-limits.
+    - toCIDRSet:
+        - cidr: 0.0.0.0/0
+          except:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+            - 100.64.0.0/10
+            - 169.254.0.0/16
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# Only the EventListener receives traffic (Tangled webhooks via the Gateway)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-eventlistener
+  namespace: tekton-ci
+spec:
+  endpointSelector:
+    matchLabels:
+      eventlistener: tangled
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

@@ -8,6 +8,7 @@ Piraeus provides distributed storage via LINSTOR + DRBD, backed by the Talos nod
 |----------------|---------------|----------|---------------|---------------------------------|
 | `piraeus`      | `file-thin`   | 2        | nuc-103/104   | Default — replicated app data   |
 | `piraeus-hdd`  | `lvm-thin-hdd`| 1        | nuc-102 only  | Bulk data — recordings, logs    |
+| `piraeus-scratch` | `file-thin` | 1      | nuc-103/104   | Throwaway — CI workspaces       |
 
 - **`piraeus`**: File-backed thin provisioning on NVMe/eMMC. 2 replicas across nuc-103 and nuc-104 via DRBD. No LVM needed — LINSTOR creates sparse files under `/var/lib/linstor-pool/` on the OS disk. Good for databases, app state, anything that needs redundancy.
 - **`piraeus-hdd`**: LVM thin provisioning on the 500GB HDD in nuc-102. Single replica (no replication). Uses a dedicated LVM Volume Group on the raw block device (`/dev/sda`), giving the HDD its own I/O path separate from the NVMe boot disk. Meant for large, replaceable data like NVR recordings.
