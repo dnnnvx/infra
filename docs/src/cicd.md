@@ -17,7 +17,7 @@ Flux ImageUpdateAutomation ─▶ commits the new digest to apps/** on main ─�
 
 ## Images and tags
 
-Images are `<project>/<image>`, where project is the Tangled repo name:
+Images are `<project>/<image>`, where project is set in the app's Trigger (the Tangled repo itself may be called anything, e.g. `web`):
 `zot.zot.svc.cluster.local:5000/casasulgorgo/web`.
 
 | Tag | Meaning |

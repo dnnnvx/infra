@@ -1,4 +1,4 @@
-# Push to main on tangled.org/casasulgorgo.net/casasulgorgo → casasulgorgo/web
+# Push to main on the Tangled repo "web" → casasulgorgo/web
 # tagged <commit sha>, latest and production (main is the production branch).
 # Everything except the image name comes from the payload, which is trusted
 # once the tangled interceptor has verified its HMAC signature.
@@ -23,7 +23,7 @@ spec:
         - name: filter
           value: >-
             header.match('X-Tangled-Event', 'push') &&
-            body.repository.name == 'casasulgorgo' &&
+            body.repository.name == 'web' &&
             body.ref == 'refs/heads/main' &&
             body.after.matches('^[0-9a-f]{40}$') &&
             body.after != '0000000000000000000000000000000000000000'
@@ -33,7 +33,7 @@ spec:
               expression: "body.after + ' latest production'"
   bindings:
     - name: project
-      value: $(body.repository.name)
+      value: casasulgorgo
     - name: image-name
       value: web
     - name: repo-url
