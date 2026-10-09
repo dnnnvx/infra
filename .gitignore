@@ -1,16 +1,5 @@
 docs/book/
-.DS_Store
-._*
-
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-.history/
 bin/
-.env*
 
 crash.log
 crash.*.log
@@ -18,19 +7,16 @@ crash.*.log
 .terraform/
 *.tfstate
 *.tfstate.*
-
 *.tfvars
 *.tfvars.json
-
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
-
-.terraform.tfstate.lock.info
 *tfplan*
-
-.terraformrc
 terraform.rc
 
 # *.dot
+.*
+!.sourceignore
+!.sops.yaml
