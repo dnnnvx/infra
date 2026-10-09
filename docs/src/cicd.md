@@ -38,14 +38,15 @@ so they don't clutter the real repositories.
 | `infrastructure/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner: upstream release manifests, versions bumped by Renovate |
 | `infrastructure/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
 | `config/tekton/base/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor |
-| `config/tekton/overlays/production/` | One `Trigger` per image, webhook HTTPRoute, push credentials, webhook HMAC secret |
+| `config/tekton/overlays/production/` | Webhook HTTPRoute, push credentials, webhook HMAC secret |
 | `config/flux/overlays/production/` | `ImageUpdateAutomation` (writes digests back to git), `zot-pull` scan credentials |
+| `apps/<app>/overlays/production/ci-trigger.yaml` | The app's `Trigger` (in `tekton-ci`; repo filter, image name) |
 | `apps/<app>/overlays/production/image-automation.yaml` | ImageRepository + ImagePolicy for that app |
 | `tofu/production/main.tf` | Talos `RegistryMirrorConfig` + `RegistryAuthConfig` so containerd can pull from zot |
 
 ## Adding a repo/image
 
-1. Copy `config/tekton/overlays/production/trigger-casasulgorgo.yaml`, then change the repo-name filter and `image-name`.
+1. Copy `apps/casasulgorgo/overlays/production/ci-trigger.yaml` into the app overlay (list it in `kustomization.yaml`), then change the repo-name filter and `image-name`.
 2. In the app overlay, use a kustomize `images:` entry with a `digest:` marker
    `# {"$imagepolicy": "flux-system:<policy>:digest"}`, and add an ImageRepository + ImagePolicy (copy casasulgorgo's).
 3. On Tangled: repo **Settings → Hooks** → payload URL `https://ci.casasulgorgo.net/`, event `push`,
@@ -55,8 +56,9 @@ so they don't clutter the real repositories.
 
 Tangled signs the body as `X-Tangled-Signature-256: sha256=<hmac>`. That's the same
 scheme as GitHub, but under a header name the built-in `github` interceptor doesn't read.
-`config/tekton/base/interceptor-tangled.py` is a small custom ClusterInterceptor (stdlib
-Python, mounted from a ConfigMap) that checks it. The `cel` interceptor then filters the
+`config/tekton/base/interceptor-tangled.yaml` runs a small custom ClusterInterceptor
+([`ghcr.io/dnnnvx/tangled-interceptor`](https://github.com/dnnnvx/tangled-interceptor), a static
+Rust binary) that checks it. The `cel` interceptor then filters the
 event and computes the tags. Because the payload is authenticated, the Trigger takes the
 clone URL, repo name and commit from it.
 

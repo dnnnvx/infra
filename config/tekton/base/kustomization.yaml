@@ -12,8 +12,3 @@ resources:
   - pipeline-build-image.yaml
   - triggertemplate-build-image.yaml
   - eventlistener.yaml
-configMapGenerator:
-  - name: tangled-interceptor
-    namespace: tekton-pipelines
-    files:
-      - interceptor.py=interceptor-tangled.py

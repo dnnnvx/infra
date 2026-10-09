@@ -22,3 +22,7 @@ terraform.rc
 !.sourceignore
 !.sops.yaml
 !.envrc
+
+# Temporary noted and todos
+/*.md
+!README.md

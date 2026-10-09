@@ -6,7 +6,6 @@ metadata:
   namespace: tekton-ci
 spec:
   serviceAccountName: tekton-triggers
-  triggerSelector:
-    labelSelector:
-      matchLabels:
-        ci.casasulgorgo.net/eventlistener: tangled
+  labelSelector:
+    matchLabels:
+      ci.casasulgorgo.net/eventlistener: tangled

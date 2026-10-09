@@ -4,6 +4,7 @@ resources:
   - ../../base
   - httproute.yaml
   - image-automation.yaml
+  - ci-trigger.yaml
 patches:
   - path: patch-deployment.yaml
 images:
