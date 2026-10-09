@@ -36,11 +36,6 @@
         "quay.io/cilium/cilium",
         "kubernetes-sigs/gateway-api"
       ]
-    },
-    {
-      "description": "zenika/alpine-chrome only publishes major tags, so treat 124 as the release granularity rather than chasing a patch that does not exist.",
-      "matchPackageNames": ["zenika/alpine-chrome"],
-      "versioning": "loose"
     }
   ]
 }
