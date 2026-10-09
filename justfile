@@ -91,7 +91,7 @@ updates:
       exit 1
     fi
     # local platform edits files but never branches or pushes; review, then commit
-    RENOVATE_GITHUB_COM_TOKEN=$(gh auth token) LOG_LEVEL=info renovate --platform=local --dry-run=false
+    RENOVATE_GITHUB_COM_TOKEN=$(gh auth token) LOG_LEVEL=info renovate --platform=local
     echo
     if git diff --quiet; then
       echo "Everything is up to date."
