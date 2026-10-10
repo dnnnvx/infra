@@ -68,10 +68,12 @@ clone URL, repo name and commit from it.
 |-----|-----|--------|
 | Humans | `registry.casasulgorgo.net` UI, Pocket-ID login (`registry_admins` group = admin) | Browse only: the Gateway bounces `/v2/<repo>/…` |
 | Tekton | `tekton` htpasswd user, `tekton-ci/registry-push` | read, create, update |
-| containerd (nodes) | `puller` via Talos `RegistryAuthConfig` (tofu var `zot_pull_password`) | read |
-| Flux | `puller` via `flux-system/zot-pull` | read |
+| containerd (nodes), Flux | anonymous (zot `anonymousPolicy`) | read |
 
-There's no anonymous access. To pull from a laptop, `kubectl -n zot port-forward svc/zot 5000`
+Anonymous read is enabled because the kubelet's pulls don't use the Talos `RegistryAuthConfig`
+(`no basic auth credentials`). Pulls stay in-cluster: the Gateway bounces `/v2/<repo>/…`, and only
+the UI endpoints under `/v2/_zot/` (search/metadata) are public, so repo and tag names are
+visible there without logging in. Pushes still need the `tekton` user. To pull from a laptop, `kubectl -n zot port-forward svc/zot 5000`
 and log in with an API key created in the UI.
 
 ## Build isolation (`tekton-ci`)

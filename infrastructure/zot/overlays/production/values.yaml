@@ -71,6 +71,7 @@ configFiles:
           "repositories": {
             "**": {
               "defaultPolicy": ["read"],
+              "anonymousPolicy": ["read"],
               "policies": [
                 { "users": ["tekton"], "actions": ["read", "create", "update"] }
               ]
