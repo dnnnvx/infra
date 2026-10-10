@@ -50,6 +50,21 @@ locals {
           allowSchedulingOnControlPlanes = false
         }
       }),
+      # an untuned kube-apiserver grew to ~2 GB and starved the node
+      # (controllers lost leases, VIP dropped). Keep the watch cache
+      # small and make Go's GC work before the cgroup/OOM limit is reached.
+      yamlencode({
+        cluster = {
+          apiServer = {
+            extraArgs = {
+              "default-watch-cache-size" = "20"
+            }
+            env = {
+              GOMEMLIMIT = "1200MiB"
+            }
+          }
+        }
+      }),
       # Disable cluster discovery
       yamlencode({
         cluster = {
