@@ -130,13 +130,6 @@ module "talos" {
       endpoints    = [{ url = "http://${local.zot_cluster_ip}:5000" }]
       skipFallback = true
     }),
-    yamlencode({
-      apiVersion = "v1alpha1"
-      kind       = "RegistryAuthConfig"
-      name       = "${local.zot_cluster_ip}:5000"
-      username   = "puller"
-      password   = var.zot_pull_password
-    }),
   ]
 
   # install_disk: device name while booted from USB

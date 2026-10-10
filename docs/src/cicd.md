@@ -39,10 +39,9 @@ so they don't clutter the real repositories.
 | `infrastructure/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
 | `config/tekton/base/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor |
 | `config/tekton/overlays/production/` | Webhook HTTPRoute, push credentials, webhook HMAC secret |
-| `config/flux/overlays/production/` | `ImageUpdateAutomation` (writes digests back to git), `zot-pull` scan credentials |
 | `apps/<app>/overlays/production/ci-trigger.yaml` | The app's `Trigger` (in `tekton-ci`; repo filter, image name) |
 | `apps/<app>/overlays/production/image-automation.yaml` | ImageRepository + ImagePolicy for that app |
-| `tofu/production/main.tf` | Talos `RegistryMirrorConfig` + `RegistryAuthConfig` so containerd can pull from zot |
+| `tofu/production/main.tf` | Talos `RegistryMirrorConfig` so containerd can pull from zot with no authorization |
 
 ## Adding a repo/image
 

@@ -9,4 +9,3 @@ resources:
   - telegram-secret.yaml
   - telegram.yaml
   - image-update-automation.yaml
-  - zot-pull-secret.yaml

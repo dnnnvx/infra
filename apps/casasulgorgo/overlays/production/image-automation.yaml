@@ -10,8 +10,6 @@ spec:
   image: zot.zot.svc.cluster.local:5000/casasulgorgo/web
   interval: 5m
   insecure: true
-  secretRef:
-    name: zot-pull
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
