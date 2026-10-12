@@ -7,7 +7,8 @@ metadata:
   name: casasulgorgo-web
   namespace: flux-system
 spec:
-  image: zot.zot.svc.cluster.local:5000/casasulgorgo/web
+  # the IP must be literal
+  image: 10.96.0.50:5000/casasulgorgo/web
   interval: 5m
   insecure: true
 ---
