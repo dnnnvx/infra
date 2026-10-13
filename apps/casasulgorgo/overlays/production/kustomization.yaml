@@ -13,4 +13,4 @@ images:
   - name: casasulgorgo
     newName: zot.zot.svc.cluster.local:5000/casasulgorgo/web
     newTag: production
-    digest: sha256:66bf8c45673e35b4187b1e7eaa8601b0ae95a19b98a479b941506bbd78c9a66a # {"$imagepolicy": "flux-system:casasulgorgo-web:digest"}
+    digest: sha256:a3bc5f5a99b16917c20476cd81cebcb1e0a99c97c5f6e1c6fdc516e40a7d0dce # {"$imagepolicy": "flux-system:casasulgorgo-web:digest"}
