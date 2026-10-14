@@ -5,3 +5,4 @@ resources:
   - httproute.yaml
   - dashboard-httproute.yaml
   - secrets.yaml
+  - ci-apps.yaml

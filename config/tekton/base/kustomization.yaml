@@ -9,6 +9,7 @@ resources:
   - interceptor-tangled.yaml
   - task-git-clone.yaml
   - task-buildkit.yaml
+  - task-flux-sync.yaml
   - pipeline-build-image.yaml
   - triggertemplate-build-image.yaml
   - eventlistener.yaml

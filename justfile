@@ -82,6 +82,18 @@ sync:
     flux reconcile kustomization config
     flux reconcile kustomization apps
 
+# replay a signed Tangled push webhook (no commit needed): just ci-build <clone_url> <sha> [repo]
+ci-build clone_url sha repo="web":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    secret=$(kubectl --context {{ context }} -n tekton-pipelines get secret tangled-webhook -o jsonpath='{.data.secret}' | base64 -d | tr -d '\n')
+    body=$(jq -nc --arg sha '{{ sha }}' --arg url '{{ clone_url }}' --arg repo '{{ repo }}' \
+      '{ref: "refs/heads/main", after: $sha, repository: {name: $repo, clone_url: $url}}')
+    sig=sha256=$(printf %s "$body" | openssl dgst -sha256 -hmac "$secret" -hex | awk '{print $NF}')
+    curl -sS -w '\nHTTP %{http_code}\n' -X POST https://ci.casasulgorgo.net/ \
+      -H 'Content-Type: application/json' -H 'X-Tangled-Event: push' -H "X-Tangled-Signature-256: $sig" -d "$body"
+    echo "watch: kubectl -n tekton-ci get pipelinerun -w"
+
 # rewrite pinned versions in-place to the latest available, then show the diff
 renovate:
     #!/usr/bin/env bash

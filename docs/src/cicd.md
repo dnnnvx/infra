@@ -6,7 +6,7 @@ or git write credentials: the only thing Tekton can do is push images.
 ```
 git push main (Tangled) ──signed webhook──▶ ci.casasulgorgo.net ─▶ EventListener "tangled" (tekton-ci)
     interceptors: tangled (HMAC check) ─▶ cel (filter + tags)
-    └▶ PipelineRun build-image: clone ─▶ buildkit (rootless)
+    └▶ PipelineRun build-image: clone ─▶ buildkit (rootless) ─▶ deploy (flux-sync)
                                             │ push <project>/<image>:<sha>, :latest, :production
                                             ▼
                          zot  (zot.zot.svc.cluster.local:5000, ClusterIP pinned by tofu)
@@ -37,18 +37,32 @@ so they don't clutter the real repositories.
 |------|------|
 | `infrastructure/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Dashboard (read-only, `tekton.home`): upstream release manifests, versions bumped by Renovate |
 | `infrastructure/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
-| `config/tekton/base/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor |
-| `config/tekton/overlays/production/` | Webhook HTTPRoute, push credentials, webhook HMAC secret |
-| `apps/<app>/overlays/production/ci-trigger.yaml` | The app's `Trigger` (in `tekton-ci`; repo filter, image name) |
+| `config/tekton/base/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`, `flux-sync`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor |
+| `config/tekton/overlays/production/` | Webhook HTTPRoute, push credentials, webhook HMAC secret, `ci-apps.yaml` (the one `Trigger` mapping Tangled repo → project/image, and the name-scoped `flux-sync` Role) |
 | `apps/<app>/overlays/production/image-automation.yaml` | ImageRepository + ImagePolicy for that app |
+| `clusters/production/app-<app>.yaml` | The app's own Flux Kustomization (`wait: true`), so CI waits only for it |
 | `tofu/production/main.tf` | Talos `RegistryMirrorConfig` so containerd can pull from zot with no authorization |
+
+## Flux sync (deploy task)
+
+After the build, the optional `deploy` task (`flux-sync`, ServiceAccount `flux-sync`) skips Flux's polling:
+it reconciles the ImageRepository, waits until the ImagePolicy resolves the pushed digest, runs
+`ImageUpdateAutomation/apps` (the bot commit), then reconciles `app-<app>` with its source and waits for
+the rollout. A failed rollout fails the PipelineRun. Names follow a convention: ImageRepository/ImagePolicy `<project>-<image>` and Kustomization `app-<project>`.
+A pipeline started without `flux-kustomization` skips the task.
+
+CI-built apps get their own Kustomization instead of living in `apps`: otherwise `wait: true` on `apps`
+would fail the build whenever any other app is unhealthy.
 
 ## Adding a repo/image
 
-1. Copy `apps/casasulgorgo/overlays/production/ci-trigger.yaml` into the app overlay (list it in `kustomization.yaml`), then change the repo-name filter and `image-name`.
+1. In `config/tekton/overlays/production/ci-apps.yaml`, add the Tangled repo name → `{project, image}` to the `app` expression
+   and the Flux names (`<project>-<image>`, `app-<project>`) to the `flux-sync` Role.
 2. In the app overlay, use a kustomize `images:` entry with a `digest:` marker
-   `# {"$imagepolicy": "flux-system:<policy>:digest"}`, and add an ImageRepository + ImagePolicy (copy casasulgorgo's).
-3. On Tangled: repo **Settings → Hooks** → payload URL `https://ci.casasulgorgo.net/`, event `push`,
+   `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}`, and add an ImageRepository + ImagePolicy (copy casasulgorgo's).
+3. Give the app its own Kustomization: remove it from `clusters/production/apps/kustomization.yaml` and copy
+   `clusters/production/app-casasulgorgo.yaml` as `app-<project>.yaml` (list it in `clusters/production/kustomization.yaml`).
+4. On Tangled: repo **Settings → Hooks** → payload URL `https://ci.casasulgorgo.net/`, event `push`,
    secret = `tangled-webhook` value (`just edit-secret config/tekton/overlays/production/secrets.yaml`).
 
 ## Webhook verification

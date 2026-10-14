@@ -1,3 +1,4 @@
+# Flux naming convention: ImageRepository/ImagePolicy <project>-<image-name>, Kustomization app-<project>.
 # Images are <registry>/<project>/<image>, e.g. zot.zot.svc.cluster.local:5000/casasulgorgo/web.
 # Build caches live apart under <registry>/cache/<project>/<image> so they
 # don't show up as tags of the real image.
@@ -41,6 +42,13 @@ spec:
             value: $(tt.params.registry)/cache/$(tt.params.project)/$(tt.params.image-name):buildcache
           - name: dockerfile
             value: $(tt.params.dockerfile)
+          - name: flux-image-policy
+            value: $(tt.params.project)-$(tt.params.image-name)
+          - name: flux-kustomization
+            value: app-$(tt.params.project)
+        taskRunSpecs:
+          - pipelineTaskName: deploy
+            serviceAccountName: flux-sync
         taskRunTemplate:
           serviceAccountName: pipeline-runner
           podTemplate:

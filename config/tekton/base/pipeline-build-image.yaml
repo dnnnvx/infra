@@ -21,6 +21,14 @@ spec:
     - name: dockerfile
       type: string
       default: Dockerfile
+    - name: flux-image-policy
+      type: string
+      default: ""
+      description: ImageRepository/ImagePolicy name in flux-system. Empty skips the Flux sync.
+    - name: flux-kustomization
+      type: string
+      default: ""
+      description: The app's Flux Kustomization to reconcile and wait for. Empty skips the Flux sync.
   workspaces:
     - name: source
   results:
@@ -57,3 +65,20 @@ spec:
       workspaces:
         - name: source
           workspace: source
+    - name: deploy
+      runAfter:
+        - build
+      when:
+        - input: $(params.flux-kustomization)
+          operator: notin
+          values: [""]
+      timeout: 12m
+      taskRef:
+        name: flux-sync
+      params:
+        - name: image-policy
+          value: $(params.flux-image-policy)
+        - name: kustomization
+          value: $(params.flux-kustomization)
+        - name: digest
+          value: $(tasks.build.results.digest)

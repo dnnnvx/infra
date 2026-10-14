@@ -20,7 +20,7 @@ spec:
         name: fluxcdbot
         email: fluxcdbot@casasulgorgo.net
       messageTemplate: |
-        chore(images): update {{ range .Changed.Changes }}{{ .OldValue }} → {{ .NewValue }} {{ end }}
+        chore(images): update {{ range .Changed.Changes }}{{ .OldValue | trunc 15 }} → {{ .NewValue | trunc 15 }} {{ end }}
     push:
       branch: main
   update:

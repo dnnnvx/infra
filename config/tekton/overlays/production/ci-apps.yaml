@@ -1,0 +1,102 @@
+# Registry of CI-built apps: one Trigger for all of them, plus the Flux objects
+# the flux-sync task may touch. To add an app, add its Tangled repo name to the
+# `app` expression and its Flux names to the Role (see docs/src/cicd.md).
+# Push to main on a listed Tangled repo → <project>/<image> tagged <commit sha>,
+# latest and production (main is the production branch). Everything else comes
+# from the payload, which is trusted once the tangled interceptor has verified
+# its HMAC signature.
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: apps
+  namespace: tekton-ci
+  labels:
+    ci.casasulgorgo.net/eventlistener: tangled
+spec:
+  interceptors:
+    - name: verify-signature
+      ref:
+        name: tangled
+        kind: ClusterInterceptor
+    # Tangled repo name → {project, image}; {} for repos we don't build.
+    - name: app
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: overlays
+          value:
+            - key: app
+              expression: >-
+                body.repository.name == 'web' ? {'project': 'casasulgorgo', 'image': 'web'} :
+                {}
+    - name: filter
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: filter
+          value: >-
+            header.match('X-Tangled-Event', 'push') &&
+            has(extensions.app.project) &&
+            body.ref == 'refs/heads/main' &&
+            body.after.matches('^[0-9a-f]{40}$') &&
+            body.after != '0000000000000000000000000000000000000000'
+        - name: overlays
+          value:
+            - key: tags
+              expression: "body.after + ' latest production'"
+  bindings:
+    - name: project
+      value: $(extensions.app.project)
+    - name: image-name
+      value: $(extensions.app.image)
+    - name: repo-url
+      value: $(body.repository.clone_url)
+    - name: revision
+      value: $(body.after)
+    - name: tags
+      value: $(extensions.tags)
+  template:
+    ref: build-image
+---
+# What the flux-sync task may touch after a build. Scoped by name: patch on a
+# Kustomization/GitRepository would otherwise let the CI namespace rewrite
+# arbitrary Flux objects. Names follow the convention <project>-<image> for
+# image objects and app-<project> for Kustomizations.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: flux-sync
+  namespace: flux-system
+rules:
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imagerepositories, imagepolicies]
+    resourceNames: [casasulgorgo-web]
+    verbs: [get, patch]
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imageupdateautomations]
+    resourceNames: [apps]
+    verbs: [get, patch]
+  - apiGroups: [kustomize.toolkit.fluxcd.io]
+    resources: [kustomizations]
+    resourceNames: [app-casasulgorgo]
+    verbs: [get, patch]
+  - apiGroups: [source.toolkit.fluxcd.io]
+    resources: [gitrepositories]
+    resourceNames: [flux-system]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: flux-sync
+  namespace: flux-system
+subjects:
+  - kind: ServiceAccount
+    name: flux-sync
+    namespace: tekton-ci
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: flux-sync

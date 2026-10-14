@@ -10,6 +10,5 @@ resources:
   - ../../../apps/bookorbit/overlays/production
   - ../../../apps/silverbullet/overlays/production
   - ../../../apps/romm/overlays/production
-  - ../../../apps/casasulgorgo/overlays/production
   # - ../../../apps/lightnvr/overlays/production
   # - ../../../apps/llama-cpp/overlays/production

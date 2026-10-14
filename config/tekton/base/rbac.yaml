@@ -40,3 +40,11 @@ metadata:
   name: pipeline-runner
   namespace: tekton-ci
 automountServiceAccountToken: false
+---
+# Runs the flux-sync task only (PipelineRun taskRunSpecs). Its permissions are
+# the name-scoped Role in flux-system (overlays/production/ci-apps.yaml).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flux-sync
+  namespace: tekton-ci
