@@ -30,8 +30,6 @@ spec:
   steps:
     - name: sync
       image: ghcr.io/fluxcd/flux-cli:v2.9.6
-      # The image's entrypoint is `flux`; the script needs a shell for kubectl polling.
-      command: ["/bin/sh"]
       env:
         - name: HOME
           value: /tmp
@@ -40,6 +38,7 @@ spec:
         capabilities:
           drop: ["ALL"]
       script: |
+        #!/bin/sh
         set -eu
         ns=flux-system
         flux reconcile image repository "$(params.image-policy)" -n "$ns" --timeout=2m
