@@ -58,7 +58,7 @@ otherwise `wait: true` on `apps` would fail the build whenever any other app is 
 ## Adding a repo/image
 
 1. Copy `config/tekton/overlays/production/ci-apps/casasulgorgo.yaml` (a `Static` ResourceSetInputProvider the `ci-apps` ResourceSet selects by label) and list it in the overlay's `kustomization.yaml`:
-   `project`, the Tangled `repo` name and `images` (`name`, optional `dockerfile` relative to `context`, optional `context` relative to the repo root).
+   `project` (required), the Tangled `repo` name (default: `project`) and `images` (default: one image named after the repo) (`name`, optional `dockerfile` relative to `context`, optional `context` relative to the repo root).
    It generates the Trigger, ImageRepository/ImagePolicy per image, the `app-<project>` Kustomization and the Role.
 2. In `apps/<project>/overlays/production`, use a kustomize `images:` entry per image with a `digest:` marker
    `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's).

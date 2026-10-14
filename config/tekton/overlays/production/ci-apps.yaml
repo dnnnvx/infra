@@ -7,7 +7,9 @@
 # The app's manifests stay in apps/<project>/overlays/production, with one
 # `images:` entry + `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` marker per image.
 # Push to main → <project>/<image> tagged <commit sha>, latest and production (main is production).
-# `dockerfile` is relative to `context`, `context` to the repo root (both optional).
+# Inputs: project; optional repo (Tangled repository name, default: project) and
+# images (default: one image named after the repo); per image `name`, optional
+# `dockerfile` relative to `context`, optional `context` relative to the repo root.
 apiVersion: fluxcd.controlplane.io/v1
 kind: ResourceSet
 metadata:
@@ -21,7 +23,9 @@ spec:
         matchLabels:
           ci.casasulgorgo.net/app: ""
   resourcesTemplate: |
-    <<- range $image := inputs.images >>
+    <<- $repo := get inputs "repo" | default inputs.project >>
+    <<- $images := get inputs "images" | default (list (dict "name" $repo)) >>
+    <<- range $image := $images >>
     ---
     # Lives in flux-system: ImageUpdateAutomation only sees policies in its own namespace.
     # Tekton moves the `production` tag on every main build; Flux follows its digest and
@@ -88,7 +92,7 @@ spec:
       - apiGroups: [image.toolkit.fluxcd.io]
         resources: [imagerepositories, imagepolicies]
         resourceNames:
-          <<- range $image := inputs.images >>
+          <<- range $image := $images >>
           - << inputs.project >>-<< $image.name >>
           <<- end >>
         verbs: [get, patch]
@@ -142,7 +146,7 @@ spec:
             - name: filter
               value: >-
                 header.match('X-Tangled-Event', 'push') &&
-                body.repository.name == '<< inputs.repo >>' &&
+                body.repository.name == '<< $repo >>' &&
                 body.ref == 'refs/heads/main' &&
                 body.after.matches('^[0-9a-f]{40}$') &&
                 body.after != '0000000000000000000000000000000000000000'
@@ -154,7 +158,7 @@ spec:
         - name: project
           value: << inputs.project >>
         - name: images
-          value: "<<- range $i, $image := inputs.images ->><< if $i >> << end ->><< $image.name >>,<< get $image "dockerfile" | default "Dockerfile" >>,<< get $image "context" | default "." >><<- end >>"
+          value: "<<- range $i, $image := $images ->><< if $i >> << end ->><< $image.name >>,<< get $image "dockerfile" | default "Dockerfile" >>,<< get $image "context" | default "." >><<- end >>"
         - name: flux-kustomization
           value: app-<< inputs.project >>
         - name: repo-url

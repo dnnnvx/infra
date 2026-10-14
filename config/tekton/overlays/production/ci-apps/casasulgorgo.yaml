@@ -1,6 +1,7 @@
 # A CI-built app: add a file like this (and list it in ../kustomization.yaml) to get
 # its Trigger, ImageRepository/ImagePolicy per image, app Kustomization and flux-sync Role.
-# `dockerfile` is relative to `context`, `context` to the repo root (both optional).
+# Only `project` is required: `repo` defaults to it, and `images` to one image named after the repo.
+# Per image: `name`, optional `dockerfile` (relative to `context`), optional `context` (relative to the repo root).
 apiVersion: fluxcd.controlplane.io/v1
 kind: ResourceSetInputProvider
 metadata:
