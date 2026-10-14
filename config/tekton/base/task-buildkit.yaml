@@ -4,30 +4,34 @@ metadata:
   name: buildkit
   namespace: tekton-ci
 spec:
-  description: Builds a Dockerfile with rootless BuildKit and pushes it under several tags, with a registry build cache.
+  description: >-
+    Builds each requested image with rootless BuildKit, one after the other, and pushes it
+    under several tags with a registry build cache.
   params:
-    - name: image
+    - name: registry
       type: string
-      description: Image repository to push to, without tag.
+      description: Registry host[:port] to push to, e.g. zot.zot.svc.cluster.local:5000.
+    - name: project
+      type: string
+      description: Registry namespace; images are <registry>/<project>/<name>.
+    - name: images
+      type: string
+      description: >-
+        Space-separated "name,dockerfile,context" entries. Dockerfile is relative to the
+        context, the context to the repository root.
     - name: tags
       type: string
       description: Space-separated tags to push (e.g. "<sha> latest production").
-    - name: cache-image
-      type: string
-      description: Image reference used for the registry build cache.
-    - name: context
+    - name: subdirectory
       type: string
       default: source
-      description: Build context, relative to the source workspace.
-    - name: dockerfile
-      type: string
-      default: Dockerfile
-      description: Dockerfile path, relative to the context.
+      description: Where git-clone put the repository inside the source workspace.
   workspaces:
     - name: source
       readOnly: true
   results:
-    - name: digest
+    - name: digests
+      description: Space-separated "name=sha256:..." for every pushed image.
   volumes:
     - name: buildkit-state
       emptyDir: {}
@@ -40,7 +44,7 @@ spec:
   steps:
     - name: build-and-push
       image: moby/buildkit:v0.34.0-rootless
-      workingDir: $(workspaces.source.path)/$(params.context)
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
         # No nested PID namespace: needed to run without privileged
         - name: BUILDKITD_FLAGS
@@ -64,20 +68,31 @@ spec:
         #!/bin/sh
         set -eu
         # Avoid dollar-brace syntax here: Flux post-build substitution would eat it
-        names=""
-        for tag in $(params.tags); do
-          [ -n "$names" ] && names="$names,"
-          names="$names""$(params.image):$tag"
+        root="$(pwd)"
+        : > "$(results.digests.path)"
+        for entry in $(params.images); do
+          name="$(echo "$entry" | cut -d, -f1)"
+          dockerfile="$(echo "$entry" | cut -d, -f2)"
+          context="$(echo "$entry" | cut -d, -f3)"
+          image="$(params.registry)/$(params.project)/$name"
+          cache="$(params.registry)/cache/$(params.project)/$name:buildcache"
+          names=""
+          for tag in $(params.tags); do
+            [ -n "$names" ] && names="$names,"
+            names="$names""$image:$tag"
+          done
+          cd "$root/$context"
+          # zot is reached over plain HTTP on its in-cluster Service, hence registry.insecure
+          buildctl-daemonless.sh build \
+            --frontend dockerfile.v0 \
+            --local context=. \
+            --local dockerfile="$(dirname "$dockerfile")" \
+            --opt filename="$(basename "$dockerfile")" \
+            --import-cache "type=registry,ref=$cache,registry.insecure=true" \
+            --export-cache "type=registry,ref=$cache,mode=max,image-manifest=true,oci-mediatypes=true,registry.insecure=true" \
+            --output "type=image,\"name=$names\",push=true,registry.insecure=true" \
+            --metadata-file /tmp/metadata.json
+          digest="$(sed -n 's/.*"containerimage.digest": *"\([^"]*\)".*/\1/p' /tmp/metadata.json | tr -d '\n')"
+          printf '%s=%s ' "$name" "$digest" >> "$(results.digests.path)"
+          echo "Pushed $names @ $digest"
         done
-        # zot is reached over plain HTTP on its in-cluster Service, hence registry.insecure
-        buildctl-daemonless.sh build \
-          --frontend dockerfile.v0 \
-          --local context=. \
-          --local dockerfile="$(dirname "$(params.dockerfile)")" \
-          --opt filename="$(basename "$(params.dockerfile)")" \
-          --import-cache "type=registry,ref=$(params.cache-image),registry.insecure=true" \
-          --export-cache "type=registry,ref=$(params.cache-image),mode=max,image-manifest=true,oci-mediatypes=true,registry.insecure=true" \
-          --output "type=image,\"name=$names\",push=true,registry.insecure=true" \
-          --metadata-file /tmp/metadata.json
-        sed -n 's/.*"containerimage.digest": *"\([^"]*\)".*/\1/p' /tmp/metadata.json | tr -d '\n' > "$(results.digest.path)"
-        echo "Pushed $names @ $(cat "$(results.digest.path)")"

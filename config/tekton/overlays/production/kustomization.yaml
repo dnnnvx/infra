@@ -6,3 +6,4 @@ resources:
   - dashboard-httproute.yaml
   - secrets.yaml
   - ci-apps.yaml
+  - ci-apps/casasulgorgo.yaml

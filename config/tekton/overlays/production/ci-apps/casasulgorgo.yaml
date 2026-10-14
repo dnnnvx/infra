@@ -1,0 +1,17 @@
+# A CI-built app: add a file like this (and list it in ../kustomization.yaml) to get
+# its Trigger, ImageRepository/ImagePolicy per image, app Kustomization and flux-sync Role.
+# `dockerfile` is relative to `context`, `context` to the repo root (both optional).
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSetInputProvider
+metadata:
+  name: ci-app-casasulgorgo
+  namespace: flux-system
+  labels:
+    ci.casasulgorgo.net/app: ""
+spec:
+  type: Static
+  defaultValues:
+    project: casasulgorgo
+    repo: web # Tangled repository name
+    images:
+      - name: web

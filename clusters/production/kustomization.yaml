@@ -4,4 +4,3 @@ resources:
   - infrastructure.yaml
   - config.yaml
   - apps.yaml
-  - app-casasulgorgo.yaml

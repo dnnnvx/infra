@@ -12,20 +12,19 @@ spec:
     - name: registry
       default: zot.zot.svc.cluster.local:5000
     - name: project
-    - name: image-name
+    - name: images
     - name: repo-url
     - name: revision
     - name: tags
-    - name: dockerfile
-      default: Dockerfile
+    - name: flux-kustomization
+      default: ""
   resourcetemplates:
     - apiVersion: tekton.dev/v1
       kind: PipelineRun
       metadata:
-        generateName: $(tt.params.project)-$(tt.params.image-name)-
+        generateName: $(tt.params.project)-
         labels:
           ci.casasulgorgo.net/project: $(tt.params.project)
-          ci.casasulgorgo.net/image: $(tt.params.image-name)
       spec:
         pipelineRef:
           name: build-image
@@ -34,18 +33,16 @@ spec:
             value: $(tt.params.repo-url)
           - name: revision
             value: $(tt.params.revision)
-          - name: image
-            value: $(tt.params.registry)/$(tt.params.project)/$(tt.params.image-name)
+          - name: registry
+            value: $(tt.params.registry)
+          - name: project
+            value: $(tt.params.project)
+          - name: images
+            value: $(tt.params.images)
           - name: tags
             value: $(tt.params.tags)
-          - name: cache-image
-            value: $(tt.params.registry)/cache/$(tt.params.project)/$(tt.params.image-name):buildcache
-          - name: dockerfile
-            value: $(tt.params.dockerfile)
-          - name: flux-image-policy
-            value: $(tt.params.project)-$(tt.params.image-name)
           - name: flux-kustomization
-            value: app-$(tt.params.project)
+            value: $(tt.params.flux-kustomization)
         taskRunSpecs:
           - pipelineTaskName: deploy
             serviceAccountName: flux-sync

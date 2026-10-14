@@ -4,27 +4,22 @@ metadata:
   name: build-image
   namespace: tekton-ci
 spec:
-  description: Clone a commit, build its Dockerfile and push it to every requested tag.
+  description: Clone a commit, build its images and push them to every requested tag, then sync Flux.
   params:
     - name: repo-url
       type: string
     - name: revision
       type: string
-    - name: image
+    - name: registry
       type: string
-      description: Image repository without tag, e.g. <registry>/casasulgorgo/web.
+    - name: project
+      type: string
+    - name: images
+      type: string
+      description: Space-separated "name,dockerfile,context" entries (see the buildkit task).
     - name: tags
       type: string
       description: Space-separated tags, e.g. "<sha> latest production".
-    - name: cache-image
-      type: string
-    - name: dockerfile
-      type: string
-      default: Dockerfile
-    - name: flux-image-policy
-      type: string
-      default: ""
-      description: ImageRepository/ImagePolicy name in flux-system. Empty skips the Flux sync.
     - name: flux-kustomization
       type: string
       default: ""
@@ -34,8 +29,8 @@ spec:
   results:
     - name: commit
       value: $(tasks.clone.results.commit)
-    - name: digest
-      value: $(tasks.build.results.digest)
+    - name: digests
+      value: $(tasks.build.results.digests)
   tasks:
     - name: clone
       taskRef:
@@ -54,14 +49,14 @@ spec:
       taskRef:
         name: buildkit
       params:
-        - name: image
-          value: $(params.image)
+        - name: registry
+          value: $(params.registry)
+        - name: project
+          value: $(params.project)
+        - name: images
+          value: $(params.images)
         - name: tags
           value: $(params.tags)
-        - name: cache-image
-          value: $(params.cache-image)
-        - name: dockerfile
-          value: $(params.dockerfile)
       workspaces:
         - name: source
           workspace: source
@@ -76,9 +71,9 @@ spec:
       taskRef:
         name: flux-sync
       params:
-        - name: image-policy
-          value: $(params.flux-image-policy)
+        - name: project
+          value: $(params.project)
+        - name: digests
+          value: $(tasks.build.results.digests)
         - name: kustomization
           value: $(params.flux-kustomization)
-        - name: digest
-          value: $(tasks.build.results.digest)

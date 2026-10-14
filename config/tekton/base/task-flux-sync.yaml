@@ -5,24 +5,24 @@ metadata:
   namespace: tekton-ci
 spec:
   description: >-
-    Skips Flux's polling intervals after a build: waits until the ImagePolicy has
-    resolved the pushed digest, makes ImageUpdateAutomation commit it, then
+    Skips Flux's polling intervals after a build: waits until each ImagePolicy has
+    resolved the pushed digest, makes ImageUpdateAutomation commit them, then
     reconciles the app's own Flux Kustomization and waits for its rollout.
     Needs the flux-sync ServiceAccount and the app's Role in flux-system.
   params:
-    - name: image-policy
+    - name: project
       type: string
-      description: Name of the app's ImageRepository and ImagePolicy in flux-system.
+      description: ImageRepository/ImagePolicy of an image are named <project>-<image name>.
+    - name: digests
+      type: string
+      description: Space-separated "name=sha256:..." as returned by the buildkit task.
     - name: kustomization
       type: string
       description: Name of the app's Flux Kustomization (wait - true) in flux-system.
-    - name: digest
-      type: string
-      description: Digest the build just pushed, e.g. sha256:...
     - name: automation
       type: string
       default: apps
-      description: ImageUpdateAutomation that commits the digest.
+      description: ImageUpdateAutomation that commits the digests.
     - name: timeout
       type: string
       default: 7m
@@ -41,16 +41,20 @@ spec:
         #!/bin/sh
         set -eu
         ns=flux-system
-        flux reconcile image repository "$(params.image-policy)" -n "$ns" --timeout=2m
-        # The policy follows the repository scan asynchronously: wait for the pushed digest
-        i=0
-        until [ "$(kubectl -n "$ns" get imagepolicy "$(params.image-policy)" -o jsonpath='{.status.latestRef.digest}')" = "$(params.digest)" ]; do
-          i=$((i + 1))
-          if [ "$i" -gt 30 ]; then
-            echo "ImagePolicy $(params.image-policy) never resolved $(params.digest)" >&2
-            exit 1
-          fi
-          sleep 2
+        for entry in $(params.digests); do
+          policy="$(params.project)-$(echo "$entry" | cut -d= -f1)"
+          digest="$(echo "$entry" | cut -d= -f2)"
+          flux reconcile image repository "$policy" -n "$ns" --timeout=2m
+          # The policy follows the repository scan asynchronously: wait for the pushed digest
+          i=0
+          until [ "$(kubectl -n "$ns" get imagepolicy "$policy" -o jsonpath='{.status.latestRef.digest}')" = "$digest" ]; do
+            i=$((i + 1))
+            if [ "$i" -gt 30 ]; then
+              echo "ImagePolicy $policy never resolved $digest" >&2
+              exit 1
+            fi
+            sleep 2
+          done
         done
         flux reconcile image update "$(params.automation)" -n "$ns" --timeout=2m
         flux reconcile kustomization "$(params.kustomization)" -n "$ns" --with-source --timeout="$(params.timeout)"

@@ -1,102 +1,167 @@
-# Registry of CI-built apps: one Trigger for all of them, plus the Flux objects
-# the flux-sync task may touch. To add an app, add its Tangled repo name to the
-# `app` expression and its Flux names to the Role (see docs/src/cicd.md).
-# Push to main on a listed Tangled repo → <project>/<image> tagged <commit sha>,
-# latest and production (main is the production branch). Everything else comes
-# from the payload, which is trusted once the tangled interceptor has verified
-# its HMAC signature.
-apiVersion: triggers.tekton.dev/v1beta1
-kind: Trigger
+# One input per CI-built app (an app may have several images), taken from the
+# Static ResourceSetInputProviders in ci-apps/. For each, this generates everything the build → deploy path needs:
+#   Trigger (Tangled push on <repo>, in tekton-ci) · ImageRepository + ImagePolicy per image
+#   · Kustomization app-<project> (own wait: true, so CI only waits for this app)
+#   · the name-scoped Role/RoleBinding the flux-sync task runs with.
+# Names: <project>-<image> for image objects, app-<project> for the Kustomization.
+# The app's manifests stay in apps/<project>/overlays/production, with one
+# `images:` entry + `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` marker per image.
+# Push to main → <project>/<image> tagged <commit sha>, latest and production (main is production).
+# `dockerfile` is relative to `context`, `context` to the repo root (both optional).
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSet
 metadata:
-  name: apps
-  namespace: tekton-ci
-  labels:
-    ci.casasulgorgo.net/eventlistener: tangled
+  name: ci-apps
+  namespace: flux-system
 spec:
-  interceptors:
-    - name: verify-signature
-      ref:
-        name: tangled
-        kind: ClusterInterceptor
-    # Tangled repo name → {project, image}; {} for repos we don't build.
-    - name: app
-      ref:
-        name: cel
-        kind: ClusterInterceptor
-      params:
-        - name: overlays
-          value:
-            - key: app
-              expression: >-
-                body.repository.name == 'web' ? {'project': 'casasulgorgo', 'image': 'web'} :
-                {}
-    - name: filter
-      ref:
-        name: cel
-        kind: ClusterInterceptor
-      params:
+  inputsFrom:
+    - apiVersion: fluxcd.controlplane.io/v1
+      kind: ResourceSetInputProvider
+      selector:
+        matchLabels:
+          ci.casasulgorgo.net/app: ""
+  resourcesTemplate: |
+    <<- range $image := inputs.images >>
+    ---
+    # Lives in flux-system: ImageUpdateAutomation only sees policies in its own namespace.
+    # Tekton moves the `production` tag on every main build; Flux follows its digest and
+    # pins it in the app overlay, so each rollout is a git commit.
+    apiVersion: image.toolkit.fluxcd.io/v1
+    kind: ImageRepository
+    metadata:
+      name: << inputs.project >>-<< $image.name >>
+      namespace: flux-system
+    spec:
+      # the IP must be literal (substituted by Flux post-build from the tofu-managed secret)
+      image: ${ZOT_CLUSTER_IP}:5000/<< inputs.project >>/<< $image.name >>
+      interval: 5m
+      insecure: true
+    ---
+    apiVersion: image.toolkit.fluxcd.io/v1
+    kind: ImagePolicy
+    metadata:
+      name: << inputs.project >>-<< $image.name >>
+      namespace: flux-system
+    spec:
+      imageRepositoryRef:
+        name: << inputs.project >>-<< $image.name >>
+      filterTags:
+        pattern: '^production$'
+      policy:
+        alphabetical:
+          order: asc
+      # The tag is mutable: re-check its digest on every interval
+      digestReflectionPolicy: Always
+      interval: 5m
+    <<- end >>
+    ---
+    apiVersion: kustomize.toolkit.fluxcd.io/v1
+    kind: Kustomization
+    metadata:
+      name: app-<< inputs.project >>
+      namespace: flux-system
+    spec:
+      dependsOn:
+        - name: infrastructure
+        - name: config
+      interval: 10m
+      timeout: 5m
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+      path: ./apps/<< inputs.project >>/overlays/production
+      prune: false
+      wait: true
+      decryption:
+        provider: sops
+        secretRef:
+          name: sops-age
+    ---
+    # What the flux-sync task may touch after a build. Scoped by name: patch on a
+    # Kustomization/GitRepository would otherwise let the CI namespace rewrite arbitrary Flux objects.
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      name: flux-sync-<< inputs.project >>
+      namespace: flux-system
+    rules:
+      - apiGroups: [image.toolkit.fluxcd.io]
+        resources: [imagerepositories, imagepolicies]
+        resourceNames:
+          <<- range $image := inputs.images >>
+          - << inputs.project >>-<< $image.name >>
+          <<- end >>
+        verbs: [get, patch]
+      - apiGroups: [image.toolkit.fluxcd.io]
+        resources: [imageupdateautomations]
+        resourceNames: [apps]
+        verbs: [get, patch]
+      - apiGroups: [kustomize.toolkit.fluxcd.io]
+        resources: [kustomizations]
+        resourceNames: [app-<< inputs.project >>]
+        verbs: [get, patch]
+      - apiGroups: [source.toolkit.fluxcd.io]
+        resources: [gitrepositories]
+        resourceNames: [flux-system]
+        verbs: [get, patch]
+    ---
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: flux-sync-<< inputs.project >>
+      namespace: flux-system
+    subjects:
+      - kind: ServiceAccount
+        name: flux-sync
+        namespace: tekton-ci
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: flux-sync-<< inputs.project >>
+    ---
+    # Everything except the repo name and images comes from the payload, which is
+    # trusted once the tangled interceptor has verified its HMAC signature.
+    apiVersion: triggers.tekton.dev/v1beta1
+    kind: Trigger
+    metadata:
+      name: << inputs.project >>
+      namespace: tekton-ci
+      labels:
+        ci.casasulgorgo.net/eventlistener: tangled
+    spec:
+      interceptors:
+        - name: verify-signature
+          ref:
+            name: tangled
+            kind: ClusterInterceptor
         - name: filter
-          value: >-
-            header.match('X-Tangled-Event', 'push') &&
-            has(extensions.app.project) &&
-            body.ref == 'refs/heads/main' &&
-            body.after.matches('^[0-9a-f]{40}$') &&
-            body.after != '0000000000000000000000000000000000000000'
-        - name: overlays
-          value:
-            - key: tags
-              expression: "body.after + ' latest production'"
-  bindings:
-    - name: project
-      value: $(extensions.app.project)
-    - name: image-name
-      value: $(extensions.app.image)
-    - name: repo-url
-      value: $(body.repository.clone_url)
-    - name: revision
-      value: $(body.after)
-    - name: tags
-      value: $(extensions.tags)
-  template:
-    ref: build-image
----
-# What the flux-sync task may touch after a build. Scoped by name: patch on a
-# Kustomization/GitRepository would otherwise let the CI namespace rewrite
-# arbitrary Flux objects. Names follow the convention <project>-<image> for
-# image objects and app-<project> for Kustomizations.
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: flux-sync
-  namespace: flux-system
-rules:
-  - apiGroups: [image.toolkit.fluxcd.io]
-    resources: [imagerepositories, imagepolicies]
-    resourceNames: [casasulgorgo-web]
-    verbs: [get, patch]
-  - apiGroups: [image.toolkit.fluxcd.io]
-    resources: [imageupdateautomations]
-    resourceNames: [apps]
-    verbs: [get, patch]
-  - apiGroups: [kustomize.toolkit.fluxcd.io]
-    resources: [kustomizations]
-    resourceNames: [app-casasulgorgo]
-    verbs: [get, patch]
-  - apiGroups: [source.toolkit.fluxcd.io]
-    resources: [gitrepositories]
-    resourceNames: [flux-system]
-    verbs: [get, patch]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: flux-sync
-  namespace: flux-system
-subjects:
-  - kind: ServiceAccount
-    name: flux-sync
-    namespace: tekton-ci
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: flux-sync
+          ref:
+            name: cel
+            kind: ClusterInterceptor
+          params:
+            - name: filter
+              value: >-
+                header.match('X-Tangled-Event', 'push') &&
+                body.repository.name == '<< inputs.repo >>' &&
+                body.ref == 'refs/heads/main' &&
+                body.after.matches('^[0-9a-f]{40}$') &&
+                body.after != '0000000000000000000000000000000000000000'
+            - name: overlays
+              value:
+                - key: tags
+                  expression: "body.after + ' latest production'"
+      bindings:
+        - name: project
+          value: << inputs.project >>
+        - name: images
+          value: "<<- range $i, $image := inputs.images ->><< if $i >> << end ->><< $image.name >>,<< get $image "dockerfile" | default "Dockerfile" >>,<< get $image "context" | default "." >><<- end >>"
+        - name: flux-kustomization
+          value: app-<< inputs.project >>
+        - name: repo-url
+          value: $(body.repository.clone_url)
+        - name: revision
+          value: $(body.after)
+        - name: tags
+          value: $(extensions.tags)
+      template:
+        ref: build-image
