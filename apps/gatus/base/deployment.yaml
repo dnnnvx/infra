@@ -13,6 +13,7 @@ spec:
       labels:
         app.kubernetes.io/name: gatus
     spec:
+      serviceAccountName: gatus
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -26,10 +27,16 @@ spec:
             capabilities:
               drop: ["ALL"]
           image: twinproduction/gatus:v5.37.0
+          env:
+            # directory mode: gatus merges config.yaml + the sidecar's gatus-sidecar.yaml
+            - name: GATUS_CONFIG_PATH
+              value: /config
           ports:
             - containerPort: 8080
               name: http
           volumeMounts:
+            - name: generated
+              mountPath: /config
             - name: config
               mountPath: /config/config.yaml
               subPath: config.yaml
@@ -43,7 +50,24 @@ spec:
               path: /health
               port: http
             initialDelaySeconds: 5
+        # writes endpoints for HTTPRoutes annotated gatus.home-operations.com/enabled
+        - name: gatus-sidecar
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          image: ghcr.io/home-operations/gatus-sidecar:0.5.3
+          args:
+            - --enable-httproute
+            - --gateway-name=homelab
+            - --output=/config/gatus-sidecar.yaml
+          volumeMounts:
+            - name: generated
+              mountPath: /config
       volumes:
+        - name: generated
+          emptyDir: {}
         - name: config
           configMap:
             name: gatus-config

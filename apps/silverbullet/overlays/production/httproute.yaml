@@ -3,6 +3,11 @@ kind: HTTPRoute
 metadata:
   name: silverbullet
   namespace: silverbullet
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    gatus.home-operations.com/endpoint: |
+      name: Silverbullet
+      path: /.instance
 spec:
   parentRefs:
     - name: homelab

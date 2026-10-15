@@ -5,6 +5,13 @@ metadata:
   namespace: kube-system
   annotations:
     io.cilium/lb-ipam-ips: "192.168.0.200"
+    # defaults inherited by every gatus-sidecar endpoint generated from a route on this Gateway
+    gatus.home-operations.com/endpoint: |
+      group: apps
+      interval: 5m
+      alerts:
+        - type: telegram
+          send-on-resolved: true
 spec:
   gatewayClassName: cilium
   listeners:

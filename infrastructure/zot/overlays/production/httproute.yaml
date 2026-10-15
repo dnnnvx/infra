@@ -7,6 +7,13 @@ kind: HTTPRoute
 metadata:
   name: zot
   namespace: zot
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    # path "" — probe the UI, not the first match (/v2/)
+    gatus.home-operations.com/endpoint: |
+      name: Zot Registry
+      group: infrastructure
+      path: ""
 spec:
   parentRefs:
     - name: homelab
