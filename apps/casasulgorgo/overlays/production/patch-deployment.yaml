@@ -12,3 +12,7 @@ spec:
             # adapter-node sits behind the Gateway; needed for form-action CSRF checks
             - name: ORIGIN
               value: https://casasulgorgo.net
+          envFrom:
+            # TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID (same bot/chat as gatus)
+            - secretRef:
+                name: casasulgorgo-secrets

@@ -13,8 +13,8 @@ spec:
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: gatus
-  # Static landing page: no egress beyond DNS
   egress:
+    # DNS through the Cilium proxy so toFQDNs can learn the Telegram IPs
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
@@ -24,4 +24,14 @@ spec:
             - port: "53"
               protocol: UDP
             - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # Telegram Bot API (form notifications)
+    - toFQDNs:
+        - matchName: api.telegram.org
+      toPorts:
+        - ports:
+            - port: "443"
               protocol: TCP
