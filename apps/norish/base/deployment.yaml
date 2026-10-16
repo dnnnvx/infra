@@ -46,6 +46,11 @@ spec:
                 secretKeyRef:
                   name: norish-secrets
                   key: master-key
+            - name: OBSCURA_CDP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: norish-secrets
+                  key: obscura-cdp-token
           volumeMounts:
             - name: uploads
               mountPath: /app/uploads
@@ -55,6 +60,12 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
+          env:
+            - name: OBSCURA_CDP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: norish-secrets
+                  key: obscura-cdp-token
           ports:
             - containerPort: 9222
               name: cdp
