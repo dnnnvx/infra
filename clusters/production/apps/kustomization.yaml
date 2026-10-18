@@ -9,6 +9,6 @@ resources:
   - ../../../apps/norish/overlays/production
   - ../../../apps/bookorbit/overlays/production
   - ../../../apps/silverbullet/overlays/production
-  - ../../../apps/romm/overlays/production
+  # - ../../../apps/romm/overlays/production
   # - ../../../apps/lightnvr/overlays/production
   # - ../../../apps/llama-cpp/overlays/production
