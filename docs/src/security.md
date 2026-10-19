@@ -1,87 +1,4 @@
-# Security [disabled]
-
-## Runtime Security (Tetragon)
-
-[Tetragon](https://tetragon.io) provides eBPF-based runtime security observability. It runs as a DaemonSet in `kube-system` and applies `TracingPolicy` resources that hook into the Linux kernel to observe (and optionally enforce) security-relevant events.
-
-### Deployment
-
-- HelmRelease: `infrastructure/tetragon/` (depends on Cilium, uses `cilium` HelmRepository)
-- Helm values: `clusters/production/values/tetragon.yaml`
-- Policies: `config/tetragon/`
-
-Key values configured:
-
-| Value | Setting | Reason |
-|---|---|---|
-| `enableProcessCred` | `true` | Include uid/gid/capabilities in all events |
-| `enableProcessNs` | `true` | Include Linux namespace info in events |
-| `clusterName` | `homelab` | Tags all events with cluster name |
-| `exportFilename` | `""` | No on-disk log file; use `tetra` CLI |
-| `grpc.address` | `0.0.0.0:54321` | Reachable for `tetra getevents` |
-| `extraHostPathMounts` | `/sys/kernel/tracing` | Required on Talos Linux |
-
-### Active policies
-
-All policies are **observe-only** (`action: Post`). No enforcement is applied until behavior is well understood.
-
-| File | What it detects |
-|---|---|
-| `privileges-raise.yaml` | `commit_creds` — any credential change in a container. Rate-limited 1/min. (`override_creds`/`revert_creds` omitted — inlined in Talos kernel) |
-| `modules.yaml` | Kernel module auto-load requests, file reads for module loading, module init and unload |
-| `sys-mount.yaml` | Any `mount()` syscall (source + target path logged) |
-| `sys-ptrace.yaml` | Any `ptrace()` call (request type + target pid logged) |
-| `sensitive-files.yaml` | Writes and truncations to `/etc/passwd`, `/etc/shadow`, `/etc/sudoers`, `/etc/ssh/` |
-
-### Disabled policies (`.disabled` files)
-
-Kept in `config/tetragon/` as commented-out YAML for future reference:
-
-| File | Why disabled |
-|---|---|
-| `tcp-connect.yaml.disabled` | Very high volume — every outbound TCP connection from every pod. Enable once you have a log aggregator (Vector, Loki) to absorb the load, or add `matchBinaries` / `matchNamespaces` selectors to narrow scope |
-| `creds-capability-usage.yaml.disabled` | Medium volume — `cap_capable` fires on every capability check during normal operation. Enable with tight selectors if investigating a specific workload |
-
-### Commands
-
-```bash
-# List all policies and their load state
-kubectl exec -n kube-system ds/tetragon -c tetragon -- tetra tracingpolicy list
-
-# Stream all events
-kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents
-
-# Filter to a specific namespace
-kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents --namespace default
-
-# Only kprobe events (policy hits)
-kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents --output json \
-  | jq 'select(.process_kprobe != null)'
-
-# Compact view: policy name + binary + args
-kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents --output json \
-  | jq -c 'select(.process_kprobe != null) | {policy: .process_kprobe.policy_name, binary: .process_kprobe.process.binary, args: .process_kprobe.args}'
-
-# Stream events from a specific pod
-kubectl exec -it -n kube-system ds/tetragon -c tetragon -- tetra getevents \
-  --pod-name <pod> --namespace <ns>
-
-# Check raw pod logs (mixes operational + event output)
-kubectl logs -n kube-system ds/tetragon -c tetragon -f
-
-# Verify kptr_restrict is 1 on all nodes (required for kprobe symbol resolution)
-talosctl read /proc/sys/kernel/kptr_restrict -n 192.168.0.101,192.168.0.102,192.168.0.103,192.168.0.104
-
-# Restart Tetragon (e.g. after sysctl changes)
-kubectl rollout restart ds/tetragon -n kube-system
-kubectl rollout status ds/tetragon -n kube-system
-```
-
-### Escalating a policy to enforcement
-
-To move a policy from observe to enforce, replace `action: Post` with `action: Sigkill` (kills the process) or `action: Override` with `argError: -1` (returns EPERM to the syscall). Test in a non-production namespace first using `matchNamespaces` selectors.
-
----
+# Security
 
 ## Pod Security Standards
 
@@ -230,3 +147,12 @@ spec:
             - port: "5432"
               protocol: TCP
 ```
+
+## Future improvements
+
+- **Runtime security with [Tetragon](https://tetragon.io):** eBPF observability (and optional
+  enforcement) through `TracingPolicy` resources, e.g. credential changes, kernel module loads,
+  `mount`/`ptrace` calls, writes to sensitive files. Start observe-only (`action: Post`) and narrow
+  noisy hooks (`tcp_connect`, `cap_capable`) with selectors. It runs from the Cilium Helm repo and
+  needs `/sys/kernel/tracing` mounted plus `kernel.kptr_restrict = 1` on Talos (currently `2`, see
+  `tofu/modules/talos/nodes.tf`).
