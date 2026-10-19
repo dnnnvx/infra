@@ -1,20 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  # tekton-ci namespace and its fences
   - namespace.yaml
   - ciliumnetworkpolicy.yaml
   - admission-policy.yaml
   - limitrange.yaml
   - rbac.yaml
-  - interceptor-tangled.yaml
-  - task-git-clone.yaml
-  - task-buildkit.yaml
-  - task-flux-sync.yaml
-  - pipeline-build-image.yaml
-  - triggertemplate-build-image.yaml
-  - eventlistener.yaml
-  - httproute.yaml
-  - dashboard-httproute.yaml
   - secrets.yaml
-  - ci-apps.yaml
-  - ci-apps/casasulgorgo.yaml
+  - dashboard-httproute.yaml
+  - tasks
+  - pipelines
+  - triggers
+  - ci-apps

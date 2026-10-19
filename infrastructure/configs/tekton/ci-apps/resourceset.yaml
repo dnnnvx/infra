@@ -1,5 +1,5 @@
 # One input per CI-built app (an app may have several images), taken from the
-# Static ResourceSetInputProviders in ci-apps/. For each, this generates everything the build → deploy path needs:
+# Static ResourceSetInputProviders in this directory. For each, this generates everything the build → deploy path needs:
 #   Trigger (Tangled push on <repo>, in tekton-ci) · ImageRepository + ImagePolicy per image
 #   · Kustomization app-<project> (own wait: true, so CI only waits for this app)
 #   · the name-scoped Role/RoleBinding the flux-sync task runs with.
