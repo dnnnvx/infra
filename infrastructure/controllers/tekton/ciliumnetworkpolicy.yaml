@@ -78,7 +78,7 @@ spec:
             - port: "443"
               protocol: TCP
 ---
-# Dashboard UI: reachable through the Gateway only (tekton.home, LAN). Egress
+# Dashboard UI: reachable through the Gateway only (tekton.local.casasulgorgo.net, LAN). Egress
 # (DNS, kube-apiserver) is already covered by the namespace policy above.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

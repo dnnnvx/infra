@@ -2,16 +2,24 @@
 
 ## Internal (LAN)
 
-| Hostname      | Service        |
-|---------------|----------------|
-| `ha.home`     | Home Assistant |
-| `hubble.home` | Hubble UI      |
-| `flux.home`   | Flux Operator  |
-| `nvr.home`    | LightNVR       |
-| `tekton.home` | Tekton Dashboard (read-only) |
+| Hostname                         | Service        |
+|----------------------------------|----------------|
+| `ha.local.casasulgorgo.net`      | Home Assistant |
+| `adguard.local.casasulgorgo.net` | AdGuard Home   |
+| `uptime.local.casasulgorgo.net`  | Gatus          |
+| `hubble.local.casasulgorgo.net`  | Hubble UI      |
+| `flux.local.casasulgorgo.net`    | Flux Operator  |
+| `nvr.local.casasulgorgo.net`     | LightNVR       |
+| `tekton.local.casasulgorgo.net`  | Tekton Dashboard (read-only) |
 
-All internal services share a single Cilium Gateway at `192.168.0.200` (HTTP, port 80).
-DNS is handled by AdGuard Home (`192.168.0.201`), configured via DHCP on the router. Each `*.home` hostname resolves to `192.168.0.200`.
+Internal services share the LAN-only Cilium Gateway `homelab-local` at `192.168.0.202` (HTTPS; HTTP redirects).
+The router doesn't forward anything to `.202`, so these routes can't be reached from the internet.
+TLS uses the same Let's Encrypt cert, which also covers `*.local.casasulgorgo.net`.
+The names aren't in Cloudflare: AdGuard Home (`192.168.0.201`, handed out by router DHCP) has a rewrite
+`*.local.casasulgorgo.net → 192.168.0.202`, configured in its UI (stored on its PVC, not in git).
+
+Don't attach LAN-only routes to the `homelab` Gateway: its port 443 is forwarded from the internet,
+so any route on it is publicly reachable by SNI/Host even without a DNS record.
 
 ## External (Internet)
 

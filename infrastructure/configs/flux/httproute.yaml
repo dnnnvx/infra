@@ -5,12 +5,11 @@ metadata:
   namespace: flux-system
 spec:
   parentRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: homelab
+    - name: homelab-local
       namespace: kube-system
+      sectionName: https
   hostnames:
-    - flux.home
+    - flux.local.casasulgorgo.net
   rules:
     - backendRefs:
         - name: flux-operator

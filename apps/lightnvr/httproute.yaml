@@ -5,11 +5,11 @@ metadata:
   namespace: lightnvr
 spec:
   parentRefs:
-    - name: homelab
+    - name: homelab-local
       namespace: kube-system
-      sectionName: http
+      sectionName: https
   hostnames:
-    - nvr.home
+    - nvr.local.casasulgorgo.net
   rules:
     - backendRefs:
         - name: lightnvr

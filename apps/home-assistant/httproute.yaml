@@ -5,13 +5,11 @@ metadata:
   namespace: home-assistant
 spec:
   parentRefs:
-    - name: homelab
+    - name: homelab-local
       namespace: kube-system
-      # Without `sectionName`, a route attaches to *all* matching listeners.
-      # `ha.home` should only be on HTTP (port 80), so we pinned it explicitly
-      sectionName: http
+      sectionName: https
   hostnames:
-    - ha.home
+    - ha.local.casasulgorgo.net
   rules:
     - backendRefs:
         - name: home-assistant

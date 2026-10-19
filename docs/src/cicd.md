@@ -35,7 +35,7 @@ so they don't clutter the real repositories.
 
 | Path | What |
 |------|------|
-| `infrastructure/controllers/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Dashboard (read-only, `tekton.home`): upstream release manifests, versions bumped by Renovate |
+| `infrastructure/controllers/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Dashboard (read-only, `tekton.local.casasulgorgo.net`): upstream release manifests, versions bumped by Renovate |
 | `infrastructure/controllers/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
 | `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`, `flux-sync`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor, webhook HTTPRoute, push credentials, webhook HMAC secret, `ci-apps.yaml`: the `ResourceSet` (inputs: one `Static` provider per app in `ci-apps/`) that generates each CI app's Trigger, ImageRepository/ImagePolicy per image, `app-<project>` Kustomization and name-scoped `flux-sync` Role |
 | `apps/<project>/kustomization.yaml` | `images:` entry with the `digest:` marker Flux rewrites |

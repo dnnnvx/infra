@@ -1,4 +1,4 @@
-# Tekton Dashboard (read-only), LAN only like the other *.home services.
+# Tekton Dashboard (read-only), LAN only like the other *.local.casasulgorgo.net services.
 # Lives in tekton-pipelines so it can reference the Service without a ReferenceGrant.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -7,11 +7,11 @@ metadata:
   namespace: tekton-pipelines
 spec:
   parentRefs:
-    - name: homelab
+    - name: homelab-local
       namespace: kube-system
-      sectionName: http
+      sectionName: https
   hostnames:
-    - tekton.home
+    - tekton.local.casasulgorgo.net
   rules:
     - backendRefs:
         - name: tekton-dashboard

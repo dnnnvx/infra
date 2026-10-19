@@ -95,13 +95,13 @@ kubectl exec -n kube-system <cilium-pod> -- cilium policy get
 ```bash
 # Test DNS from inside the cluster (no policy constraints on default ns)
 kubectl run -it --rm dns-test --image=busybox --restart=Never -n default \
-  -- nslookup ha.home 192.168.0.201
+  -- nslookup ha.local.casasulgorgo.net 192.168.0.201
 
 # Test a custom DNS server directly (bypasses OS resolver)
-dig ha.home @192.168.0.201
+dig ha.local.casasulgorgo.net @192.168.0.201
 
 # Test the macOS OS resolver (what curl/browsers use)
-dscacheutil -q host -a name ha.home
+dscacheutil -q host -a name ha.local.casasulgorgo.net
 
 # Show all macOS resolver config (check for search domain issues)
 scutil --dns
@@ -109,22 +109,17 @@ scutil --dns
 # Flush macOS DNS cache
 sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
 
-# Fix .home resolution when macOS appends the search domain (search domain = "home")
-# macOS router DHCP sets search domain "home", causing ha.home → ha.home.home lookup
-sudo mkdir -p /etc/resolver
-echo "nameserver 192.168.0.201" | sudo tee /etc/resolver/home
-
 # Check what port AdGuard is listening on inside the pod
 kubectl exec -n adguard-home adguard-home-0 -- ss -ulnp | grep 53
 ```
 
-### macOS .home not resolving in browser
+### `*.local.casasulgorgo.net` not resolving in browser
 
-Firefox has its own DNS-over-HTTPS stack that ignores the OS resolver:
-- **about:preferences** → Network Settings → uncheck "Enable DNS over HTTPS"
-- Or add `.home` to `network.trr.excluded-domains` in `about:config`
+These names exist only in AdGuard, so a browser using its own DNS-over-HTTPS gets NXDOMAIN from public DNS:
+- Firefox: add `local.casasulgorgo.net` to `network.trr.excluded-domains` in `about:config`, or disable DoH
+- Chrome/Safari: turn off "Use secure DNS" / iCloud Private Relay on the home network
 
-If `dig` works but `curl` doesn't, the OS resolver is the issue — create `/etc/resolver/home` as above.
+If `dig @192.168.0.201` works but `dscacheutil` doesn't, the OS isn't using AdGuard (see [DNS notes](./networking.md#dns-notes)).
 
 ---
 
@@ -133,7 +128,7 @@ If `dig` works but `curl` doesn't, the OS resolver is the issue — create `/etc
 ```bash
 # HTTP connectivity from inside a pod (no image pull policy issues)
 kubectl run -it --rm curl-test --image=curlimages/curl --restart=Never -n default \
-  -- curl -sv http://192.168.0.200 -H "Host: ha.home" --max-time 5
+  -- curl -sv https://ha.local.casasulgorgo.net --resolve ha.local.casasulgorgo.net:443:192.168.0.202 --max-time 5
 
 # From a pod in the same namespace
 kubectl exec -n home-assistant deployment/home-assistant \

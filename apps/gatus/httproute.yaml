@@ -5,11 +5,11 @@ metadata:
   namespace: gatus
 spec:
   parentRefs:
-    - name: homelab
+    - name: homelab-local
       namespace: kube-system
-      sectionName: http
+      sectionName: https
   hostnames:
-    - uptime.home
+    - uptime.local.casasulgorgo.net
   rules:
     - backendRefs:
         - name: gatus

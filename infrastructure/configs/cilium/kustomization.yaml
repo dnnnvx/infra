@@ -5,4 +5,5 @@ resources:
   - ip-pool.yaml
   - l2-policy.yaml
   - gateway.yaml
+  - gateway-local.yaml
   - hubble-httproute.yaml

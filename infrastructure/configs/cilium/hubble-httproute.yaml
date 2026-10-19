@@ -5,10 +5,11 @@ metadata:
   namespace: kube-system
 spec:
   parentRefs:
-    - name: homelab
+    - name: homelab-local
       namespace: kube-system
+      sectionName: https
   hostnames:
-    - hubble.home
+    - hubble.local.casasulgorgo.net
   rules:
     - backendRefs:
         - name: hubble-ui

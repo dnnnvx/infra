@@ -5,11 +5,11 @@ metadata:
   namespace: adguard-home
 spec:
   parentRefs:
-    - name: homelab
+    - name: homelab-local
       namespace: kube-system
-      sectionName: http
+      sectionName: https
   hostnames:
-    - adguard.home
+    - adguard.local.casasulgorgo.net
   rules:
     - backendRefs:
         - name: adguard-home
