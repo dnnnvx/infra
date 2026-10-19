@@ -10,43 +10,28 @@ tofu/                    # OpenTofu (Terraform) — provisions the cluster
     └── github/          # Deploy key + pinned SSH known_hosts
 
 clusters/production/     # Flux entry point (synced by FluxInstance)
-├── kustomization.yaml   # ConfigMapGenerators for Helm values
-├── infrastructure.yaml  # Flux Kustomization → ./infrastructure
-├── config.yaml          # Flux Kustomization → ./config (dependsOn infrastructure)
-├── home-assistant.yaml  # Flux Kustomization → ./apps/home-assistant/overlays/production
-├── ddns.yaml            # Flux Kustomization → ./apps/ddns/overlays/production
-├── adguard-home.yaml    # Flux Kustomization → ./apps/adguard-home/overlays/production
-├── pocket-id.yaml       # Flux Kustomization → ./apps/pocket-id/overlays/production
-├── lightnvr.yaml        # Flux Kustomization → ./apps/lightnvr/overlays/production
-└── values/              # Cluster-specific Helm values
+├── infrastructure.yaml  # Flux Kustomization → ./infrastructure/controllers
+├── config.yaml          # Flux Kustomization → ./infrastructure/configs (dependsOn infrastructure)
+└── apps.yaml            # Flux Kustomization → ./apps (dependsOn both)
 
-infrastructure/          # Base HelmReleases (reusable, values optional)
-├── cilium/              # CNI + Gateway API CRDs
-├── cert-manager/        # TLS certificates
-├── flux/                # Flux operator + instance
-├── metrics-server/      # Resource metrics
-├── piraeus/             # LINSTOR storage (DRBD)
+infrastructure/
+├── controllers/         # Operators and their CRDs: HelmReleases (+ values.yaml) or upstream manifests
+│   ├── cert-manager/    # TLS certificates
+│   ├── cilium/          # CNI + Gateway API CRDs
+│   ├── cnpg/            # CloudNativePG operator
+│   ├── flux/            # Flux operator + instance
+│   ├── metrics-server/  # Resource metrics
+│   ├── piraeus/         # LINSTOR storage (DRBD)
+│   ├── tekton/          # Pipelines, Triggers, Pruner, Dashboard
+│   └── zot/             # OCI registry
+└── configs/             # Custom resources for those controllers (their CRDs must exist)
+    ├── cert-manager/    # ClusterIssuer (Let's Encrypt DNS-01) + wildcard Certificate
+    ├── cilium/          # Default-deny policy, Gateway, IP pool, L2 policy, Hubble HTTPRoute
+    ├── flux/            # Web UI, webhook Receiver, notifications, ImageUpdateAutomation
+    ├── piraeus/         # LinstorCluster, satellite configs, storage pools + classes
+    └── tekton/          # tekton-ci namespace, Tasks, Pipeline, EventListener, ci-apps ResourceSet
 
-config/                  # Post-install configuration (CRDs must exist)
-├── cert-manager/        # ClusterIssuer (Let's Encrypt DNS-01) + wildcard Certificate
-├── cilium/              # Gateway, IP pool, L2 policy, Hubble HTTPRoute
-├── flux/                # Flux operator HTTPRoute
-└── piraeus/             # LinstorSatelliteConfiguration
-
-apps/                    # User-facing applications
-├── home-assistant/
-│   ├── base/               # Deployment, Service, PVC, Matter Server
-│   └── overlays/production # HTTPRoutes (internal + external), NetworkPolicy, patches
-├── ddns/
-│   ├── base/               # favonia/cloudflare-ddns Deployment
-│   └── overlays/production # Homelab-specific env (domain, secret ref)
-├── adguard-home/
-│   ├── base/               # StatefulSet, DNS + Web Services
-│   └── overlays/production # HTTPRoute, storage patches
-├── pocket-id/
-│   ├── base/               # Pocket-ID (OIDC IdP, passkey auth), OAuth2 Proxy (disabled)
-│   └── overlays/production # HTTPRoute, SOPS-encrypted secrets
-└── lightnvr/
-    ├── base/               # Deployment, Service, PVC (recordings)
-    └── overlays/production # HTTPRoute (nvr.home), piraeus-hdd storage
+apps/                    # User-facing applications, one flat directory each
+├── kustomization.yaml   # Enabled apps (CI-built apps get their own app-<project> Kustomization)
+└── <app>/               # Namespace, CiliumNetworkPolicy, workloads, HTTPRoute, SOPS secrets
 ```

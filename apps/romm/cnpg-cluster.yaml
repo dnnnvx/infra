@@ -1,0 +1,23 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: romm-postgres
+  namespace: romm
+  labels:
+    app.kubernetes.io/part-of: romm
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17-standard-trixie
+  storage:
+    size: 2Gi
+    storageClass: piraeus
+  bootstrap:
+    initdb:
+      database: romm
+      owner: romm
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi

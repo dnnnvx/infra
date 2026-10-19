@@ -34,7 +34,7 @@ variable "sops_age_key" {
 }
 
 variable "zot_pull_password" {
-  description = "Password of zot's read-only `puller` user, used by containerd on every node (matches the bcrypt hash in infrastructure/zot/overlays/production/secrets.yaml)"
+  description = "Password of zot's read-only `puller` user, used by containerd on every node (matches the bcrypt hash in infrastructure/controllers/zot/secrets.yaml)"
   type        = string
   sensitive   = true
 }

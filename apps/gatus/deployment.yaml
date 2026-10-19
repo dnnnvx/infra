@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatus
+  namespace: gatus
+  labels:
+    app.kubernetes.io/part-of: gatus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gatus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gatus
+        app.kubernetes.io/part-of: gatus
+    spec:
+      serviceAccountName: gatus
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gatus
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          image: twinproduction/gatus:v5.37.0
+          env:
+            # directory mode: gatus merges config.yaml + the sidecar's gatus-sidecar.yaml
+            - name: GATUS_CONFIG_PATH
+              value: /config
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: generated
+              mountPath: /config
+            - name: config
+              mountPath: /config/config.yaml
+              subPath: config.yaml
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+          envFrom:
+            - secretRef:
+                name: gatus-secrets
+        # writes endpoints for HTTPRoutes annotated gatus.home-operations.com/enabled
+        - name: gatus-sidecar
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          image: ghcr.io/home-operations/gatus-sidecar:0.5.4
+          args:
+            - --enable-httproute
+            - --gateway-name=homelab
+            - --output=/config/gatus-sidecar.yaml
+          volumeMounts:
+            - name: generated
+              mountPath: /config
+      volumes:
+        - name: generated
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: gatus-config

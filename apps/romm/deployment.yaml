@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: romm
+  namespace: romm
+  labels:
+    app.kubernetes.io/part-of: romm
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: romm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: romm
+        app.kubernetes.io/part-of: romm
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: romm
+          image: rommapp/romm:5.4.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: ROMM_BASE_URL
+              value: https://romm.casasulgorgo.net
+            # Served over HTTPS at the gateway, so the session/CSRF cookies can
+            # be marked Secure (defaults to false upstream).
+            - name: ROMM_SESSION_SECURE_COOKIE
+              value: "true"
+            - name: OIDC_ENABLED
+              value: "true"
+            - name: OIDC_PROVIDER
+              value: pocket-id
+            - name: OIDC_SERVER_APPLICATION_URL
+              value: https://auth.casasulgorgo.net
+            - name: OIDC_SERVER_METADATA_URL
+              value: https://auth.casasulgorgo.net/.well-known/openid-configuration
+            - name: OIDC_REDIRECT_URI
+              value: https://romm.casasulgorgo.net/api/oauth/openid
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: romm-secrets
+                  key: OIDC_CLIENT_ID
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: romm-secrets
+                  key: OIDC_CLIENT_SECRET
+            - name: ROMM_DB_DRIVER
+              value: postgresql
+            - name: DB_HOST
+              value: romm-postgres-rw
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: romm
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: romm-postgres-app
+                  key: username
+            - name: DB_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: romm-postgres-app
+                  key: password
+            - name: ROMM_AUTH_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: romm-secrets
+                  key: ROMM_AUTH_SECRET_KEY
+            - name: HASHEOUS_API_ENABLED
+              value: "true"
+          startupProbe:
+            httpGet:
+              path: /api/heartbeat
+              port: http
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /api/heartbeat
+              port: http
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/heartbeat
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 100m
+            limits:
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /romm
+            - name: redis
+              mountPath: /redis-data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: romm-data
+        - name: redis
+          persistentVolumeClaim:
+            claimName: romm-redis

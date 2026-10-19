@@ -193,10 +193,10 @@ All namespaces have a `CiliumNetworkPolicy` with `endpointSelector: {}` (applies
 
 ### Adding a new app
 
-1. Create `apps/<name>/overlays/production/networkpolicy.yaml`
+1. Create `apps/<name>/ciliumnetworkpolicy.yaml`
 2. Allow DNS egress + gateway ingress as a minimum
 3. Add cross-namespace rules for postgres, valkey, etc. as needed
-4. Add to the overlay `kustomization.yaml` resources
+4. Add it to `apps/<name>/kustomization.yaml` resources
 
 ### Pattern reference
 

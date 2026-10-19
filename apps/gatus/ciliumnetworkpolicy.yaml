@@ -1,0 +1,39 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: gatus
+  labels:
+    app.kubernetes.io/part-of: gatus
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - ingress
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # internal cluster services — no port restriction
+    - toEntities:
+        - cluster
+        - kube-apiserver
+    # kube-apiserver VIP (not matched by kube-apiserver entity)
+    - toCIDR:
+        - 192.168.0.100/32
+    # external endpoints (HTTPS only)
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "80"
+              protocol: TCP

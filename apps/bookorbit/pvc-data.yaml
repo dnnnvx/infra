@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bookorbit-data
+  namespace: bookorbit
+  labels:
+    app.kubernetes.io/part-of: bookorbit
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+  storageClassName: piraeus

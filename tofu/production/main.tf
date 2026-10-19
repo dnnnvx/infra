@@ -74,7 +74,7 @@ locals {
   # zot gets a pinned ClusterIP from the static band at its start, because
   # containerd on the nodes can't resolve *.svc.cluster.local. Single source of
   # truth: fed to the Talos registry mirror below and, via flux-substitutions,
-  # to the zot Service (ZOT_CLUSTER_IP in infrastructure/zot/overlays/production/values.yaml).
+  # to the zot Service (ZOT_CLUSTER_IP in infrastructure/controllers/zot/values.yaml).
   service_cidr   = "10.96.0.0/12"
   zot_cluster_ip = cidrhost(local.service_cidr, 50)
 }
@@ -203,9 +203,9 @@ module "cloudflare" {
 module "k8s" {
   source = "../modules/k8s"
 
-  cilium_values        = file("${path.module}/../../infrastructure/cilium/overlays/production/values.yaml")
-  flux_operator_values = file("${path.module}/../../infrastructure/flux/overlays/production/values-operator.yaml")
-  flux_instance_values = file("${path.module}/../../infrastructure/flux/overlays/production/values-instance.yaml")
+  cilium_values        = file("${path.module}/../../infrastructure/controllers/cilium/values.yaml")
+  flux_operator_values = file("${path.module}/../../infrastructure/controllers/flux/values-operator.yaml")
+  flux_instance_values = file("${path.module}/../../infrastructure/controllers/flux/values-instance.yaml")
 
   namespaces = [
     "cert-manager",

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: norish
+  namespace: norish
+  labels:
+    app.kubernetes.io/part-of: norish
+spec:
+  selector:
+    app.kubernetes.io/name: norish
+  ports:
+    - port: 3000
+      targetPort: http
+      name: http
+      appProtocol: kubernetes.io/ws

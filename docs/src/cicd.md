@@ -35,11 +35,10 @@ so they don't clutter the real repositories.
 
 | Path | What |
 |------|------|
-| `infrastructure/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Dashboard (read-only, `tekton.home`): upstream release manifests, versions bumped by Renovate |
-| `infrastructure/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
-| `config/tekton/base/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`, `flux-sync`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor |
-| `config/tekton/overlays/production/` | Webhook HTTPRoute, push credentials, webhook HMAC secret, `ci-apps.yaml`: the `ResourceSet` (inputs: one `Static` provider per app in `ci-apps/`) that generates each CI app's Trigger, ImageRepository/ImagePolicy per image, `app-<project>` Kustomization and name-scoped `flux-sync` Role |
-| `apps/<app>/overlays/production/image-automation.yaml` | ImageRepository + ImagePolicy for that app |
+| `infrastructure/controllers/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Dashboard (read-only, `tekton.home`): upstream release manifests, versions bumped by Renovate |
+| `infrastructure/controllers/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
+| `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, Tasks (`git-clone`, `buildkit`, `flux-sync`), Pipeline `build-image`, TriggerTemplate, EventListener, the `tangled` ClusterInterceptor, webhook HTTPRoute, push credentials, webhook HMAC secret, `ci-apps.yaml`: the `ResourceSet` (inputs: one `Static` provider per app in `ci-apps/`) that generates each CI app's Trigger, ImageRepository/ImagePolicy per image, `app-<project>` Kustomization and name-scoped `flux-sync` Role |
+| `apps/<project>/kustomization.yaml` | `images:` entry with the `digest:` marker Flux rewrites |
 | `tofu/production/main.tf` | Talos `RegistryMirrorConfig` so containerd can pull from zot with no authorization |
 
 ## Flux sync (deploy task)
@@ -57,20 +56,20 @@ otherwise `wait: true` on `apps` would fail the build whenever any other app is 
 
 ## Adding a repo/image
 
-1. Copy `config/tekton/overlays/production/ci-apps/casasulgorgo.yaml` (a `Static` ResourceSetInputProvider the `ci-apps` ResourceSet selects by label) and list it in the overlay's `kustomization.yaml`:
+1. Copy `infrastructure/configs/tekton/ci-apps/casasulgorgo.yaml` (a `Static` ResourceSetInputProvider the `ci-apps` ResourceSet selects by label) and list it in that directory's `kustomization.yaml`:
    `project` (required), the Tangled `repo` name (default: `project`) and `images` (default: one image named after the repo) (`name`, optional `dockerfile` relative to `context`, optional `context` relative to the repo root).
    It generates the Trigger, ImageRepository/ImagePolicy per image, the `app-<project>` Kustomization and the Role.
-2. In `apps/<project>/overlays/production`, use a kustomize `images:` entry per image with a `digest:` marker
+2. In `apps/<project>/kustomization.yaml`, use a kustomize `images:` entry per image with a `digest:` marker
    `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's).
-   Check the generated objects with `flux-operator build resourceset -f config/tekton/overlays/production/ci-apps.yaml --inputs-from-provider <provider file>`.
+   Check the generated objects with `flux-operator build resourceset -f infrastructure/configs/tekton/ci-apps.yaml --inputs-from-provider <provider file>`.
 3. On Tangled: repo **Settings → Hooks** → payload URL `https://ci.casasulgorgo.net/`, event `push`,
-   secret = `tangled-webhook` value (`just edit-secret config/tekton/overlays/production/secrets.yaml`).
+   secret = `tangled-webhook` value (`just edit-secret infrastructure/configs/tekton/secrets.yaml`).
 
 ## Webhook verification
 
 Tangled signs the body as `X-Tangled-Signature-256: sha256=<hmac>`. That's the same
 scheme as GitHub, but under a header name the built-in `github` interceptor doesn't read.
-`config/tekton/base/interceptor-tangled.yaml` runs a small custom ClusterInterceptor
+`infrastructure/configs/tekton/interceptor-tangled.yaml` runs a small custom ClusterInterceptor
 ([`ghcr.io/dnnnvx/tangled-interceptor`](https://github.com/dnnnvx/tangled-interceptor), a static
 Rust binary) that checks it. The `cel` interceptor then filters the
 event and computes the tags. Because the payload is authenticated, the Trigger takes the

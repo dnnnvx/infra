@@ -11,7 +11,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./clusters/production/apps
+  path: ./apps
   prune: false
   wait: true
   decryption:

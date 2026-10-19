@@ -15,7 +15,7 @@ Piraeus provides distributed storage via LINSTOR + DRBD, backed by the Talos nod
 
 ## Pool configuration (GitOps)
 
-Both pools are declared as `LinstorSatelliteConfiguration` CRDs in `config/piraeus/`:
+Both pools are declared as `LinstorSatelliteConfiguration` CRDs in `infrastructure/configs/piraeus/`:
 - `storage-pool.yaml` — `file-thin` pool, applied to nodes with label `cluster.casasulgorgo.net/storage: local`
 - `storage-pool-hdd.yaml` — `lvm-thin-hdd` pool, applied to nodes with label `cluster.casasulgorgo.net/storage: hdd`
 

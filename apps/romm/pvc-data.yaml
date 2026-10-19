@@ -1,0 +1,22 @@
+# Single volume for the whole of /romm. RomM's image deliberately declares only
+# the parent /romm as a VOLUME (not library/, resources/, assets/) so those stay
+# on one filesystem — it hardlinks across them with os.link(), which fails with
+# EXDEV if they land on separate mounts.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: romm-data
+  namespace: romm
+  labels:
+    app.kubernetes.io/part-of: romm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  # On `piraeus` (file-thin, placementCount 2) rather than `piraeus-hdd`, because
+  # nuc-102 — the only `storage: hdd` node — was removed from the cluster, leaving
+  # that pool with no backing node (lightnvr has been unschedulable since).
+  # Costs 40Gi raw for a 20Gi library; revisit if nuc-102 comes back.
+  storageClassName: piraeus

@@ -1,0 +1,34 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: silverbullet
+  namespace: silverbullet
+  labels:
+    app.kubernetes.io/part-of: silverbullet
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: silverbullet
+  ingress:
+    - fromEntities:
+        - ingress
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

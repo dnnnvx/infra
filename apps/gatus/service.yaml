@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatus
+  namespace: gatus
+  labels:
+    app.kubernetes.io/part-of: gatus
+spec:
+  selector:
+    app.kubernetes.io/name: gatus
+  ports:
+    - port: 8080
+      targetPort: http
+      name: http

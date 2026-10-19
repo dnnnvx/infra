@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pocket-id
+  namespace: webauth
+  labels:
+    app.kubernetes.io/part-of: webauth
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pocket-id
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pocket-id
+        app.kubernetes.io/part-of: webauth
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: pocket-id
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["SETUID", "SETGID", "CHOWN"]
+          image: ghcr.io/pocket-id/pocket-id:v2.18.0
+          ports:
+            - name: http
+              containerPort: 1411
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+          env:
+            - name: APP_URL
+              value: "https://auth.casasulgorgo.net"
+            - name: TRUST_PROXY
+              value: "true"
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocket-id-secrets
+                  key: encryption-key
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pocket-id-data

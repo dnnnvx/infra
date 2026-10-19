@@ -106,14 +106,13 @@ renovate:
       | [$f, $d.depName, $d.currentValue, .newValue, .updateType] | @tsv' \
       /tmp/renovate.json | column -t
 
-# validate all kustomize overlays and manifests
+# validate the Flux entrypoints and every app (including disabled and CI-built ones)
 validate:
     #!/usr/bin/env bash
     set -euo pipefail
     errors=0
 
-    overlays=$(find apps -path "*/overlays/*" -maxdepth 4 -name "kustomization.yaml" -exec dirname {} \; | sort)
-    for dir in clusters/{{ environment }} infrastructure config $overlays; do
+    for dir in clusters/{{ environment }} infrastructure/controllers infrastructure/configs apps apps/*/; do
       echo "==> Building $dir..."
       output=$(kustomize build "$dir" 2>&1) || {
         echo "    ✗ kustomize build FAILED:"

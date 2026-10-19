@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: adguard-home
+  namespace: adguard-home
+  labels:
+    app.kubernetes.io/part-of: adguard-home
+spec:
+  serviceName: adguard-home
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: adguard-home
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: adguard-home
+        app.kubernetes.io/part-of: adguard-home
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: adguard-home
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_BIND_SERVICE"]
+          image: adguard/adguardhome:v0.107.79
+          args:
+            - --config
+            - /opt/adguardhome/conf/AdGuardHome.yaml
+            - --work-dir
+            - /opt/adguardhome/work
+            - --no-check-update
+          ports:
+            - name: dns-tcp
+              containerPort: 53
+              protocol: TCP
+            - name: dns-udp
+              containerPort: 53
+              protocol: UDP
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - name: conf
+              mountPath: /opt/adguardhome/conf
+            - name: work
+              mountPath: /opt/adguardhome/work
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: conf
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 100Mi
+        storageClassName: piraeus
+    - metadata:
+        name: work
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 512Mi
+        storageClassName: piraeus

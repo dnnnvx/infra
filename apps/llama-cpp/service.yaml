@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama-cpp
+  namespace: llama-cpp
+  labels:
+    app.kubernetes.io/part-of: llama-cpp
+spec:
+  selector:
+    app.kubernetes.io/name: llama-cpp
+  ports:
+    - port: 8080
+      targetPort: http
+      name: http

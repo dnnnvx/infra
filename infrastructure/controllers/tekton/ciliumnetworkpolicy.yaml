@@ -1,0 +1,98 @@
+# Controllers, webhooks and core interceptors (pipelines, triggers, pruner)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: tekton-pipelines
+spec:
+  endpointSelector: {}
+  ingress:
+    # Admission/conversion webhooks called by kube-apiserver (hostNetwork, so
+    # it shows up as host/remote-node — same as cnpg-system)
+    - fromEntities:
+        - kube-apiserver
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "8443"
+              protocol: TCP
+    # EventListeners call the core interceptors (8443) and the custom
+    # tangled-interceptor (8080, infrastructure/configs/tekton/interceptor-tangled.yaml)
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: tekton-ci
+      toPorts:
+        - ports:
+            - port: "8443"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+    # The pipelines controller reads image configs from registries to resolve
+    # step entrypoints when a step has no explicit command
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# Remote resolvers (git, hub, bundles, http) fetch Tasks/Pipelines from the internet
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: tekton-pipelines-resolvers
+spec:
+  endpointSelector: {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# Dashboard UI: reachable through the Gateway only (tekton.home, LAN). Egress
+# (DNS, kube-apiserver) is already covered by the namespace policy above.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: dashboard
+  namespace: tekton-pipelines
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: tekton-dashboard
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "9097"
+              protocol: TCP

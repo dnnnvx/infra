@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+  labels:
+    app.kubernetes.io/part-of: home-assistant
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: home-assistant
+        app.kubernetes.io/part-of: home-assistant
+    spec:
+      # hostNetwork: required for LAN device discovery (mDNS, Zigbee over network, etc.)
+      # The pod gets the node's IP instead of a pod IP, giving it direct access to the LAN.
+      hostNetwork: true
+      # ClusterFirstWithHostNet: with hostNetwork=true the pod would normally inherit the node's
+      # /etc/resolv.conf and lose cluster DNS. This policy restores CoreDNS so that
+      # Kubernetes service names (e.g. matter-server.home-assistant.svc.cluster.local) still resolve.
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: home-assistant
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: home-assistant
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          image: ghcr.io/home-assistant/home-assistant:2026.10.2
+          ports:
+            - name: http
+              containerPort: 8123
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 30
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: home-assistant-config

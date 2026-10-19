@@ -5,14 +5,12 @@
   "kubernetes": {
     "managerFilePatterns": [
       "/^apps/.+\\.ya?ml$/",
-      "/^infrastructure/.+\\.ya?ml$/",
-      "/^config/.+\\.ya?ml$/"
+      "/^infrastructure/.+\\.ya?ml$/"
     ]
   },
   "flux": {
     "managerFilePatterns": [
       "/^infrastructure/.+\\.ya?ml$/",
-      "/^config/.+\\.ya?ml$/",
       "/^clusters/.+\\.ya?ml$/"
     ]
   },
