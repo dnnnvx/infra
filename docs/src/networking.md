@@ -15,8 +15,8 @@
 Internal services share the LAN-only Cilium Gateway `homelab-local` at `192.168.0.202` (HTTPS; HTTP redirects).
 The router doesn't forward anything to `.202`, so these routes can't be reached from the internet.
 TLS uses the same Let's Encrypt cert, which also covers `*.local.casasulgorgo.net`.
-The names aren't in Cloudflare: AdGuard Home (`192.168.0.201`, handed out by router DHCP) has a rewrite
-`*.local.casasulgorgo.net → 192.168.0.202`, configured in its UI (stored on its PVC, not in git).
+DNS: a DNS-only (not proxied) Cloudflare record `*.local.casasulgorgo.net → 192.168.0.202` (tofu, `local_gateway_ip`),
+so every resolver, including browser DoH, gets the same answer. Publishing the private IP is harmless.
 
 Don't attach LAN-only routes to the `homelab` Gateway: its port 443 is forwarded from the internet,
 so any route on it is publicly reachable by SNI/Host even without a DNS record.

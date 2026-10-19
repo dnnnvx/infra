@@ -28,6 +28,12 @@ variable "cname_subdomains" {
   default     = []
 }
 
+variable "local_gateway_ip" {
+  description = "Private IP of the LAN-only Gateway; creates a DNS-only *.local A record pointing to it. Leave empty to skip."
+  type        = string
+  default     = ""
+}
+
 variable "atproto_did" {
   description = "AT Protocol DID for handle verification via _atproto TXT record (e.g. did:plc:xxxx). Leave empty to skip."
   type        = string

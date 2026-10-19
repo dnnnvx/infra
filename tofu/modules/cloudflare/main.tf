@@ -47,3 +47,16 @@ resource "cloudflare_dns_record" "cname_subdomains" {
   ttl     = 1 # 1 = auto (TTL is ignored when proxied)
   proxied = true
 }
+
+# LAN-only services: public wildcard pointing at the private homelab-local Gateway IP,
+# so browsers using DoH resolve them too. Unreachable from the internet (private IP, not proxied).
+resource "cloudflare_dns_record" "local_wildcard" {
+  count = var.local_gateway_ip != "" ? 1 : 0
+
+  zone_id = data.cloudflare_zone.main.zone_id
+  name    = "*.local"
+  content = var.local_gateway_ip
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}

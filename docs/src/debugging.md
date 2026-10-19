@@ -113,13 +113,10 @@ sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
 kubectl exec -n adguard-home adguard-home-0 -- ss -ulnp | grep 53
 ```
 
-### `*.local.casasulgorgo.net` not resolving in browser
+### `*.local.casasulgorgo.net` not resolving
 
-These names exist only in AdGuard, so a browser using its own DNS-over-HTTPS gets NXDOMAIN from public DNS:
-- Firefox: add `local.casasulgorgo.net` to `network.trr.excluded-domains` in `about:config`, or disable DoH
-- Chrome/Safari: turn off "Use secure DNS" / iCloud Private Relay on the home network
-
-If `dig @192.168.0.201` works but `dscacheutil` doesn't, the OS isn't using AdGuard (see [DNS notes](./networking.md#dns-notes)).
+The wildcard is public (Cloudflare, DNS-only), so `dig ha.local.casasulgorgo.net @1.1.1.1` should return `192.168.0.202`.
+If a resolver returns nothing, it's likely DNS-rebinding protection stripping private-IP answers (some routers do this).
 
 ---
 

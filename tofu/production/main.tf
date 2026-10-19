@@ -198,6 +198,7 @@ module "cloudflare" {
   cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "romm", "ci", "registry"]
   r2_buckets            = { "tofu-state" = {} }
   atproto_did           = local.atproto_did
+  local_gateway_ip      = "192.168.0.202" # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)
 }
 
 module "k8s" {
