@@ -39,9 +39,3 @@ variable "atproto_did" {
   type        = string
   default     = ""
 }
-
-variable "mail_subdomain" {
-  description = "Mail server subdomain"
-  type        = string
-  default     = "mail"
-}

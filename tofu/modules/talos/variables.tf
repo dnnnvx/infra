@@ -8,11 +8,6 @@ variable "cluster_vip" {
   type        = string
 }
 
-variable "project" {
-  description = "Project name used in node labels"
-  type        = string
-}
-
 variable "talos_version" {
   description = "Short Talos version for secrets/config generation (e.g. v1.12)"
   type        = string

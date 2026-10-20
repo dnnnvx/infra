@@ -33,12 +33,6 @@ variable "sops_age_key" {
   default     = ""
 }
 
-variable "zot_pull_password" {
-  description = "Password of zot's read-only `puller` user, used by containerd on every node (matches the bcrypt hash in infrastructure/controllers/zot/secrets.yaml)"
-  type        = string
-  sensitive   = true
-}
-
 variable "flux_substitutions" {
   description = "Key-value pairs exposed as Flux variable substitutions via the flux_substitutions Secret"
   type        = map(string)
