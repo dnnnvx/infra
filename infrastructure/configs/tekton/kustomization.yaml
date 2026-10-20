@@ -12,4 +12,3 @@ resources:
   - tasks
   - pipelines
   - triggers
-  - ci-apps

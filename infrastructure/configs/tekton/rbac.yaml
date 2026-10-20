@@ -42,7 +42,7 @@ metadata:
 automountServiceAccountToken: false
 ---
 # Runs the flux-sync task only (PipelineRun taskRunSpecs). Its permissions are
-# the name-scoped Role in flux-system (ci-apps/resourceset.yaml).
+# the name-scoped Role in flux-system (apps/<project>/ci.yaml).
 apiVersion: v1
 kind: ServiceAccount
 metadata:

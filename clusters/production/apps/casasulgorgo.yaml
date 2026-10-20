@@ -1,0 +1,28 @@
+# CI-built (apps/casasulgorgo/ci.yaml): the flux-sync task waits for this Kustomization after each build.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-casasulgorgo
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infrastructure
+    - name: config
+  interval: 10m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/casasulgorgo
+  prune: false
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  # ZOT_CLUSTER_IP for the ImageRepository in ci.yaml
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: flux-substitutions
+        optional: true

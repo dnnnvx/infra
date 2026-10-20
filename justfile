@@ -80,7 +80,7 @@ sync:
     flux reconcile source git flux-system -n flux-system --context {{ context }}
     flux reconcile kustomization infrastructure
     flux reconcile kustomization config
-    flux reconcile kustomization apps
+    flux get kustomizations | awk '/^app-/ {print $1}' | xargs -n1 flux reconcile kustomization
 
 # replay a signed Tangled push webhook (no commit needed): just ci-build <clone_url> <sha> [repo]
 ci-build clone_url sha repo="web":
@@ -112,7 +112,7 @@ validate:
     set -euo pipefail
     errors=0
 
-    for dir in clusters/{{ environment }} infrastructure/controllers infrastructure/configs apps apps/*/; do
+    for dir in clusters/{{ environment }} infrastructure/controllers infrastructure/configs apps/*/; do
       echo "==> Building $dir..."
       output=$(kustomize build "$dir" 2>&1) || {
         echo "    ✗ kustomize build FAILED:"

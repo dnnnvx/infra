@@ -1,0 +1,124 @@
+# Build → deploy wiring for this app (Tekton Trigger, Flux image automation, flux-sync RBAC).
+# Its Flux Kustomization is clusters/production/apps/casasulgorgo.yaml. For a new CI-built app, copy both and replace:
+#   casasulgorgo → project · web (Trigger filter) → Tangled repository name · web (image) → image name.
+# Per extra image: another ImageRepository/ImagePolicy pair, its name in the Role's resourceNames,
+# a `<name>,<dockerfile>,<context>` entry (space-separated) in the Trigger's `images` binding
+# and an `images:` entry with a `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` marker in kustomization.yaml.
+---
+# Lives in flux-system: ImageUpdateAutomation only sees policies in its own namespace.
+# Tekton moves the `production` tag on every main build; Flux follows its digest and
+# pins it in kustomization.yaml, so each rollout is a git commit.
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: casasulgorgo-web
+  namespace: flux-system
+spec:
+  # the IP must be literal (substituted by Flux post-build from the tofu-managed secret)
+  image: ${ZOT_CLUSTER_IP}:5000/casasulgorgo/web
+  interval: 5m
+  insecure: true
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: casasulgorgo-web
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: casasulgorgo-web
+  filterTags:
+    pattern: '^production$'
+  policy:
+    alphabetical:
+      order: asc
+  # The tag is mutable: re-check its digest on every interval
+  digestReflectionPolicy: Always
+  interval: 5m
+---
+# What the flux-sync task may touch after a build. Scoped by name: patch on a
+# Kustomization/GitRepository would otherwise let the CI namespace rewrite arbitrary Flux objects.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: flux-sync-casasulgorgo
+  namespace: flux-system
+rules:
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imagerepositories, imagepolicies]
+    resourceNames: [casasulgorgo-web]
+    verbs: [get, patch]
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imageupdateautomations]
+    resourceNames: [apps]
+    verbs: [get, patch]
+  - apiGroups: [kustomize.toolkit.fluxcd.io]
+    resources: [kustomizations]
+    resourceNames: [app-casasulgorgo]
+    verbs: [get, patch]
+  - apiGroups: [source.toolkit.fluxcd.io]
+    resources: [gitrepositories]
+    resourceNames: [flux-system]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: flux-sync-casasulgorgo
+  namespace: flux-system
+subjects:
+  - kind: ServiceAccount
+    name: flux-sync
+    namespace: tekton-ci
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: flux-sync-casasulgorgo
+---
+# Everything except the repo name and images comes from the payload, which is
+# trusted once the tangled interceptor has verified its HMAC signature.
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: casasulgorgo
+  namespace: tekton-ci
+  labels:
+    ci.casasulgorgo.net/eventlistener: tangled
+spec:
+  interceptors:
+    - name: verify-signature
+      ref:
+        name: tangled
+        kind: ClusterInterceptor
+    - name: filter
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: filter
+          value: >-
+            header.match('X-Tangled-Event', 'push') &&
+            body.repository.name == 'web' &&
+            body.ref == 'refs/heads/main' &&
+            body.after.matches('^[0-9a-f]{40}$') &&
+            body.after != '0000000000000000000000000000000000000000'
+        - name: overlays
+          value:
+            - key: tags
+              expression: "body.after + ' latest production'"
+  bindings:
+    - name: project
+      value: casasulgorgo
+    # space-separated <name>,<dockerfile>,<context> per image (dockerfile relative to context)
+    - name: images
+      value: web,Dockerfile,.
+    - name: flux-kustomization
+      value: app-casasulgorgo
+    - name: repo-url
+      value: $(body.repository.clone_url)
+    - name: revision
+      value: $(body.after)
+    - name: tags
+      value: $(extensions.tags)
+  template:
+    ref: build-image

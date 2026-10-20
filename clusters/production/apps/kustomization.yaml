@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# One Flux Kustomization per app (app-<name> → ./apps/<name>), so an unhealthy app
+# doesn't fail the others. Comment out a line to disable an app.
+resources:
+  - home-assistant.yaml
+  - ddns.yaml
+  - adguard-home.yaml
+  - pocket-id.yaml
+  - gatus.yaml
+  - norish.yaml
+  - bookorbit.yaml
+  - silverbullet.yaml
+  - casasulgorgo.yaml
+  # - romm.yaml
+  # - lightnvr.yaml
+  # - llama-cpp.yaml

@@ -195,10 +195,10 @@ kubectl exec -n <namespace> <pod> -- ls -la /data
 flux get all -n flux-system
 
 # Force a reconciliation
-flux reconcile kustomization apps --with-source
+flux reconcile kustomization app-<name> --with-source
 
 # Watch events for a specific kustomization
-kubectl describe kustomization apps -n flux-system
+kubectl describe kustomization app-<name> -n flux-system
 
 # Check if a HelmRelease is stuck
 flux get helmreleases -A

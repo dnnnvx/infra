@@ -7,6 +7,7 @@ resources:
   - service.yaml
   - httproute.yaml
   - secrets.yaml
+  - ci.yaml
 images:
   # Pulled by containerd through the Talos registry mirror (tofu/production/main.tf).
   # The digest is a placeholder until the first build; Flux rewrites it.

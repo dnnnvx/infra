@@ -12,7 +12,7 @@ tofu/                    # OpenTofu (Terraform) — provisions the cluster
 clusters/production/     # Flux entry point (synced by FluxInstance)
 ├── infrastructure.yaml  # Flux Kustomization → ./infrastructure/controllers
 ├── config.yaml          # Flux Kustomization → ./infrastructure/configs (dependsOn infrastructure)
-└── apps.yaml            # Flux Kustomization → ./apps (dependsOn both)
+└── apps/                # one Flux Kustomization per app: app-<name> → ./apps/<name> (dependsOn both)
 
 infrastructure/
 ├── controllers/         # Operators and their CRDs: HelmReleases (+ values.yaml) or upstream manifests
@@ -29,9 +29,8 @@ infrastructure/
     ├── cilium/          # Default-deny policy, Gateway, IP pool, L2 policy, Hubble HTTPRoute
     ├── flux/            # Web UI, webhook Receiver, notifications, ImageUpdateAutomation
     ├── piraeus/         # LinstorCluster, satellite configs, storage pools + classes
-    └── tekton/          # tekton-ci namespace, Tasks, Pipeline, EventListener, ci-apps ResourceSet
+    └── tekton/          # tekton-ci namespace, Tasks, Pipeline, EventListener
 
-apps/                    # User-facing applications, one flat directory each
-├── kustomization.yaml   # Enabled apps (CI-built apps get their own app-<project> Kustomization)
+apps/                    # User-facing applications, one flat directory each (enabled in clusters/production/apps/)
 └── <app>/               # Namespace, CiliumNetworkPolicy, workloads, HTTPRoute, SOPS secrets
 ```
