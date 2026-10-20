@@ -36,6 +36,15 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # In-cluster clients keep their identity through the Gateway's Envoy, which checks
+    # this egress policy against the backend too
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: zot
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
     # git clone over HTTPS, base images + Dockerfile frontend from public
     # registries. Public internet only: builds run arbitrary Dockerfile RUN
     # steps, so the LAN (router, nodes, other devices) stays off-limits.

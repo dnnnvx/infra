@@ -44,7 +44,7 @@ spec:
               replaceFullPath: /
             statusCode: 302
 ---
-# The registry API for everything else (nodes, Tekton, Chains, Flux), LAN-only.
+# UI + registry API for the LAN (nodes, Tekton, Chains, Flux, laptops).
 # TLS from the public *.local.casasulgorgo.net wildcard, so no client needs a private CA
 # or an insecure/plain-HTTP flag. Pushes need credentials, reads are anonymous.
 apiVersion: gateway.networking.k8s.io/v1
@@ -60,10 +60,6 @@ spec:
   hostnames:
     - registry.local.casasulgorgo.net
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /v2/
-      backendRefs:
+    - backendRefs:
         - name: zot
           port: 5000

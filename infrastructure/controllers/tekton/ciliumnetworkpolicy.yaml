@@ -134,3 +134,12 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # In-cluster clients keep their identity through the Gateway's Envoy, which checks
+    # this egress policy against the backend too
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: zot
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
