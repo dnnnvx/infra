@@ -21,7 +21,7 @@ spec:
       readOnly: true
   steps:
     - name: scan
-      image: bridgecrew/checkov:3.3.29
+      image: bridgecrew/checkov:3.3.30
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
         - name: HOME

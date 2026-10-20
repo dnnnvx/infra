@@ -46,7 +46,7 @@ spec:
         drop: ["ALL"]
   steps:
     - name: verify
-      image: ghcr.io/sigstore/cosign/cosign:v3.1.3-dev
+      image: ghcr.io/sigstore/cosign/cosign:v3.1.4-dev
       volumeMounts:
         - name: chains-public-key
           mountPath: /chains
