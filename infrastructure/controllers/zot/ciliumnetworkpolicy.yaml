@@ -6,8 +6,7 @@ metadata:
 spec:
   endpointSelector: {}
   ingress:
-    # Only through the Gateways (httproute.yaml): registry.casasulgorgo.net (UI) and
-    # registry.local.casasulgorgo.net from the LAN
+    # Only through the homelab-local Gateway (httproute.yaml): registry.local.casasulgorgo.net from the LAN
     - fromEntities:
         - ingress
       toPorts:
@@ -15,7 +14,7 @@ spec:
             - port: "5000"
               protocol: TCP
     # In-cluster clients of registry.local.casasulgorgo.net keep their own identity through the Gateway's Envoy:
-    # containerd on the nodes, Tekton pushes, Chains attaches signatures, Flux scans tags
+    # containerd on the nodes, Tekton pushes, Chains attaches signatures, Flux scans tags, Gatus probes
     - fromEntities:
         - host
         - remote-node
@@ -30,6 +29,8 @@ spec:
             io.kubernetes.pod.namespace: tekton-chains
         - matchLabels:
             io.kubernetes.pod.namespace: flux-system
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
       toPorts:
         - ports:
             - port: "5000"

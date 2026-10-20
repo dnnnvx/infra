@@ -44,7 +44,7 @@ configFiles:
       "http": {
         "address": "0.0.0.0",
         "port": "5000",
-        "externalUrl": "https://registry.casasulgorgo.net",
+        "externalUrl": "https://registry.local.casasulgorgo.net",
         "realm": "zot",
         "auth": {
           "htpasswd": { "path": "/secret/zot/htpasswd" },

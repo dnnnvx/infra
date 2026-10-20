@@ -29,9 +29,8 @@ so any route on it is publicly reachable by SNI/Host even without a DNS record.
 | `auth.casasulgorgo.net` | Pocket-ID      |
 | `casasulgorgo.net`      | Landing page   |
 | `ci.casasulgorgo.net`   | Tekton EventListener (Tangled webhooks) |
-| `registry.casasulgorgo.net` | zot UI only (no push/pull) |
 
-The registry API is LAN-only: `registry.local.casasulgorgo.net` on the `homelab-local` Gateway (public wildcard cert, so no client needs insecure flags). Nodes and pods resolve it through a Talos `StaticHostConfig` (see [CI/CD](./cicd.md)).
+The registry (UI and API) is LAN-only: `registry.local.casasulgorgo.net` on the `homelab-local` Gateway (public wildcard cert, so no client needs insecure flags). Nodes and pods resolve it through a Talos `StaticHostConfig` (see [CI/CD](./cicd.md)).
 
 External access via Cloudflare proxy (orange cloud) → port-forward 443 → Cilium Gateway (HTTPS, port 443).
 TLS terminated at the Gateway using a Let's Encrypt wildcard cert (`*.casasulgorgo.net`) issued via DNS-01.

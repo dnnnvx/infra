@@ -1,53 +1,4 @@
-# Public UI only (login via Pocket-ID). Image traffic uses the LAN-only
-# registry.local.casasulgorgo.net route below, so the distribution API (/v2/<repo>/...)
-# is bounced here; the UI only needs the /v2/ status ping and the /v2/_zot/
-# extensions (search, mgmt, userprefs).
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: zot
-  namespace: zot
-  annotations:
-    gatus.home-operations.com/enabled: "true"
-    # path "" — probe the UI, not the first match (/v2/)
-    gatus.home-operations.com/endpoint: |
-      name: Zot Registry
-      group: infrastructure
-      path: ""
-spec:
-  parentRefs:
-    - name: homelab
-      namespace: kube-system
-      sectionName: https
-  hostnames:
-    - registry.casasulgorgo.net
-  rules:
-    - matches:
-        - path:
-            type: Exact
-            value: /v2/
-        - path:
-            type: PathPrefix
-            value: /v2/_zot/
-      backendRefs:
-        - name: zot
-          port: 5000
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /v2/
-      filters:
-        - type: RequestRedirect
-          requestRedirect:
-            path:
-              type: ReplaceFullPath
-              replaceFullPath: /
-            statusCode: 302
-    - backendRefs:
-        - name: zot
-          port: 5000
----
-# UI + registry API for the LAN (nodes, Tekton, Chains, Flux, laptops).
+# UI + registry API, LAN-only (nodes, Tekton, Chains, Flux, laptops). The UI logs in via Pocket-ID.
 # TLS from the public *.local.casasulgorgo.net wildcard, so no client needs a private CA
 # or an insecure/plain-HTTP flag. Pushes need credentials, reads are anonymous.
 apiVersion: gateway.networking.k8s.io/v1
@@ -55,6 +6,11 @@ kind: HTTPRoute
 metadata:
   name: zot-local
   namespace: zot
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+    gatus.home-operations.com/endpoint: |
+      name: Zot Registry
+      group: infrastructure
 spec:
   parentRefs:
     - name: homelab-local

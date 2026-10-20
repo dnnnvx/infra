@@ -166,15 +166,15 @@ clone URL, repo name and commit from it.
 
 | Who | How | Rights |
 |-----|-----|--------|
-| Humans | `registry.casasulgorgo.net` UI, Pocket-ID login (`registry_admins` group = admin) | Browse only: the Gateway bounces `/v2/<repo>/…` |
+| Humans | `registry.local.casasulgorgo.net` UI (LAN), Pocket-ID login (`registry_admins` group = admin) | read; admins delete |
 | Tekton (pipelines, Chains) | `tekton` htpasswd user, `tekton-ci/registry-push` (Chains via `pipeline-runner`'s `imagePullSecrets`) | read, create, update |
 | containerd (nodes), Flux | anonymous (zot `anonymousPolicy`) | read |
 
 Anonymous read is enabled because the kubelet's pulls don't use the Talos `RegistryAuthConfig`
-(`no basic auth credentials`). Pulls stay in-cluster: the Gateway bounces `/v2/<repo>/…`, and only
-the UI endpoints under `/v2/_zot/` (search/metadata) are public, so repo and tag names are
-visible there without logging in. Pushes still need the `tekton` user. To pull from a laptop, `kubectl -n zot port-forward svc/zot 5000`
-and log in with an API key created in the UI.
+(`no basic auth credentials`). zot's access control is the same for every hostname, so the whole
+registry (UI included) is LAN-only: it isn't exposed on the public Gateway at all. Pushes still need
+the `tekton` user. Laptops on the LAN pull from `registry.local.casasulgorgo.net` directly; for
+anything else, log in with an API key created in the UI.
 
 ## Build isolation (`tekton-ci`)
 
