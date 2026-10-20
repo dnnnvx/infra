@@ -1,7 +1,7 @@
-# Public UI only (login via Pocket-ID). Image traffic never goes through the
-# Gateway: Tekton, Flux and containerd all talk to the in-cluster Service, so the
-# distribution API (/v2/<repo>/...) is bounced here; the UI only needs the /v2/
-# status ping and the /v2/_zot/ extensions (search, mgmt, userprefs).
+# Public UI only (login via Pocket-ID). Image traffic uses the LAN-only
+# registry.local.casasulgorgo.net route below, so the distribution API (/v2/<repo>/...)
+# is bounced here; the UI only needs the /v2/ status ping and the /v2/_zot/
+# extensions (search, mgmt, userprefs).
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -43,6 +43,9 @@ spec:
               type: ReplaceFullPath
               replaceFullPath: /
             statusCode: 302
+    - backendRefs:
+        - name: zot
+          port: 5000
 ---
 # UI + registry API for the LAN (nodes, Tekton, Chains, Flux, laptops).
 # TLS from the public *.local.casasulgorgo.net wildcard, so no client needs a private CA
