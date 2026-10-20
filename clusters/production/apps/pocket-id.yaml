@@ -12,7 +12,9 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./apps/pocket-id
-  prune: false
+  prune: true
+  # commenting the app out of kustomization.yaml (deleting this object) keeps its resources
+  deletionPolicy: Orphan
   wait: true
   decryption:
     provider: sops
