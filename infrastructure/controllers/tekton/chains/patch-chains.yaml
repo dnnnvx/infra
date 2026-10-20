@@ -19,8 +19,7 @@ data:
   storage.oci.repository.insecure: "true"
   storage.oci.encoding-format: sigstore-bundle
 ---
-# The key is a SOPS Secret in infrastructure/configs/tekton/secrets-chains.yaml; don't let the
-# release manifest's empty placeholder fight with it
+# The key is a SOPS Secret in ../secrets-chains.yaml; drop the release manifest's empty placeholder
 apiVersion: v1
 kind: Secret
 metadata:

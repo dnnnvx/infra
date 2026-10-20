@@ -45,9 +45,9 @@ so they don't clutter the real repositories.
 
 | Path | What |
 |------|------|
-| `infrastructure/controllers/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Chains, Dashboard (read-only, `tekton.local.casasulgorgo.net`): upstream release manifests, versions bumped by Renovate. `patch-chains.yaml` (Chains config), `patch-events.yaml` (CloudEvents sink) |
+| `infrastructure/controllers/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Chains, Dashboard (read-only, `tekton.local.casasulgorgo.net`): upstream release manifests, versions bumped by Renovate. `chains/` (release + config), `secrets-chains.yaml` (SOPS signing key, applied with the controller that mounts it), `patch-events.yaml` (CloudEvents sink) |
 | `infrastructure/controllers/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
-| `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, RBAC, push credentials, Chains signing key (`secrets-chains.yaml`, in `tekton-chains`) and public key (`chains.pub` → ConfigMap `chains-public-key`), webhook HMAC secret, dashboard HTTPRoute |
+| `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, RBAC, push credentials, Chains public key (`chains.pub` → ConfigMap `chains-public-key`), webhook HMAC secret, dashboard HTTPRoute |
 | `infrastructure/configs/tekton/tasks/` | one file per Task (`git-clone`, `buildkit`, `sbom`, `scan-image`, `release-image`, `flux-sync`, `validate-manifests`, `lint-tofu`, `checkov`, `trufflehog`) |
 | `infrastructure/configs/tekton/pipelines/` | one file per Pipeline (`build-image`, `release-image`, `validate-infra`) |
 | `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`tangled`: public webhooks; `tekton-events`: internal CloudEvents), the `tangled` ClusterInterceptor, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
@@ -73,7 +73,7 @@ The pipeline has no signing key and never moves `latest`/`production`.
 signs every image named in the type-hinted `IMAGES` result and generates a SLSA v1.0 provenance for the whole run
 (deep inspection: every TaskRun, its params, results and step images). Both go to zot as Sigstore bundles
 referring to the image (OCI 1.1 referrers). Same choices as Konflux's Chains config, see
-`infrastructure/controllers/tekton/patch-chains.yaml`. Nothing goes to the public Rekor log, so verification
+`infrastructure/controllers/tekton/chains/patch-chains.yaml`. Nothing goes to the public Rekor log, so verification
 skips the tlog. Chains authenticates to zot with `pipeline-runner`'s `imagePullSecrets` (`registry-push`).
 
 **release-image** is started by the `release` Trigger on the internal `tekton-events` EventListener, which receives

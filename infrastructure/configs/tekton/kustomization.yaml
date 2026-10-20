@@ -8,7 +8,6 @@ resources:
   - limitrange.yaml
   - rbac.yaml
   - secrets.yaml
-  - secrets-chains.yaml
   - dashboard-httproute.yaml
   - tasks
   - pipelines

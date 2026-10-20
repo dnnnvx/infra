@@ -5,12 +5,13 @@ resources:
   - https://github.com/tektoncd/triggers/releases/download/v0.37.1/release.yaml
   - https://github.com/tektoncd/triggers/releases/download/v0.37.1/interceptors.yaml
   - https://github.com/tektoncd/pruner/releases/download/v0.4.3/release.yaml
-  # Signs images + SLSA provenance of finished PipelineRuns (signing key: infrastructure/configs/tekton/secrets-chains.yaml)
-  - https://github.com/tektoncd/chains/releases/download/v0.29.0/release.yaml
   # Read-only install (release-full.yaml would allow creating/deleting runs)
   - https://github.com/tektoncd/dashboard/releases/download/v0.73.0/release.yaml
   - ciliumnetworkpolicy.yaml
+  # Tekton Chains: signs images + SLSA provenance of finished PipelineRuns. Its key ships in the same
+  # Flux Kustomization as the Deployment that mounts it (config/ is only applied once this one is healthy)
+  - chains
+  - secrets-chains.yaml
 patches:
   - path: patch-pruner.yaml
-  - path: patch-chains.yaml
   - path: patch-events.yaml
