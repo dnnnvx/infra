@@ -1,4 +1,6 @@
 terraform {
+  required_version = "1.12.6"
+
   backend "s3" {
     bucket                      = "tofu-state"
     encrypt                     = true
@@ -85,7 +87,6 @@ data "external" "tangled_known_hosts" {
 
 module "talos" {
   source  = "../modules/talos"
-  project = "production"
 
   cluster_name = "production"
   cluster_vip  = "192.168.0.100"
