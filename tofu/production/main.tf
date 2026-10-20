@@ -71,16 +71,6 @@ provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }
 
-locals {
-  # Talos default service CIDR (kube-apiserver --service-cluster-ip-range).
-  # zot gets a pinned ClusterIP from the static band at its start, because
-  # containerd on the nodes can't resolve *.svc.cluster.local. Single source of
-  # truth: fed to the Talos registry mirror below and, via flux-substitutions,
-  # to the zot Service (ZOT_CLUSTER_IP in infrastructure/controllers/zot/values.yaml).
-  service_cidr   = "10.96.0.0/12"
-  zot_cluster_ip = cidrhost(local.service_cidr, 50)
-}
-
 data "external" "tangled_known_hosts" {
   program = ["sh", "-c", "ssh-keyscan tangled.org 2>/dev/null | grep -v '^#' | jq -Rsc '{known_hosts: .}'"]
 }
@@ -122,14 +112,15 @@ module "talos" {
         }
       }
     }),
-    # Images are referenced by zot's in-cluster name, which the node can't
-    # resolve: point containerd at zot's pinned ClusterIP over plain HTTP.
+    # zot is served on the LAN Gateway (homelab-local, LB IP pinned in
+    # infrastructure/configs/cilium/gateway-local.yaml). Pinned in /etc/hosts so
+    # image pulls don't depend on DNS; host DNS also answers CoreDNS, so pods
+    # (Tekton, Chains, Flux) resolve it the same way.
     yamlencode({
-      apiVersion   = "v1alpha1"
-      kind         = "RegistryMirrorConfig"
-      name         = "zot.zot.svc.cluster.local:5000"
-      endpoints    = [{ url = "http://${local.zot_cluster_ip}:5000" }]
-      skipFallback = true
+      apiVersion = "v1alpha1"
+      kind       = "StaticHostConfig"
+      name       = "192.168.0.202"
+      hostnames  = ["registry.local.casasulgorgo.net"]
     }),
   ]
 
@@ -232,7 +223,7 @@ module "k8s" {
     {
       name      = "flux-substitutions"
       namespace = "flux-system"
-      data      = merge(var.flux_substitutions, { ZOT_CLUSTER_IP = local.zot_cluster_ip })
+      data      = var.flux_substitutions
     },
     {
       name      = "cloudflare-api-token"

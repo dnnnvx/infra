@@ -29,13 +29,12 @@ spec:
               protocol: TCP
             - port: "8080"
               protocol: TCP
-    # BuildKit → zot (push image + build cache)
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: zot
+    # BuildKit, syft, grype, oras, cosign, crane → zot via the LAN Gateway (registry.local.casasulgorgo.net)
+    - toEntities:
+        - ingress
       toPorts:
         - ports:
-            - port: "5000"
+            - port: "443"
               protocol: TCP
     # git clone over HTTPS, base images + Dockerfile frontend from public
     # registries. Public internet only: builds run arbitrary Dockerfile RUN

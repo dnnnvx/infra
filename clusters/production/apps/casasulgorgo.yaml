@@ -22,9 +22,3 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  # ZOT_CLUSTER_IP for the ImageRepository in ci.yaml
-  postBuild:
-    substituteFrom:
-      - kind: Secret
-        name: flux-substitutions
-        optional: true

@@ -12,7 +12,7 @@ spec:
   params:
     - name: registry
       type: string
-      description: Registry host[:port], e.g. zot.zot.svc.cluster.local:5000.
+      description: Registry host[:port], e.g. registry.local.casasulgorgo.net.
     - name: project
       type: string
       description: Registry namespace; images are <registry>/<project>/<name>.
@@ -59,8 +59,8 @@ spec:
         for entry in $(params.digests); do
           ref="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)@$(echo "$entry" | cut -d= -f2)"
           i=0
-          until cosign verify --key /chains/cosign.pub --insecure-ignore-tlog --allow-http-registry "$ref" > /dev/null &&
-            cosign verify-attestation --key /chains/cosign.pub --insecure-ignore-tlog --allow-http-registry \
+          until cosign verify --key /chains/cosign.pub --insecure-ignore-tlog "$ref" > /dev/null &&
+            cosign verify-attestation --key /chains/cosign.pub --insecure-ignore-tlog \
               --type slsaprovenance1 "$ref" > /dev/null; do
             i=$((i + 1))
             if [ "$i" -ge "$(params.wait)" ]; then
@@ -86,7 +86,7 @@ spec:
         for entry in $(params.digests); do
           ref="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)@$(echo "$entry" | cut -d= -f2)"
           for tag in $(params.tags); do
-            crane tag --insecure "$ref" "$tag"
+            crane tag "$ref" "$tag"
             echo "Tagged $ref as $tag"
           done
         done

@@ -31,7 +31,7 @@ so any route on it is publicly reachable by SNI/Host even without a DNS record.
 | `ci.casasulgorgo.net`   | Tekton EventListener (Tangled webhooks) |
 | `registry.casasulgorgo.net` | zot UI only (no push/pull) |
 
-Image traffic never leaves the cluster: everything uses `zot.zot.svc.cluster.local:5000`, and nodes reach it through a Talos registry mirror on a pinned ClusterIP (see [CI/CD](./cicd.md)).
+The registry API is LAN-only: `registry.local.casasulgorgo.net` on the `homelab-local` Gateway (public wildcard cert, so no client needs insecure flags). Nodes and pods resolve it through a Talos `StaticHostConfig` (see [CI/CD](./cicd.md)).
 
 External access via Cloudflare proxy (orange cloud) → port-forward 443 → Cilium Gateway (HTTPS, port 443).
 TLS terminated at the Gateway using a Let's Encrypt wildcard cert (`*.casasulgorgo.net`) issued via DNS-01.

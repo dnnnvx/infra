@@ -10,7 +10,7 @@ spec:
   params:
     - name: registry
       type: string
-      description: Registry host[:port] to push to, e.g. zot.zot.svc.cluster.local:5000.
+      description: Registry host[:port] to push to, e.g. registry.local.casasulgorgo.net.
     - name: project
       type: string
       description: Registry namespace; images are <registry>/<project>/<name>.
@@ -87,15 +87,14 @@ spec:
             names="$names""$image:$tag"
           done
           cd "$root/$context"
-          # zot is reached over plain HTTP on its in-cluster Service, hence registry.insecure
           buildctl-daemonless.sh build \
             --frontend dockerfile.v0 \
             --local context=. \
             --local dockerfile="$(dirname "$dockerfile")" \
             --opt filename="$(basename "$dockerfile")" \
-            --import-cache "type=registry,ref=$cache,registry.insecure=true" \
-            --export-cache "type=registry,ref=$cache,mode=max,image-manifest=true,oci-mediatypes=true,registry.insecure=true" \
-            --output "type=image,\"name=$names\",push=true,registry.insecure=true" \
+            --import-cache "type=registry,ref=$cache" \
+            --export-cache "type=registry,ref=$cache,mode=max,image-manifest=true,oci-mediatypes=true" \
+            --output "type=image,\"name=$names\",push=true" \
             --metadata-file /tmp/metadata.json
           digest="$(sed -n 's/.*"containerimage.digest": *"\([^"]*\)".*/\1/p' /tmp/metadata.json | tr -d '\n')"
           printf '%s=%s ' "$name" "$digest" >> "$(results.digests.path)"

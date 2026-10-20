@@ -9,9 +9,8 @@ resources:
   - secrets.yaml
   - ci.yaml
 images:
-  # Pulled by containerd through the Talos registry mirror (tofu/production/main.tf).
   # The digest is a placeholder until the first build; Flux rewrites it.
   - name: casasulgorgo
-    newName: zot.zot.svc.cluster.local:5000/casasulgorgo/web
+    newName: registry.local.casasulgorgo.net/casasulgorgo/web
     newTag: production
     digest: sha256:1ea59eab2bdd3f3674dee1b14d5f6ead3ab7d87ef089aee37bf0e2328dd4ea8c # {"$imagepolicy": "flux-system:casasulgorgo-web:digest"}

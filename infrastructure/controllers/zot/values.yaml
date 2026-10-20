@@ -1,10 +1,6 @@
 service:
   type: ClusterIP
   port: 5000
-  # Pinned so containerd (Talos registry mirror) can reach it from the host.
-  # Substituted by Flux from the tofu-managed flux-substitutions Secret
-  # (local.zot_cluster_ip in tofu/production/main.tf).
-  clusterIP: ${ZOT_CLUSTER_IP}
 
 # RWO volume: a rolling update would deadlock on the PVC
 strategy:

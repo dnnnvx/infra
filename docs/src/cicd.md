@@ -13,7 +13,7 @@ git push main (Tangled) ──signed webhook──▶ ci.casasulgorgo.net ─▶
     └▶ PipelineRun build-image: clone ─▶ build (buildkit) ─┬▶ sbom (syft + oras attach)
                                           │ push :<sha>    └▶ scan (grype, fails on fixable high/critical)
                                           ▼
-                  zot (zot.zot.svc.cluster.local:5000, ClusterIP pinned by tofu)
+                  zot (registry.local.casasulgorgo.net, LAN Gateway, public TLS)
                                           ▲ image signature + SLSA v1 provenance (OCI referrers)
     Tekton Chains (tekton-chains, holds the key) ── signs the build once it has succeeded
                                           │
@@ -28,7 +28,7 @@ Flux ImageUpdateAutomation ─▶ commits the new digest to apps/** on main ─�
 ## Images and tags
 
 Images are `<project>/<image>`, where project is set in the app's Trigger (the Tangled repo itself may be called anything, e.g. `web`):
-`zot.zot.svc.cluster.local:5000/casasulgorgo/web`.
+`registry.local.casasulgorgo.net/casasulgorgo/web`.
 
 | Tag | Meaning |
 |-----|---------|
@@ -52,10 +52,10 @@ so they don't clutter the real repositories.
 | `infrastructure/configs/tekton/pipelines/` | one file per Pipeline (`build-image`, `release-image`, `validate-infra`) |
 | `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`tangled`: public webhooks; `tekton-events`: internal CloudEvents), the `tangled` ClusterInterceptor, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
 | `.checkov.yaml`, `tofu/.tflint.hcl` | scanner config for `validate-infra` |
-| `clusters/production/apps/<project>.yaml` | the app's Flux Kustomization `app-<project>` (CI-built apps add post-build substitution for `ZOT_CLUSTER_IP`) |
+| `clusters/production/apps/<project>.yaml` | the app's Flux Kustomization `app-<project>` |
 | `apps/<project>/ci.yaml` | the app's Trigger, ImageRepository/ImagePolicy per image and name-scoped `flux-sync` Role/RoleBinding |
 | `apps/<project>/kustomization.yaml` | `images:` entry with the `digest:` marker Flux rewrites |
-| `tofu/production/main.tf` | Talos `RegistryMirrorConfig` so containerd can pull from zot with no authorization |
+| `tofu/production/main.tf` | Talos `StaticHostConfig` pinning `registry.local.casasulgorgo.net` to the LAN Gateway, so pulls don't depend on DNS |
 
 ## Build, sign, release
 
@@ -88,14 +88,14 @@ release run with the build's `registry`, `project`, `tags`, `flux-kustomization`
 The event isn't authenticated. That's fine: release-image only promotes digests signed by Chains, i.e. images that
 a successful build-image run produced. The worst a forged event can do is re-release such an image.
 
-To check an image from a laptop (`kubectl -n zot port-forward svc/zot 5000`):
+To check an image from a laptop on the LAN:
 
 ```bash
-cosign verify --key infrastructure/configs/tekton/chains.pub --insecure-ignore-tlog --allow-http-registry \
-  localhost:5000/casasulgorgo/web:production
+cosign verify --key infrastructure/configs/tekton/chains.pub --insecure-ignore-tlog \
+  registry.local.casasulgorgo.net/casasulgorgo/web:production
 cosign verify-attestation --type slsaprovenance1 --key infrastructure/configs/tekton/chains.pub \
-  --insecure-ignore-tlog --allow-http-registry localhost:5000/casasulgorgo/web:production | jq -r .payload | base64 -d | jq .predicate
-oras discover --plain-http localhost:5000/casasulgorgo/web:production   # signature, provenance, SBOM
+  --insecure-ignore-tlog registry.local.casasulgorgo.net/casasulgorgo/web:production | jq -r .payload | base64 -d | jq .predicate
+oras discover registry.local.casasulgorgo.net/casasulgorgo/web:production   # signature, provenance, SBOM
 ```
 
 Not done yet (Konflux has them): an admission policy that rejects unsigned images (Kyverno or Conforma), and

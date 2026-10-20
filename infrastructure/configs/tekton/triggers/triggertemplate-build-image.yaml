@@ -1,5 +1,5 @@
 # Flux naming convention: ImageRepository/ImagePolicy <project>-<image-name>, Kustomization app-<project>.
-# Images are <registry>/<project>/<image>, e.g. zot.zot.svc.cluster.local:5000/casasulgorgo/web.
+# Images are <registry>/<project>/<image>, e.g. registry.local.casasulgorgo.net/casasulgorgo/web.
 # Build caches live apart under <registry>/cache/<project>/<image> so they
 # don't show up as tags of the real image.
 apiVersion: triggers.tekton.dev/v1beta1
@@ -10,7 +10,7 @@ metadata:
 spec:
   params:
     - name: registry
-      default: zot.zot.svc.cluster.local:5000
+      default: registry.local.casasulgorgo.net
     - name: project
     - name: images
     - name: repo-url

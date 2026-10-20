@@ -14,9 +14,7 @@ data:
   artifacts.oci.storage: oci
   # Rekor is public: it would publish our image names and digests
   transparency.enabled: "false"
-  # zot is plain HTTP on its in-cluster Service. Credentials: imagePullSecrets of the run's
-  # ServiceAccount (tekton-ci/pipeline-runner → registry-push)
-  storage.oci.repository.insecure: "true"
+  # Credentials: imagePullSecrets of the run's ServiceAccount (tekton-ci/pipeline-runner → registry-push)
   storage.oci.encoding-format: sigstore-bundle
 ---
 # The key is a SOPS Secret in ../secrets-chains.yaml; drop the release manifest's empty placeholder

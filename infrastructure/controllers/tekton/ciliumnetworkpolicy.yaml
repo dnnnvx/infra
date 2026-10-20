@@ -127,10 +127,10 @@ spec:
               protocol: TCP
     - toEntities:
         - kube-apiserver
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: zot
+    # zot via the LAN Gateway (registry.local.casasulgorgo.net)
+    - toEntities:
+        - ingress
       toPorts:
         - ports:
-            - port: "5000"
+            - port: "443"
               protocol: TCP

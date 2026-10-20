@@ -11,7 +11,7 @@ spec:
   params:
     - name: registry
       type: string
-      description: Registry host[:port], e.g. zot.zot.svc.cluster.local:5000.
+      description: Registry host[:port], e.g. registry.local.casasulgorgo.net.
     - name: project
       type: string
       description: Registry namespace; images are <registry>/<project>/<name>.
@@ -30,9 +30,6 @@ spec:
           value: /tmp
         - name: GRYPE_DB_CACHE_DIR
           value: /tmp/grype-db
-        # zot is reached over plain HTTP on its in-cluster Service, and allows anonymous reads
-        - name: GRYPE_REGISTRY_INSECURE_USE_HTTP
-          value: "true"
       securityContext:
         allowPrivilegeEscalation: false
         capabilities:

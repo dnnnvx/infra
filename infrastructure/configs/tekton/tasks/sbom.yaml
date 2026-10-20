@@ -10,7 +10,7 @@ spec:
   params:
     - name: registry
       type: string
-      description: Registry host[:port], e.g. zot.zot.svc.cluster.local:5000.
+      description: Registry host[:port], e.g. registry.local.casasulgorgo.net.
     - name: project
       type: string
       description: Registry namespace; images are <registry>/<project>/<name>.
@@ -43,10 +43,6 @@ spec:
   steps:
     - name: generate
       image: anchore/syft:v1.55.0-debug
-      env:
-        # zot is reached over plain HTTP on its in-cluster Service, and allows anonymous reads
-        - name: SYFT_REGISTRY_INSECURE_USE_HTTP
-          value: "true"
       script: |
         #!/busybox/sh
         set -eu
@@ -70,7 +66,7 @@ spec:
         for entry in $(params.digests); do
           name="$(echo "$entry" | cut -d= -f1)"
           ref="$(params.registry)/$(params.project)/$name@$(echo "$entry" | cut -d= -f2)"
-          oras attach --plain-http --registry-config /docker-config/config.json \
+          oras attach --registry-config /docker-config/config.json \
             --artifact-type application/spdx+json "$ref" "$name.spdx.json:application/spdx+json"
           echo "Attached SBOM to $ref"
         done

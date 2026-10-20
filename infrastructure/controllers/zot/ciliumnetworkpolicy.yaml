@@ -6,29 +6,10 @@ metadata:
 spec:
   endpointSelector: {}
   ingress:
-    # registry.casasulgorgo.net via the Gateway (UI only, see the HTTPRoute)
+    # Only via the Gateways: registry.casasulgorgo.net (UI) and registry.local.casasulgorgo.net
+    # (registry API for nodes, Tekton, Chains, Flux), see httproute.yaml
     - fromEntities:
         - ingress
-      toPorts:
-        - ports:
-            - port: "5000"
-              protocol: TCP
-    # containerd on the nodes pulls via the pinned ClusterIP (Talos registry mirror)
-    - fromEntities:
-        - host
-        - remote-node
-      toPorts:
-        - ports:
-            - port: "5000"
-              protocol: TCP
-    # In-cluster clients use the Service directly: Tekton pushes, Chains attaches signatures, Flux scans tags
-    - fromEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: tekton-ci
-        - matchLabels:
-            io.kubernetes.pod.namespace: tekton-chains
-        - matchLabels:
-            io.kubernetes.pod.namespace: flux-system
       toPorts:
         - ports:
             - port: "5000"

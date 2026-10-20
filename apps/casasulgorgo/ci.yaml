@@ -14,10 +14,8 @@ metadata:
   name: casasulgorgo-web
   namespace: flux-system
 spec:
-  # the IP must be literal (substituted by Flux post-build from the tofu-managed secret)
-  image: ${ZOT_CLUSTER_IP}:5000/casasulgorgo/web
+  image: registry.local.casasulgorgo.net/casasulgorgo/web
   interval: 5m
-  insecure: true
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
