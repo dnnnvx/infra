@@ -21,6 +21,7 @@ spec:
       # CPU-only inference: pin to the i3-7100U (most capable node)
       nodeSelector:
         kubernetes.io/hostname: nuc-102
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -32,6 +33,7 @@ spec:
           image: ghcr.io/ggml-org/llama.cpp:server-b5350
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           args:
@@ -82,7 +84,11 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /models
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: models
           persistentVolumeClaim:
             claimName: llama-models
+        - name: tmp
+          emptyDir: {}

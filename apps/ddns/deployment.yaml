@@ -5,6 +5,9 @@ metadata:
   namespace: ddns
   labels:
     app.kubernetes.io/part-of: cloudflare-ddns
+  annotations:
+    checkov.io/skip1: CKV_K8S_8=no listening port or health command to probe
+    checkov.io/skip2: CKV_K8S_9=no listening port or health command to probe
 spec:
   replicas: 1
   selector:
@@ -16,9 +19,20 @@ spec:
         app.kubernetes.io/name: cloudflare-ddns
         app.kubernetes.io/part-of: cloudflare-ddns
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: cloudflare-ddns
           image: favonia/cloudflare-ddns:1.17.1
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
           env:
             - name: CLOUDFLARE_API_TOKEN
               valueFrom:

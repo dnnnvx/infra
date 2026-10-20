@@ -33,13 +33,16 @@ roleRef:
   kind: ClusterRole
   name: tekton-triggers-eventlistener-clusterroles
 ---
-# Build pods need no Kubernetes API access
+# Build pods need no Kubernetes API access. Tekton Chains reads this account's
+# imagePullSecrets to push signatures and provenance next to the images in zot.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pipeline-runner
   namespace: tekton-ci
 automountServiceAccountToken: false
+imagePullSecrets:
+  - name: registry-push
 ---
 # Runs the flux-sync task only (PipelineRun taskRunSpecs). Its permissions are
 # the name-scoped Role in flux-system (apps/<project>/ci.yaml).

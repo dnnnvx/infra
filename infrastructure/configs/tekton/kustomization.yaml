@@ -8,7 +8,16 @@ resources:
   - limitrange.yaml
   - rbac.yaml
   - secrets.yaml
+  - secrets-chains.yaml
   - dashboard-httproute.yaml
   - tasks
   - pipelines
   - triggers
+configMapGenerator:
+  # Public half of the Tekton Chains key: the release pipeline verifies images against it
+  - name: chains-public-key
+    namespace: tekton-ci
+    files:
+      - cosign.pub=chains.pub
+    options:
+      disableNameSuffixHash: true

@@ -32,6 +32,10 @@ spec:
   results:
     - name: digests
       description: Space-separated "name=sha256:..." for every pushed image.
+    - name: IMAGES
+      description: >-
+        Comma-separated <image>@<digest> of every pushed image. Type hint for Tekton Chains,
+        which signs these images and makes them the subjects of the run's SLSA provenance.
   volumes:
     - name: buildkit-state
       emptyDir: {}
@@ -70,6 +74,7 @@ spec:
         # Avoid dollar-brace syntax here: Flux post-build substitution would eat it
         root="$(pwd)"
         : > "$(results.digests.path)"
+        : > "$(results.IMAGES.path)"
         for entry in $(params.images); do
           name="$(echo "$entry" | cut -d, -f1)"
           dockerfile="$(echo "$entry" | cut -d, -f2)"
@@ -94,5 +99,7 @@ spec:
             --metadata-file /tmp/metadata.json
           digest="$(sed -n 's/.*"containerimage.digest": *"\([^"]*\)".*/\1/p' /tmp/metadata.json | tr -d '\n')"
           printf '%s=%s ' "$name" "$digest" >> "$(results.digests.path)"
+          [ -s "$(results.IMAGES.path)" ] && printf ',' >> "$(results.IMAGES.path)"
+          printf '%s@%s' "$image" "$digest" >> "$(results.IMAGES.path)"
           echo "Pushed $names @ $digest"
         done

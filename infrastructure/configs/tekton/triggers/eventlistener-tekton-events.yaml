@@ -1,0 +1,12 @@
+# Receives Tekton's own CloudEvents (config-events sink, infrastructure/controllers/tekton/patch-events.yaml).
+# ClusterIP only, no HTTPRoute; the CiliumNetworkPolicy lets in tekton-events-controller only.
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: tekton-events
+  namespace: tekton-ci
+spec:
+  serviceAccountName: tekton-triggers
+  labelSelector:
+    matchLabels:
+      ci.casasulgorgo.net/eventlistener: tekton-events

@@ -41,6 +41,15 @@ spec:
               protocol: TCP
     - toEntities:
         - kube-apiserver
+    # tekton-events-controller → internal EventListener (CloudEvents, see patch-events.yaml)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: tekton-ci
+            eventlistener: tekton-events
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     # The pipelines controller reads image configs from registries to resolve
     # step entrypoints when a step has no explicit command
     - toEntities:
@@ -95,4 +104,33 @@ spec:
       toPorts:
         - ports:
             - port: "9097"
+              protocol: TCP
+---
+# Chains: watches runs (kube-apiserver) and pushes signatures/attestations next to the images in zot
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: tekton-chains
+spec:
+  endpointSelector: {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: zot
+      toPorts:
+        - ports:
+            - port: "5000"
               protocol: TCP

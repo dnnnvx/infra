@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: checkov
+  namespace: tekton-ci
+spec:
+  description: >-
+    Policy scan of the repository with checkov. Frameworks, skipped checks and the
+    baseline of accepted findings come from the repository's config file.
+  params:
+    - name: config-file
+      type: string
+      default: .checkov.yaml
+      description: Checkov config, relative to the repository root.
+    - name: subdirectory
+      type: string
+      default: source
+      description: Where git-clone put the repository inside the source workspace.
+  workspaces:
+    - name: source
+      readOnly: true
+  steps:
+    - name: scan
+      image: bridgecrew/checkov:3.3.29
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)
+      env:
+        - name: HOME
+          value: /tmp
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      script: |
+        #!/bin/sh
+        set -eu
+        checkov --config-file "$(params.config-file)" --directory .

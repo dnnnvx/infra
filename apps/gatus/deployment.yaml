@@ -5,6 +5,10 @@ metadata:
   namespace: gatus
   labels:
     app.kubernetes.io/part-of: gatus
+  annotations:
+    checkov.io/skip1: CKV_K8S_38=gatus-sidecar watches HTTPRoutes through the API (read-only ClusterRole)
+    checkov.io/skip2: CKV_K8S_8=gatus-sidecar only renders a file; the gatus container is probed
+    checkov.io/skip3: CKV_K8S_9=gatus-sidecar only renders a file; the gatus container is probed
 spec:
   replicas: 1
   selector:
@@ -27,9 +31,16 @@ spec:
         - name: gatus
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           image: twinproduction/gatus:v5.37.0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
           env:
             # directory mode: gatus merges config.yaml + the sidecar's gatus-sidecar.yaml
             - name: GATUS_CONFIG_PATH
@@ -64,6 +75,12 @@ spec:
             capabilities:
               drop: ["ALL"]
           image: ghcr.io/home-operations/gatus-sidecar:0.5.4
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
           args:
             - --enable-httproute
             - --gateway-name=homelab

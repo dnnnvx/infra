@@ -1,0 +1,50 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: release-image
+  namespace: tekton-ci
+spec:
+  params:
+    - name: registry
+    - name: project
+    - name: digests
+    - name: tags
+    - name: flux-kustomization
+      default: ""
+    - name: build
+      description: Name of the build-image PipelineRun being released (label only).
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: $(tt.params.project)-release-
+        labels:
+          ci.casasulgorgo.net/project: $(tt.params.project)
+          ci.casasulgorgo.net/build: $(tt.params.build)
+      spec:
+        pipelineRef:
+          name: release-image
+        params:
+          - name: registry
+            value: $(tt.params.registry)
+          - name: project
+            value: $(tt.params.project)
+          - name: digests
+            value: $(tt.params.digests)
+          - name: tags
+            value: $(tt.params.tags)
+          - name: flux-kustomization
+            value: $(tt.params.flux-kustomization)
+        taskRunSpecs:
+          - pipelineTaskName: deploy
+            serviceAccountName: flux-sync
+        taskRunTemplate:
+          serviceAccountName: pipeline-runner
+          podTemplate:
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              runAsGroup: 1000
+              fsGroup: 1000
+              seccompProfile:
+                type: RuntimeDefault

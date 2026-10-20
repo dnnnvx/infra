@@ -1,0 +1,76 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: sbom
+  namespace: tekton-ci
+spec:
+  description: >-
+    Generates an SPDX SBOM for each built image (syft) and attaches it to the image in the
+    registry as an OCI 1.1 referrer (oras), like Konflux's build tasks do.
+  params:
+    - name: registry
+      type: string
+      description: Registry host[:port], e.g. zot.zot.svc.cluster.local:5000.
+    - name: project
+      type: string
+      description: Registry namespace; images are <registry>/<project>/<name>.
+    - name: digests
+      type: string
+      description: Space-separated "name=sha256:..." as returned by the buildkit task.
+  results:
+    - name: sboms
+      description: Space-separated "name=<image repo>@sha256:..." pointing at each SBOM blob.
+  volumes:
+    - name: sboms
+      emptyDir: {}
+    - name: registry-auth
+      secret:
+        secretName: registry-push
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+  stepTemplate:
+    env:
+      - name: HOME
+        value: /tmp
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+    volumeMounts:
+      - name: sboms
+        mountPath: /sboms
+  steps:
+    - name: generate
+      image: anchore/syft:v1.55.0-debug
+      env:
+        # zot is reached over plain HTTP on its in-cluster Service, and allows anonymous reads
+        - name: SYFT_REGISTRY_INSECURE_USE_HTTP
+          value: "true"
+      script: |
+        #!/bin/sh
+        set -eu
+        : > "$(results.sboms.path)"
+        for entry in $(params.digests); do
+          name="$(echo "$entry" | cut -d= -f1)"
+          repo="$(params.registry)/$(params.project)/$name"
+          /syft scan "registry:$repo@$(echo "$entry" | cut -d= -f2)" --output "spdx-json=/sboms/$name.spdx.json"
+          printf '%s=%s@sha256:%s ' "$name" "$repo" "$(sha256sum "/sboms/$name.spdx.json" | cut -d' ' -f1)" >> "$(results.sboms.path)"
+        done
+    - name: attach
+      image: ghcr.io/oras-project/oras:v1.3.5
+      volumeMounts:
+        - name: registry-auth
+          mountPath: /docker-config
+          readOnly: true
+      script: |
+        #!/bin/sh
+        set -eu
+        cd /sboms
+        for entry in $(params.digests); do
+          name="$(echo "$entry" | cut -d= -f1)"
+          ref="$(params.registry)/$(params.project)/$name@$(echo "$entry" | cut -d= -f2)"
+          oras attach --plain-http --registry-config /docker-config/config.json \
+            --artifact-type application/spdx+json "$ref" "$name.spdx.json:application/spdx+json"
+          echo "Attached SBOM to $ref"
+        done

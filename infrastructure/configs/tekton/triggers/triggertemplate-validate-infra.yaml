@@ -1,0 +1,45 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: validate-infra
+  namespace: tekton-ci
+spec:
+  params:
+    - name: repo-url
+    - name: revision
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: infra-
+        labels:
+          ci.casasulgorgo.net/project: infra
+      spec:
+        pipelineRef:
+          name: validate-infra
+        params:
+          - name: repo-url
+            value: $(tt.params.repo-url)
+          - name: revision
+            value: $(tt.params.revision)
+        taskRunTemplate:
+          serviceAccountName: pipeline-runner
+          podTemplate:
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              runAsGroup: 1000
+              fsGroup: 1000
+              seccompProfile:
+                type: RuntimeDefault
+        workspaces:
+          # Deleted with the PipelineRun (see the Tekton pruner config)
+          - name: source
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                storageClassName: piraeus-scratch
+                resources:
+                  requests:
+                    storage: 1Gi

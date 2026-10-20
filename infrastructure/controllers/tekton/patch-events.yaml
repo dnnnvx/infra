@@ -1,0 +1,11 @@
+# CloudEvents for every TaskRun/PipelineRun state change go to the internal tekton-events
+# EventListener, which starts the release pipeline after a successful build
+# (infrastructure/configs/tekton/triggers/trigger-release.yaml)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-events
+  namespace: tekton-pipelines
+data:
+  formats: tektonv1
+  sink: http://el-tekton-events.tekton-ci.svc.cluster.local:8080

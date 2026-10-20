@@ -1,0 +1,48 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: lint-tofu
+  namespace: tekton-ci
+spec:
+  description: >-
+    Checks OpenTofu formatting (tofu fmt) and lints every module with tflint
+    (bundled terraform ruleset, config in <path>/.tflint.hcl). Needs no providers or state.
+  params:
+    - name: path
+      type: string
+      default: tofu
+      description: Root of the OpenTofu code, relative to the repository root.
+    - name: subdirectory
+      type: string
+      default: source
+      description: Where git-clone put the repository inside the source workspace.
+  workspaces:
+    - name: source
+      readOnly: true
+  steps:
+    - name: fmt
+      image: ghcr.io/opentofu/opentofu:1.13.1
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      script: |
+        #!/bin/sh
+        set -eu
+        tofu fmt -check -diff -recursive "$(params.path)"
+    - name: tflint
+      image: ghcr.io/terraform-linters/tflint:v0.64.0
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)/$(params.path)
+      env:
+        - name: HOME
+          value: /tmp
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      script: |
+        #!/bin/sh
+        set -eu
+        # --recursive needs an absolute --config, otherwise each module looks for its own
+        tflint --recursive --config "$(pwd)/.tflint.hcl" --format compact

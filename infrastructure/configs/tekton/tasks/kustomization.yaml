@@ -4,3 +4,10 @@ resources:
   - git-clone.yaml
   - buildkit.yaml
   - flux-sync.yaml
+  - sbom.yaml
+  - scan-image.yaml
+  - release-image.yaml
+  - validate-manifests.yaml
+  - lint-tofu.yaml
+  - checkov.yaml
+  - trufflehog.yaml

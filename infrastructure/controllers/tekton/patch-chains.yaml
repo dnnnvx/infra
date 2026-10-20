@@ -1,0 +1,29 @@
+# Same shape as Konflux: one SLSA provenance per PipelineRun (deep inspection reads the type-hinted
+# IMAGES result of its TaskRuns), image signatures, no public transparency log. Both are stored next
+# to the image in zot as OCI 1.1 referrers (sigstore bundles, what cosign v3 verifies by default).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chains-config
+  namespace: tekton-chains
+data:
+  artifacts.taskrun.storage: ""
+  artifacts.pipelinerun.format: slsa/v2alpha4
+  artifacts.pipelinerun.storage: oci
+  artifacts.pipelinerun.enable-deep-inspection: "true"
+  artifacts.oci.storage: oci
+  # Rekor is public: it would publish our image names and digests
+  transparency.enabled: "false"
+  # zot is plain HTTP on its in-cluster Service. Credentials: imagePullSecrets of the run's
+  # ServiceAccount (tekton-ci/pipeline-runner → registry-push)
+  storage.oci.repository.insecure: "true"
+  storage.oci.encoding-format: sigstore-bundle
+---
+# The key is a SOPS Secret in infrastructure/configs/tekton/secrets-chains.yaml; don't let the
+# release manifest's empty placeholder fight with it
+apiVersion: v1
+kind: Secret
+metadata:
+  name: signing-secrets
+  namespace: tekton-chains
+$patch: delete

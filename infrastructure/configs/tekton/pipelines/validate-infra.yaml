@@ -1,0 +1,63 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: validate-infra
+  namespace: tekton-ci
+spec:
+  description: >-
+    Validates a commit of this repository: Flux builds + kubeconform, tofu fmt + tflint,
+    checkov and trufflehog, in parallel after the clone. Read-only: deploys nothing.
+  params:
+    - name: repo-url
+      type: string
+    - name: revision
+      type: string
+  workspaces:
+    - name: source
+  results:
+    - name: commit
+      value: $(tasks.clone.results.commit)
+  tasks:
+    - name: clone
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.revision)
+      workspaces:
+        - name: source
+          workspace: source
+    - name: manifests
+      runAfter:
+        - clone
+      taskRef:
+        name: validate-manifests
+      workspaces:
+        - name: source
+          workspace: source
+    - name: tofu
+      runAfter:
+        - clone
+      taskRef:
+        name: lint-tofu
+      workspaces:
+        - name: source
+          workspace: source
+    - name: policies
+      runAfter:
+        - clone
+      taskRef:
+        name: checkov
+      workspaces:
+        - name: source
+          workspace: source
+    - name: secrets
+      runAfter:
+        - clone
+      taskRef:
+        name: trufflehog
+      workspaces:
+        - name: source
+          workspace: source

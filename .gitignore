@@ -22,6 +22,8 @@ terraform.rc
 !.sourceignore
 !.sops.yaml
 !.envrc
+!.checkov.yaml
+!.tflint.hcl
 
 # Temporary noted and todos
 /*.md

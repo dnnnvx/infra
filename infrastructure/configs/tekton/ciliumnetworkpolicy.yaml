@@ -70,3 +70,24 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+---
+# Internal EventListener: only Tekton's own CloudEvents (tekton-events-controller) reach it.
+# Not exposed on the Gateway; the release pipeline trusts signatures, not the event.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-tekton-events
+  namespace: tekton-ci
+spec:
+  endpointSelector:
+    matchLabels:
+      eventlistener: tekton-events
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: tekton-pipelines
+            app.kubernetes.io/name: events
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

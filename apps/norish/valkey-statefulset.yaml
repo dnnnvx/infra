@@ -17,6 +17,7 @@ spec:
         app.kubernetes.io/name: valkey
         app.kubernetes.io/part-of: norish
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
@@ -28,11 +29,28 @@ spec:
           image: valkey/valkey:9.1.2-alpine
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           ports:
             - containerPort: 6379
               name: redis
+          # maxmemory 128mb below, plus overhead
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command: ["valkey-cli", "ping"]
+            periodSeconds: 10
           args:
             - --maxmemory
             - 128mb

@@ -5,6 +5,10 @@ metadata:
   namespace: webauth
   labels:
     app.kubernetes.io/part-of: webauth
+  annotations:
+    checkov.io/skip1: CKV_K8S_23=the entrypoint starts as root to chown /app/data, then drops to its own user
+    checkov.io/skip2: CKV_K8S_25=SETUID, SETGID, CHOWN for that privilege drop
+    checkov.io/skip3: CKV_K8S_22=the entrypoint's privilege drop isn't verified with a read-only root yet
 spec:
   replicas: 1
   strategy:
@@ -18,6 +22,7 @@ spec:
         app.kubernetes.io/name: pocket-id
         app.kubernetes.io/part-of: webauth
     spec:
+      automountServiceAccountToken: false
       securityContext:
         seccompProfile:
           type: RuntimeDefault
@@ -33,6 +38,12 @@ spec:
             - name: http
               containerPort: 1411
               protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
           volumeMounts:
             - name: data
               mountPath: /app/data

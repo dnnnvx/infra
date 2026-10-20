@@ -5,6 +5,9 @@ metadata:
   namespace: lightnvr
   labels:
     app.kubernetes.io/part-of: lightnvr
+  annotations:
+    checkov.io/skip1: CKV_K8S_23=the image runs as root and writes recordings under its own /var/lib/lightnvr
+    checkov.io/skip2: CKV_K8S_22=writes recordings and its database inside the image until the data volume is enabled
 spec:
   replicas: 1
   strategy:
@@ -18,6 +21,7 @@ spec:
         app.kubernetes.io/name: lightnvr
         app.kubernetes.io/part-of: lightnvr
     spec:
+      automountServiceAccountToken: false
       securityContext:
         seccompProfile:
           type: RuntimeDefault
@@ -31,6 +35,21 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
       #     volumeMounts:
       #       - name: data
       #         mountPath: /var/lib/lightnvr/data

@@ -1,0 +1,53 @@
+# Successful build-image run → release-image run, with the build's params and results.
+# The event body carries the run as v1beta1 (results under status.pipelineResults).
+# The event itself isn't authenticated: release-image only promotes digests that verify against
+# the Tekton Chains key, i.e. images a successful build-image run actually produced.
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: release
+  namespace: tekton-ci
+  labels:
+    ci.casasulgorgo.net/eventlistener: tekton-events
+spec:
+  interceptors:
+    - name: filter
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: filter
+          value: >-
+            header.match('Ce-Type', 'dev.tekton.event.pipelinerun.successful.v1') &&
+            body.pipelineRun.metadata.namespace == 'tekton-ci' &&
+            body.pipelineRun.spec.pipelineRef.name == 'build-image' &&
+            body.pipelineRun.status.pipelineResults.exists(r, r.name == 'digests')
+        - name: overlays
+          value:
+            - key: registry
+              expression: "body.pipelineRun.spec.params.filter(p, p.name == 'registry')[0].value"
+            - key: project
+              expression: "body.pipelineRun.spec.params.filter(p, p.name == 'project')[0].value"
+            - key: tags
+              expression: "body.pipelineRun.spec.params.filter(p, p.name == 'tags')[0].value"
+            - key: flux-kustomization
+              expression: >-
+                body.pipelineRun.spec.params.exists(p, p.name == 'flux-kustomization') ?
+                body.pipelineRun.spec.params.filter(p, p.name == 'flux-kustomization')[0].value : ''
+            - key: digests
+              expression: "body.pipelineRun.status.pipelineResults.filter(r, r.name == 'digests')[0].value"
+  bindings:
+    - name: registry
+      value: $(extensions.registry)
+    - name: project
+      value: $(extensions.project)
+    - name: tags
+      value: $(extensions.tags)
+    - name: flux-kustomization
+      value: $(extensions.flux-kustomization)
+    - name: digests
+      value: $(extensions.digests)
+    - name: build
+      value: $(body.pipelineRun.metadata.name)
+  template:
+    ref: release-image

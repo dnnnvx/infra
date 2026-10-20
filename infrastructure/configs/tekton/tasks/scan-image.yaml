@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: scan-image
+  namespace: tekton-ci
+spec:
+  description: >-
+    Scans each built image for known vulnerabilities (grype) and fails on any of the given
+    severity or worse that has a fix. A failed scan fails the build PipelineRun, so the
+    image never gets released.
+  params:
+    - name: registry
+      type: string
+      description: Registry host[:port], e.g. zot.zot.svc.cluster.local:5000.
+    - name: project
+      type: string
+      description: Registry namespace; images are <registry>/<project>/<name>.
+    - name: digests
+      type: string
+      description: Space-separated "name=sha256:..." as returned by the buildkit task.
+    - name: fail-on
+      type: string
+      default: high
+      description: Lowest grype severity that fails the run (only vulnerabilities that have a fix count).
+  steps:
+    - name: grype
+      image: anchore/grype:v0.121.0-debug
+      env:
+        - name: HOME
+          value: /tmp
+        - name: GRYPE_DB_CACHE_DIR
+          value: /tmp/grype-db
+        # zot is reached over plain HTTP on its in-cluster Service, and allows anonymous reads
+        - name: GRYPE_REGISTRY_INSECURE_USE_HTTP
+          value: "true"
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      script: |
+        #!/bin/sh
+        set -eu
+        for entry in $(params.digests); do
+          ref="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)@$(echo "$entry" | cut -d= -f2)"
+          echo "Scanning $ref"
+          /grype "registry:$ref" --only-fixed --fail-on "$(params.fail-on)"
+        done

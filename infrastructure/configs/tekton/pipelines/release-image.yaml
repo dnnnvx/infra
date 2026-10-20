@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: release-image
+  namespace: tekton-ci
+spec:
+  description: >-
+    Release the images of a successful build-image run: verify Tekton Chains' signature and
+    SLSA provenance, move the release tags to them, then sync Flux. Started by the release
+    Trigger on the build's CloudEvent.
+  params:
+    - name: registry
+      type: string
+    - name: project
+      type: string
+    - name: digests
+      type: string
+      description: Space-separated "name=sha256:..." from the build run's results.
+    - name: tags
+      type: string
+      description: Space-separated tags, e.g. "<sha> latest production".
+    - name: flux-kustomization
+      type: string
+      default: ""
+      description: The app's Flux Kustomization to reconcile and wait for. Empty skips the Flux sync.
+  tasks:
+    - name: release
+      taskRef:
+        name: release-image
+      params:
+        - name: registry
+          value: $(params.registry)
+        - name: project
+          value: $(params.project)
+        - name: digests
+          value: $(params.digests)
+        - name: tags
+          value: $(params.tags)
+    - name: deploy
+      runAfter:
+        - release
+      when:
+        - input: $(params.flux-kustomization)
+          operator: notin
+          values: [""]
+      timeout: 12m
+      taskRef:
+        name: flux-sync
+      params:
+        - name: project
+          value: $(params.project)
+        - name: digests
+          value: $(params.digests)
+        - name: kustomization
+          value: $(params.flux-kustomization)

@@ -1,0 +1,35 @@
+# Validates every branch push of this repository (Flux's image automation commits on main included).
+# Everything except the repo name comes from the payload, which is trusted once the
+# tangled interceptor has verified its HMAC signature.
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: infra
+  namespace: tekton-ci
+  labels:
+    ci.casasulgorgo.net/eventlistener: tangled
+spec:
+  interceptors:
+    - name: verify-signature
+      ref:
+        name: tangled
+        kind: ClusterInterceptor
+    - name: filter
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: filter
+          value: >-
+            header.match('X-Tangled-Event', 'push') &&
+            body.repository.name == 'infra' &&
+            body.ref.startsWith('refs/heads/') &&
+            body.after.matches('^[0-9a-f]{40}$') &&
+            body.after != '0000000000000000000000000000000000000000'
+  bindings:
+    - name: repo-url
+      value: $(body.repository.clone_url)
+    - name: revision
+      value: $(body.after)
+  template:
+    ref: validate-infra

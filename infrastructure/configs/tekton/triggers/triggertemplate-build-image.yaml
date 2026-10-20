@@ -43,9 +43,6 @@ spec:
             value: $(tt.params.tags)
           - name: flux-kustomization
             value: $(tt.params.flux-kustomization)
-        taskRunSpecs:
-          - pipelineTaskName: deploy
-            serviceAccountName: flux-sync
         taskRunTemplate:
           serviceAccountName: pipeline-runner
           podTemplate:

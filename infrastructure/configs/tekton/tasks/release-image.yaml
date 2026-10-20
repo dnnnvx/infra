@@ -1,0 +1,92 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: release-image
+  namespace: tekton-ci
+spec:
+  description: >-
+    Releases built images: waits until Tekton Chains has signed each digest and attached its
+    SLSA provenance, verifies both against the Chains public key, then moves the release tags
+    (latest, production, …) to it. Only images that came out of a successful build-image run
+    can pass, whoever started this run.
+  params:
+    - name: registry
+      type: string
+      description: Registry host[:port], e.g. zot.zot.svc.cluster.local:5000.
+    - name: project
+      type: string
+      description: Registry namespace; images are <registry>/<project>/<name>.
+    - name: digests
+      type: string
+      description: Space-separated "name=sha256:..." as returned by the buildkit task.
+    - name: tags
+      type: string
+      description: Space-separated tags to point at each verified digest.
+    - name: wait
+      type: string
+      default: "30"
+      description: How many 10s rounds to wait for Chains to sign a digest.
+  volumes:
+    - name: chains-public-key
+      configMap:
+        name: chains-public-key
+    - name: registry-auth
+      secret:
+        secretName: registry-push
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+  stepTemplate:
+    env:
+      - name: HOME
+        value: /tmp
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+  steps:
+    - name: verify
+      image: ghcr.io/sigstore/cosign/cosign:v3.1.3-dev
+      volumeMounts:
+        - name: chains-public-key
+          mountPath: /chains
+          readOnly: true
+      script: |
+        #!/bin/sh
+        set -eu
+        # Chains signs once the build PipelineRun has finished, so the first attempts may miss.
+        # No transparency log (Chains runs with transparency disabled), hence --insecure-ignore-tlog.
+        for entry in $(params.digests); do
+          ref="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)@$(echo "$entry" | cut -d= -f2)"
+          i=0
+          until cosign verify --key /chains/cosign.pub --insecure-ignore-tlog --allow-http-registry "$ref" > /dev/null &&
+            cosign verify-attestation --key /chains/cosign.pub --insecure-ignore-tlog --allow-http-registry \
+              --type slsaprovenance1 "$ref" > /dev/null; do
+            i=$((i + 1))
+            if [ "$i" -ge "$(params.wait)" ]; then
+              echo "No valid Chains signature and provenance for $ref" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "Verified signature and SLSA provenance of $ref"
+        done
+    - name: promote
+      image: gcr.io/go-containerregistry/crane/debug:v0.22.1
+      env:
+        - name: DOCKER_CONFIG
+          value: /docker-config
+      volumeMounts:
+        - name: registry-auth
+          mountPath: /docker-config
+          readOnly: true
+      script: |
+        #!/bin/sh
+        set -eu
+        for entry in $(params.digests); do
+          ref="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)@$(echo "$entry" | cut -d= -f2)"
+          for tag in $(params.tags); do
+            crane tag --insecure "$ref" "$tag"
+            echo "Tagged $ref as $tag"
+          done
+        done

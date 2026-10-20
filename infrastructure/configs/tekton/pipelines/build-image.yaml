@@ -4,7 +4,10 @@ metadata:
   name: build-image
   namespace: tekton-ci
 spec:
-  description: Clone a commit, build its images and push them to every requested tag, then sync Flux.
+  description: >-
+    Clone a commit, build its images under the commit tag, then SBOM + vulnerability scan them
+    in parallel. Holds no signing key and moves no release tag: Tekton Chains signs the result
+    once the run succeeds, and the release-image pipeline takes it from there.
   params:
     - name: repo-url
       type: string
@@ -17,13 +20,14 @@ spec:
     - name: images
       type: string
       description: Space-separated "name,dockerfile,context" entries (see the buildkit task).
+    # The next two are only read by the release trigger (from this run's spec)
     - name: tags
       type: string
-      description: Space-separated tags, e.g. "<sha> latest production".
+      description: Space-separated tags release-image moves to the images, e.g. "<sha> latest production".
     - name: flux-kustomization
       type: string
       default: ""
-      description: The app's Flux Kustomization to reconcile and wait for. Empty skips the Flux sync.
+      description: The app's Flux Kustomization release-image reconciles and waits for. Empty skips the Flux sync.
   workspaces:
     - name: source
   results:
@@ -31,6 +35,11 @@ spec:
       value: $(tasks.clone.results.commit)
     - name: digests
       value: $(tasks.build.results.digests)
+    # Chains type hint: subjects of this run's SLSA provenance
+    - name: IMAGES
+      value: $(tasks.build.results.IMAGES)
+    - name: sboms
+      value: $(tasks.sbom.results.sboms)
   tasks:
     - name: clone
       taskRef:
@@ -55,25 +64,33 @@ spec:
           value: $(params.project)
         - name: images
           value: $(params.images)
+        # Only the immutable tag: release-image moves the others once Chains has signed the images
         - name: tags
-          value: $(params.tags)
+          value: $(tasks.clone.results.commit)
       workspaces:
         - name: source
           workspace: source
-    - name: deploy
+    - name: sbom
       runAfter:
         - build
-      when:
-        - input: $(params.flux-kustomization)
-          operator: notin
-          values: [""]
-      timeout: 12m
       taskRef:
-        name: flux-sync
+        name: sbom
       params:
+        - name: registry
+          value: $(params.registry)
         - name: project
           value: $(params.project)
         - name: digests
           value: $(tasks.build.results.digests)
-        - name: kustomization
-          value: $(params.flux-kustomization)
+    - name: scan
+      runAfter:
+        - build
+      taskRef:
+        name: scan-image
+      params:
+        - name: registry
+          value: $(params.registry)
+        - name: project
+          value: $(params.project)
+        - name: digests
+          value: $(tasks.build.results.digests)

@@ -1,0 +1,74 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: validate-manifests
+  namespace: tekton-ci
+spec:
+  description: >-
+    Renders every Flux Kustomization of a cluster the way kustomize-controller does
+    (flux build --dry-run: no cluster access, substituteFrom variables stay as-is),
+    then validates the output against the Kubernetes and CRDs-catalog schemas.
+  params:
+    - name: cluster-path
+      type: string
+      default: clusters/production
+      description: Directory with the cluster's flux-system kustomization and its Flux Kustomizations (one level of subdirectories too).
+    - name: skip-kinds
+      type: string
+      default: CustomResourceDefinition,ClusterInterceptor,Task,Pipeline,TriggerTemplate,EventListener,Trigger,LinstorCluster,LinstorSatelliteConfiguration,Secret
+      description: Kinds kubeconform skips (no published schema; SOPS Secrets carry an extra `sops` field).
+    - name: subdirectory
+      type: string
+      default: source
+      description: Where git-clone put the repository inside the source workspace.
+  workspaces:
+    - name: source
+      readOnly: true
+  volumes:
+    - name: rendered
+      emptyDir: {}
+  steps:
+    - name: render
+      image: ghcr.io/fluxcd/flux-cli:v2.9.6
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)
+      env:
+        - name: HOME
+          value: /tmp
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      volumeMounts:
+        - name: rendered
+          mountPath: /rendered
+      script: |
+        #!/bin/sh
+        set -eu
+        cluster="$(params.cluster-path)"
+        # The root (flux-system) Kustomization is created at bootstrap, not in git: build it with plain kustomize
+        kubectl kustomize "$cluster" > /rendered/flux-system.yaml
+        for file in "$cluster"/*.yaml "$cluster"/*/*.yaml; do
+          grep -q '^apiVersion: kustomize.toolkit.fluxcd.io/' "$file" || continue
+          name="$(sed -n 's/^  name: //p' "$file" | head -n 1)"
+          dir="$(sed -n 's/^  path: //p' "$file" | head -n 1)"
+          echo "Building $name ($dir)"
+          flux build kustomization "$name" --path "$dir" --kustomization-file "$file" --dry-run > "/rendered/$name.yaml"
+        done
+    - name: kubeconform
+      image: ghcr.io/yannh/kubeconform:v0.8.0-alpine
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      volumeMounts:
+        - name: rendered
+          mountPath: /rendered
+      script: |
+        #!/bin/sh
+        set -eu
+        mkdir -p /tmp/kubeconform
+        /kubeconform -strict -summary -output text -cache /tmp/kubeconform \
+          -schema-location default \
+          -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+          -skip "$(params.skip-kinds)" \
+          /rendered/*.yaml

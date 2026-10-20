@@ -5,6 +5,15 @@ metadata:
   namespace: home-assistant
   labels:
     app.kubernetes.io/part-of: home-assistant
+  # Matter over Thread/Wi-Fi needs the host's IPv6 networking and Bluetooth (commissioning), hence privileged + hostNetwork
+  annotations:
+    checkov.io/skip1: CKV_K8S_16=privileged for host IPv6 routing and Bluetooth
+    checkov.io/skip2: CKV_K8S_19=Matter multicast and IPv6 need the host network
+    checkov.io/skip3: CKV_K8S_20=privileged
+    checkov.io/skip4: CKV_K8S_23=privileged
+    checkov.io/skip5: CKV_K8S_28=privileged
+    checkov.io/skip6: CKV_K8S_37=privileged
+    checkov.io/skip7: CKV_K8S_22=privileged
 spec:
   replicas: 1
   strategy:
@@ -20,11 +29,31 @@ spec:
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: matter-server
           image: ghcr.io/home-assistant-libs/python-matter-server:8.1.0
           securityContext:
             privileged: true
+          resources:
+            requests:
+              cpu: 20m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          # websocket API used by Home Assistant
+          livenessProbe:
+            tcpSocket:
+              port: 5580
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 5580
+            periodSeconds: 10
           volumeMounts:
             - name: data
               mountPath: /data

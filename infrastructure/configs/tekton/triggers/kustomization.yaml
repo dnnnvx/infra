@@ -3,5 +3,10 @@ kind: Kustomization
 resources:
   - interceptor-tangled.yaml
   - triggertemplate-build-image.yaml
+  - triggertemplate-validate-infra.yaml
+  - trigger-infra.yaml
+  - eventlistener-tekton-events.yaml
+  - triggertemplate-release-image.yaml
+  - trigger-release.yaml
   - eventlistener.yaml
   - httproute.yaml

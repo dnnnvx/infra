@@ -5,6 +5,8 @@ metadata:
   namespace: silverbullet
   labels:
     app.kubernetes.io/part-of: silverbullet
+  annotations:
+    checkov.io/skip1: CKV_K8S_22=the entrypoint's PUID/PGID user setup isn't verified with a read-only root yet
 spec:
   replicas: 1
   strategy:
@@ -18,6 +20,7 @@ spec:
         app.kubernetes.io/name: silverbullet
         app.kubernetes.io/part-of: silverbullet
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -35,6 +38,12 @@ spec:
           ports:
             - containerPort: 3000
               name: http
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 512Mi
           env:
             # match the fsGroup so the entrypoint's owner-detection lands on our uid
             - name: PUID

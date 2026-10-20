@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: trufflehog
+  namespace: tekton-ci
+spec:
+  description: >-
+    Scans the cloned commit for leaked credentials with trufflehog and fails on any
+    finding. Candidates are verified against their provider's API (public internet).
+    git-clone is shallow, so this covers the commit's tree, not older history.
+  params:
+    - name: subdirectory
+      type: string
+      default: source
+      description: Where git-clone put the repository inside the source workspace.
+  workspaces:
+    - name: source
+      readOnly: true
+  steps:
+    - name: scan
+      image: trufflesecurity/trufflehog:3.99.3
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)
+      env:
+        - name: HOME
+          value: /tmp
+        # The volume root is owned by root (fsGroup only grants group access)
+        - name: GIT_CONFIG_COUNT
+          value: "1"
+        - name: GIT_CONFIG_KEY_0
+          value: safe.directory
+        - name: GIT_CONFIG_VALUE_0
+          value: "*"
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      script: |
+        #!/bin/sh
+        set -eu
+        trufflehog git file://. --fail --no-update

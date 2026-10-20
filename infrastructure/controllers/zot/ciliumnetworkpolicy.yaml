@@ -21,10 +21,12 @@ spec:
         - ports:
             - port: "5000"
               protocol: TCP
-    # In-cluster clients use the Service directly: Tekton pushes, Flux scans tags
+    # In-cluster clients use the Service directly: Tekton pushes, Chains attaches signatures, Flux scans tags
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: tekton-ci
+        - matchLabels:
+            io.kubernetes.pod.namespace: tekton-chains
         - matchLabels:
             io.kubernetes.pod.namespace: flux-system
       toPorts:

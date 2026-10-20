@@ -1,0 +1,25 @@
+# Checkov config for the Tekton validate-infra pipeline (checkov task runs `checkov --config-file .checkov.yaml -d .`).
+# Scans what this repo authors: tofu/ and the raw manifests. Upstream release manifests and Helm charts aren't rendered.
+# Platform-wide exceptions are skipped below. Per-workload exceptions are annotated on the resource itself
+# (`checkov.io/skipN: CKV_K8S_x=<why>` in its metadata), so they're reviewed next to the code they excuse.
+framework:
+  - terraform
+  - kubernetes
+skip-path:
+  - docs
+skip-download: true
+compact: true
+quiet: true
+skip-check:
+  # Namespaces are isolated with CiliumNetworkPolicy, which checkov doesn't know about
+  - CKV2_K8S_6
+  # Images are pinned by tag (Renovate) or by digest (CI-built apps), so Always only adds pulls
+  - CKV_K8S_15
+  # Renovate pins tags, not digests
+  - CKV_K8S_43
+  # Images keep their own UIDs (often < 10000); running as non-root is still checked by CKV_K8S_23
+  - CKV_K8S_40
+  # No CPU limits on purpose: CFS throttling hurts latency on these small nodes. Requests are still required (CKV_K8S_10)
+  - CKV_K8S_11
+  # Secrets as env vars: that's the configuration interface of most of these images
+  - CKV_K8S_35
