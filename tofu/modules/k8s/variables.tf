@@ -29,5 +29,5 @@ variable "secrets" {
     namespace = string
     data      = map(string)
   }))
-  default   = []
+  default = []
 }
