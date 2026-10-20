@@ -27,10 +27,11 @@ spec:
   volumes:
     - name: rendered
       emptyDir: {}
+    - name: work
+      emptyDir: {}
   steps:
     - name: render
       image: ghcr.io/fluxcd/flux-cli:v2.9.6
-      workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
         - name: HOME
           value: /tmp
@@ -41,9 +42,16 @@ spec:
       volumeMounts:
         - name: rendered
           mountPath: /rendered
+        - name: work
+          mountPath: /work
       script: |
         #!/bin/sh
         set -eu
+        # flux build writes a temporary kustomization.yaml next to each one it builds: work on a
+        # private copy, the shared workspace is read-only and read by the other tasks in parallel
+        cp -R "$(workspaces.source.path)/$(params.subdirectory)/." /work/
+        chmod -R u+w /work
+        cd /work
         cluster="$(params.cluster-path)"
         # The root (flux-system) Kustomization is created at bootstrap, not in git: build it with plain kustomize
         kubectl kustomize "$cluster" > /rendered/flux-system.yaml
