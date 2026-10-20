@@ -86,7 +86,7 @@ data "external" "tangled_known_hosts" {
 }
 
 module "talos" {
-  source  = "../modules/talos"
+  source = "../modules/talos"
 
   cluster_name = "production"
   cluster_vip  = "192.168.0.100"

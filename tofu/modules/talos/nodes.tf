@@ -134,6 +134,10 @@ resource "talos_machine_configuration_apply" "this" {
   apply_mode = "auto"
 }
 
+# Opt-in check (health_check_enabled): reading it blocks plan/apply until Talos reports the cluster
+# healthy. Nothing consumes it on purpose: the k8s module can't wait for node readiness before it
+# installs Cilium.
+# tflint-ignore: terraform_unused_declarations
 data "talos_cluster_health" "this" {
   count      = var.health_check_enabled ? 1 : 0
   depends_on = [talos_machine_bootstrap.this]
