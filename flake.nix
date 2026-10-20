@@ -54,6 +54,7 @@
             age
             mdbook
             renovate
+            tektoncd-cli
           ];
         };
       }
