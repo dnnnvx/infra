@@ -48,7 +48,7 @@ spec:
         - name: SYFT_REGISTRY_INSECURE_USE_HTTP
           value: "true"
       script: |
-        #!/bin/sh
+        #!/busybox/sh
         set -eu
         : > "$(results.sboms.path)"
         for entry in $(params.digests); do

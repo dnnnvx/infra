@@ -38,7 +38,7 @@ spec:
         capabilities:
           drop: ["ALL"]
       script: |
-        #!/bin/sh
+        #!/busybox/sh
         set -eu
         for entry in $(params.digests); do
           ref="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)@$(echo "$entry" | cut -d= -f2)"
