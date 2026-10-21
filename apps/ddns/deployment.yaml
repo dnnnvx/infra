@@ -39,8 +39,13 @@ spec:
                 secretKeyRef:
                   name: cloudflare-api-token
                   key: api-token
+            # apex (proxied, existing records keep their proxy status) + WireGuard
+            # endpoint (created DNS-only via PROXIED=false); set by tofu
             - name: DOMAINS
-              value: "casasulgorgo.net"
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-api-token
+                  key: domains
             - name: CF_API_TOKEN
               value: ""
             - name: PROXIED

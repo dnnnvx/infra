@@ -10,7 +10,7 @@ Injected by Tofu directly into Kubernetes — not managed by Flux/SOPS:
 | `sops-age`                          | `flux-system`  | Age key for SOPS decryption          |
 | `flux-substitutions`                | `flux-system`  | Variable substitutions for postBuild |
 | `cloudflare-api-token`              | `cert-manager` | DNS-01 challenge for Let's Encrypt   |
-| `cloudflare-api-token`              | `ddns`         | DDNS A record updates                |
+| `cloudflare-api-token`              | `ddns`         | DDNS A record updates + `domains`    |
 
 Namespaces required before Flux runs (`cert-manager`, `ddns`) are also created by Tofu.
 

@@ -138,6 +138,8 @@ module "talos" {
       node-type    = "nuc"
       cpu-class    = "J3455"
       gpu-class    = "HD500"
+      # WireGuard endpoint: must hold the VIP, so keep it on a controlplane node
+      extra_patches = [module.wireguard.config_patch]
     }
     # "nuc-102" = {
     #   machine_type = "worker"
@@ -178,6 +180,20 @@ module "talos" {
       gpu-class    = "HD605"
       storage      = "local"
     }
+  }
+}
+
+# Remote access (docs/src/remote-access.md): WireGuard on nuc-101, the router forwards 51820/udp to it.
+# Clients route the VIP and node IP through the tunnel; both are local addresses of nuc-101, so the
+# node doesn't forward anything and kubeconfig/talosconfig work unchanged.
+module "wireguard" {
+  source = "../modules/wireguard"
+
+  hostname   = var.wireguard_hostname
+  routed_ips = ["192.168.0.100", "192.168.0.101"]
+  peers = {
+    laptop = "10.10.0.2",
+    phone  = "10.10.0.3",
   }
 }
 
@@ -233,7 +249,11 @@ module "k8s" {
     {
       name      = "cloudflare-api-token"
       namespace = "ddns"
-      data      = { api-token = module.cloudflare.cluster_api_token }
+      data = {
+        api-token = module.cloudflare.cluster_api_token
+        # the WireGuard hostname exposes the home IP, so it's kept out of git
+        domains = join(",", compact(["casasulgorgo.net", var.wireguard_hostname]))
+      }
     },
   ]
 }

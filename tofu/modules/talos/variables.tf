@@ -39,6 +39,7 @@ variable "nodes" {
     gpu-class     = optional(string, "")
     storage       = optional(string, "")
     nameservers   = optional(list(string), ["192.168.0.1", "1.1.1.1", "8.8.8.8"])
+    extra_patches = optional(list(string), []) # config patches applied to this node only
     extra_disks = optional(list(object({
       device     = string
       mountpoint = string

@@ -118,6 +118,7 @@ data "talos_machine_configuration" "this" {
         auto       = "off"
       }),
     ],
+    each.value.extra_patches,
   )
 }
 

@@ -55,6 +55,7 @@
             mdbook
             renovate
             tektoncd-cli
+            wireguard-tools
           ];
         };
       }
