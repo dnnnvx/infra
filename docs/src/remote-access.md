@@ -30,7 +30,7 @@ live only in the encrypted state and in those configs. Devices are listed in the
 `wireguard_hostname` (`terraform.tfvars`) is the DNS-only record DDNS points at the home IP, used as the
 clients' `Endpoint`. It's kept out of git because a DNS-only record exposes the home IP. Tofu writes it into the
 `domains` key of the `ddns/cloudflare-api-token` Secret, next to the apex, and `cloudflare-ddns` creates it
-unproxied (`PROXIED=false` only affects new records; the apex stays proxied).
+unproxied (`PROXIED=is(casasulgorgo.net)`: only the apex is proxied).
 
 Unauthenticated packets get no reply, so the open port is invisible to scanners. A leaked client key only
 gives network reachability: the Talos and Kubernetes APIs still need their mTLS client certs.
