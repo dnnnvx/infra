@@ -13,4 +13,4 @@ images:
   - name: casasulgorgo
     newName: registry.local.casasulgorgo.net/casasulgorgo/web
     newTag: production
-    digest: sha256:3cad107c7ab79dc8f5ed38a52c53ea58bd4d9c3bdc397b61e6b6d7de1b1be10b # {"$imagepolicy": "flux-system:casasulgorgo-web:digest"}
+    digest: sha256:2981588f4f9fbeb134b35d60214f67d4e769deff30bbe6ce375a192f5196cf6c # {"$imagepolicy": "flux-system:casasulgorgo-web:digest"}
