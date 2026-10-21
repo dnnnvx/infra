@@ -15,6 +15,10 @@ addresses of `nuc-101`, so the node never forwards or masquerades, and the usual
 Other nodes are reached through apid's proxy: `talosctl -n 192.168.0.103 …`.
 Nothing else on the LAN (`*.local`, AdGuard, the registry) is reachable through the tunnel.
 
+LAN-only UIs aren't routed; reach them through the API server instead, e.g.
+`kubectl -n kube-system port-forward svc/hubble-ui 12000:80`. Talos changes via `tofu apply` need the LAN
+(the Talos provider dials every node directly).
+
 If the VIP ever moves to another controlplane, kubectl over the tunnel stops working until the
 client's `AllowedIPs` and the endpoint node change with it.
 
