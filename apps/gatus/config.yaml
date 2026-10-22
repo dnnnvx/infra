@@ -1,7 +1,8 @@
 alerting:
-  telegram:
-    token: ${TELEGRAM_TOKEN}
-    id: ${TELEGRAM_CHAT_ID}
+  matrix:
+    server-url: http://tuwunel.matrix.svc.cluster.local:8008
+    access-token: ${MATRIX_TOKEN}
+    internal-room-id: "!hcNOO-kFitB4fJ15jq8k5Ju5H56mGzLYXIIdbuhJvXM"
 
 endpoints:
   - name: Kubernetes API
@@ -13,5 +14,5 @@ endpoints:
     conditions:
       - "[CONNECTED] == true"
     alerts:
-      - type: telegram
+      - type: matrix
         send-on-resolved: true

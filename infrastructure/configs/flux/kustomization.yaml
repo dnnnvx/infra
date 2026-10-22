@@ -6,6 +6,6 @@ resources:
   - flux-web-config.yaml
   - receiver.yaml
   - receiver-token.yaml
-  - telegram-secret.yaml
-  - telegram.yaml
+  - matrix-secret.yaml
+  - matrix.yaml
   - image-update-automation.yaml

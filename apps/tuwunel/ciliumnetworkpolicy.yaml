@@ -13,6 +13,15 @@ spec:
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: gatus
+    # Flux alerts
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: flux-system
+            app: notification-controller
+      toPorts:
+        - ports:
+            - port: "8008"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:

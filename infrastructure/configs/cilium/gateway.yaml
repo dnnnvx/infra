@@ -10,7 +10,7 @@ metadata:
       group: apps
       interval: 5m
       alerts:
-        - type: telegram
+        - type: matrix
           send-on-resolved: true
 spec:
   gatewayClassName: cilium

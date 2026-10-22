@@ -1,22 +1,23 @@
 apiVersion: notification.toolkit.fluxcd.io/v1beta3
 kind: Provider
 metadata:
-  name: telegram
+  name: matrix
   namespace: flux-system
 spec:
-  type: telegram
-  channel: ${quote}${TELEGRAM_CHAT_ID}${quote}
+  type: matrix
+  address: http://tuwunel.matrix.svc.cluster.local:8008
+  channel: '!hcNOO-kFitB4fJ15jq8k5Ju5H56mGzLYXIIdbuhJvXM'
   secretRef:
-    name: telegram-token
+    name: matrix-token
 ---
 apiVersion: notification.toolkit.fluxcd.io/v1beta3
 kind: Alert
 metadata:
-  name: telegram
+  name: matrix
   namespace: flux-system
 spec:
   providerRef:
-    name: telegram
+    name: matrix
   eventSeverity: error
   eventSources:
     - kind: GitRepository
@@ -41,11 +42,11 @@ spec:
 apiVersion: notification.toolkit.fluxcd.io/v1beta3
 kind: Alert
 metadata:
-  name: telegram-audit
+  name: matrix-audit
   namespace: flux-system
 spec:
   providerRef:
-    name: telegram
+    name: matrix
   eventSeverity: info
   eventSources:
     - kind: Kustomization
