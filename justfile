@@ -77,10 +77,10 @@ docs:
 
 # sync flux with the defined git repo
 sync:
-    flux reconcile source git flux-system -n flux-system --context {{ context }}
+    flux reconcile kustomization flux-system --with-source --context {{ context }}
     flux reconcile kustomization infrastructure
     flux reconcile kustomization config
-    flux get kustomizations | awk '/^app-/ {print $1}' | xargs -n1 flux reconcile kustomization
+    kustomize build clusters/production/apps | yq '.metadata.name' | grep -v '^---$' | xargs -n1 flux reconcile kustomization
 
 # replay a signed Tangled push webhook (no commit needed): just ci-build <clone_url> <sha> [repo]
 ci-build clone_url sha repo="web":
