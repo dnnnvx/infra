@@ -8,10 +8,10 @@ resources:
   - ciliumnetworkpolicy.yaml
   - httproute.yaml
   - secrets.yaml
+# hashed name: config.yaml is a subPath mount (never updated in place), so a config
+# change must roll the pod
 configMapGenerator:
   - name: gatus-config
     namespace: gatus
     files:
       - config.yaml
-    options:
-      disableNameSuffixHash: true
