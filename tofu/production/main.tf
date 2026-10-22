@@ -203,7 +203,7 @@ module "cloudflare" {
   cloudflare_account_id = var.cloudflare_account_id
   zone_name             = "casasulgorgo.net"
   cloudflare_api_token  = var.cloudflare_api_token
-  cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "ci"]
+  cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "ci", "matrix"]
   r2_buckets            = { "tofu-state" = {} }
   atproto_did           = local.atproto_did
   local_gateway_ip      = "192.168.0.202" # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)

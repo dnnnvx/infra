@@ -1,0 +1,22 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-tuwunel
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infrastructure
+    - name: config
+  interval: 10m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/tuwunel
+  prune: true
+  # commenting the app out of kustomization.yaml (deleting this object) keeps its resources
+  deletionPolicy: Orphan
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
