@@ -16,3 +16,13 @@ endpoints:
     alerts:
       - type: matrix
         send-on-resolved: true
+  - name: alert-test
+    group: test
+    url: https://does-not-exist.casasulgorgo.net
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: matrix
+        failure-threshold: 1
+        send-on-resolved: true
