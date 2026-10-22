@@ -19,6 +19,8 @@ spec:
         app.kubernetes.io/part-of: matrix
     spec:
       automountServiceAccountToken: false
+      # the Service's injected TUWUNEL_SERVICE_*/TUWUNEL_PORT_* vars are read as tuwunel config
+      enableServiceLinks: false
       # the first boot after an upgrade may run a DB migration that must not be interrupted
       terminationGracePeriodSeconds: 600
       securityContext:
@@ -49,7 +51,8 @@ spec:
             exec:
               command: ["tuwunel", "--health-check"]
             periodSeconds: 10
-            failureThreshold: 60
+            # 30 min for DB migrations, as in tuwunel's kubernetes docs
+            failureThreshold: 180
           livenessProbe:
             exec:
               command: ["tuwunel", "--health-check"]
