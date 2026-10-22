@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tuwunel
+  namespace: matrix
+  labels:
+    app.kubernetes.io/part-of: matrix
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tuwunel
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tuwunel
+        app.kubernetes.io/part-of: matrix
+    spec:
+      automountServiceAccountToken: false
+      # the first boot after an upgrade may run a DB migration that must not be interrupted
+      terminationGracePeriodSeconds: 600
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: tuwunel
+          image: ghcr.io/matrix-construct/tuwunel:v1.9.4
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 8008
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 2Gi
+          startupProbe:
+            exec:
+              command: ["tuwunel", "--health-check"]
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            exec:
+              command: ["tuwunel", "--health-check"]
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command: ["tuwunel", "--health-check"]
+            periodSeconds: 10
+            failureThreshold: 3
+          env:
+            # cannot be changed later without wiping the database
+            - name: TUWUNEL_SERVER_NAME
+              value: casasulgorgo.net
+            - name: TUWUNEL_DATABASE_PATH
+              value: /var/lib/tuwunel
+            - name: TUWUNEL_ADDRESS
+              value: 0.0.0.0
+            - name: TUWUNEL_PORT
+              value: "8008"
+            # Cloudflare's free-plan upload limit
+            - name: TUWUNEL_MAX_REQUEST_SIZE
+              value: "104857600"
+            - name: TUWUNEL_ALLOW_FEDERATION
+              value: "false"
+            # accounts are created by signing in with Pocket-ID only
+            - name: TUWUNEL_ALLOW_REGISTRATION
+              value: "false"
+            # served on casasulgorgo.net/.well-known/matrix; client is also the OIDC issuer for next-gen auth (Element X)
+            - name: TUWUNEL_WELL_KNOWN__CLIENT
+              value: https://matrix.casasulgorgo.net
+            # Pocket-ID. client_id is tuwunel's provider ID: never change it
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: tuwunel-secrets
+                  key: oidc-client-id
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tuwunel-secrets
+                  key: oidc-client-secret
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__BRAND
+              value: pocket-id
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__NAME
+              value: Casa sul Gorgo
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__ISSUER_URL
+              value: https://auth.casasulgorgo.net
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__CALLBACK_URL
+              value: https://matrix.casasulgorgo.net/_matrix/client/unstable/login/sso/callback/$(TUWUNEL_IDENTITY_PROVIDER__0__CLIENT_ID)
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__USERID_CLAIMS
+              value: '["preferred_username"]'
+            - name: TUWUNEL_IDENTITY_PROVIDER__0__UNIQUE_ID_FALLBACKS
+              value: "false"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/tuwunel
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: tuwunel-data
+        - name: tmp
+          emptyDir: {}

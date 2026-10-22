@@ -13,6 +13,7 @@ resources:
   - bookorbit.yaml
   - silverbullet.yaml
   - casasulgorgo.yaml
+  - tuwunel.yaml
   # - romm.yaml
   # - lightnvr.yaml
   # - llama-cpp.yaml
