@@ -73,6 +73,8 @@ spec:
               value: 0.0.0.0
             - name: TUWUNEL_PORT
               value: "8008"
+            - name: TUWUNEL_NEW_USER_DISPLAYNAME_SUFFIX
+              value: ""
             # Cloudflare's free-plan upload limit
             - name: TUWUNEL_MAX_REQUEST_SIZE
               value: "104857600"
