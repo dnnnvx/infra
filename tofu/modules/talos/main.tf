@@ -46,14 +46,27 @@ locals {
           extraHostEntries = local.dns_entries
         }
 
-        kubelet = merge(
-          {
-            nodeIP = {
-              validSubnets = ["${node.ip}/32"]
-            }
-          },
-          length(node.taints) > 0 ? {
-            extraConfig = {
+        kubelet = {
+          nodeIP = {
+            validSubnets = ["${node.ip}/32"]
+          }
+          extraConfig = merge(
+            {
+              # Keep CPU and memory back from pods for the OS and the kubelet: with Talos' defaults
+              # (50m CPU, no kubeReserved) a Rust build in CI starved nuc-103's kubelet into NotReady.
+              # Setting systemReserved replaces Talos' defaults, so pid/ephemeral-storage are repeated.
+              systemReserved = {
+                cpu                 = "100m"
+                memory              = "512Mi"
+                pid                 = "100"
+                "ephemeral-storage" = "256Mi"
+              }
+              kubeReserved = {
+                cpu    = "200m"
+                memory = "256Mi"
+              }
+            },
+            length(node.taints) > 0 ? {
               registerWithTaints = [
                 for t in node.taints : {
                   key    = t.key
@@ -61,9 +74,9 @@ locals {
                   effect = t.effect
                 }
               ]
-            }
-          } : {},
-        )
+            } : {},
+          )
+        }
         }, length(node.extra_disks) > 0 ? {
         disks = [
           for d in node.extra_disks : {
