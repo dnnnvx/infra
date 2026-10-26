@@ -7,6 +7,9 @@ node-3 := "192.168.0.103"
 node-4 := "192.168.0.104"
 nodes := node-1  + " " + node-3 + " " + node-4
 
+# age private key for sops (keep it 0600). Explicit because sops' default on macOS is ~/Library/Application Support
+export SOPS_AGE_KEY_FILE := env("SOPS_AGE_KEY_FILE", home_directory() + "/.config/sops/age/keys.txt")
+
 # print available commands
 default:
     @just --list
@@ -17,7 +20,7 @@ dev:
 
 # merge talosconfig from state into ~/.talos/config
 add-talosconfig:
-    tofu -chdir=tofu/{{ environment }} output -raw talosconfig > ~/.talos/config-{{ context }}
+    just tofu output -raw talosconfig > ~/.talos/config-{{ context }}
     talosctl config merge ~/.talos/config-{{ context }}
     rm ~/.talos/config-{{ context }}
 
@@ -28,7 +31,7 @@ rm-talosconfig:
 
 # merge kubeconfig from state into ~/.kube/config, rename context to cluster name
 add-kubeconfig:
-    tofu -chdir=tofu/{{ environment }} output -raw kubeconfig > ~/.kube/config-{{ context }}
+    just tofu output -raw kubeconfig > ~/.kube/config-{{ context }}
     kubectl config --kubeconfig ~/.kube/config-{{ context }} rename-context admin@{{ context }} {{ context }}
     KUBECONFIG=~/.kube/config:~/.kube/config-{{ context }} kubectl config view --flatten > ~/.kube/config-merged
     mv ~/.kube/config-merged ~/.kube/config
@@ -45,7 +48,7 @@ rm-kubeconfig:
 upgrade-nodes:
     #!/usr/bin/env bash
     set -euo pipefail
-    IMAGE=$(cd tofu/{{ environment }} && tofu output -raw installer_image)
+    IMAGE=$(just tofu output -raw installer_image)
     for node in {{ nodes }}; do
       echo "Upgrading $node..."
       talosctl --context {{ context }} -n "$node" upgrade --image "$IMAGE" --wait
@@ -53,22 +56,30 @@ upgrade-nodes:
       sleep 10
     done
 
-# encrypt a secret file in-place with sops
-encrypt file:
+# run tofu with the R2 keys and variables from infrastructure/tofu/secret.yaml: just tofu plan
+tofu *args:
     #!/usr/bin/env bash
-    echo -n "Age private key: "
-    read -rs SOPS_AGE_KEY
-    echo
-    export SOPS_AGE_KEY
+    set -euo pipefail
+    # Decrypted in memory only. terraform.tfvars (HCL) -> TF_VAR_<name>: strings as-is,
+    # maps/objects as JSON, which tofu parses as HCL (so ${ and %{ are escaped).
+    secret=$(sops --decrypt infrastructure/tofu/secret.yaml)
+    eval "$(printf '%s\n' "$secret" | yq -r '.stringData | (
+      "export AWS_ACCESS_KEY_ID=" + (.AWS_ACCESS_KEY_ID | @sh),
+      "export AWS_SECRET_ACCESS_KEY=" + (.AWS_SECRET_ACCESS_KEY | @sh))')"
+    eval "$(printf '%s\n' "$secret" | yq -r '.stringData."terraform.tfvars"' | yq -p hcl -o json | yq -p json -r '
+      to_entries[] | "export TF_VAR_" + .key + "=" + ((
+        if (.value | tag) == "!!str" then .value
+        else .value | to_json(0) | sub("\\$\\{"; "$$$${") | sub("%\\{"; "%%{") end
+      ) | @sh)')"
+    unset secret
+    tofu -chdir=tofu/{{ environment }} {{ args }}
+
+# encrypt a secret file in-place with sops (needs only the public key in .sops.yaml)
+encrypt file:
     sops --encrypt --in-place {{ file }}
 
-# edit an encrypted secret
+# edit an encrypted secret, e.g. the tofu inputs: just edit-secret infrastructure/tofu/secret.yaml
 edit-secret file:
-    #!/usr/bin/env bash
-    echo -n "Age private key: "
-    read -rs SOPS_AGE_KEY
-    echo
-    export SOPS_AGE_KEY
     sops {{ file }}
 
 # build and serve docs

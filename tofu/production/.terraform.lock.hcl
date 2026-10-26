@@ -26,8 +26,7 @@ provider "registry.opentofu.org/cloudflare/cloudflare" {
 }
 
 provider "registry.opentofu.org/hashicorp/external" {
-  version     = "2.4.2"
-  constraints = "~> 2.0"
+  version = "2.4.2"
   hashes = [
     "h1:+0PiugIB6q/pd3hCYhyYRWWxHT0S8C3mbW0qn983zAQ=",
     "h1:/5O2eEFkFnNB96Xi4po3saQwlMh6eqIEDiOmJIgyHM0=",

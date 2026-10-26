@@ -31,7 +31,7 @@ Talos `WireguardConfig` patch (applied to nuc-101 via its `extra_patches`) and t
 live only in the encrypted state and in those configs. Devices are listed in the module's `peers`
 (`tofu/production/main.tf`, name → `10.10.0.x`).
 
-`wireguard_hostname` (`terraform.tfvars`) is the DNS-only record DDNS points at the home IP, used as the
+`wireguard_hostname` (tfvars in `infrastructure/tofu/secret.yaml`, see [OpenTofu](opentofu.md)) is the DNS-only record DDNS points at the home IP, used as the
 clients' `Endpoint`. It's kept out of git because a DNS-only record exposes the home IP. Tofu writes it into the
 `domains` key of the `ddns/cloudflare-api-token` Secret, next to the apex, and `cloudflare-ddns` creates it
 unproxied (`PROXIED=is(casasulgorgo.net)`: only the apex is proxied).

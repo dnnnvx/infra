@@ -28,13 +28,13 @@ Edit an encrypted secret:
 just edit-secret path/to/secret.yaml
 ```
 
-Both commands prompt for the Age private key interactively.
+`encrypt` only needs the public key from `.sops.yaml`. `edit-secret` (and `just tofu`) read the age private key
+from `~/.config/sops/age/keys.txt` (mode 0600), via `SOPS_AGE_KEY_FILE` set in the justfile.
 
-## Sensitive files (gitignored)
+## Tofu inputs
 
-| File                          | Contents                        |
-|-------------------------------|----------------------------------|
-| `tofu/production/terraform.tfvars` | All Tofu variables (tokens, keys) |
-| `tofu/production/.env`            | R2 S3 credentials (`AWS_*`)     |
-| `*.tfvars`, `*.tfvars.json`   | Matched by `.gitignore`          |
-| `.env*`                       | Matched by `.gitignore`          |
+Tofu's variables (`terraform.tfvars`) and the R2 state credentials live in the SOPS Secret
+`infrastructure/tofu/secret.yaml`, shared by `just tofu …` locally and tofu-controller in-cluster.
+See [OpenTofu](opentofu.md).
+
+`*.tfvars`, `*.tfvars.json` and dotfiles (`.env`) stay gitignored as a safety net.
