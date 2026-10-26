@@ -1,5 +1,5 @@
-# session.json + the SQLite state/crypto store. Wipe both or neither: a new login is a new device
-# that can't decrypt what the old one received.
+# store/: the SQLite state/crypto store, including the session (sealed under STORE_PASSPHRASE).
+# Wiping it means a new login, i.e. a new device that can't decrypt what the old one received.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
