@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - infrastructure.yaml
   - config.yaml
+  - tofu.yaml
   - apps

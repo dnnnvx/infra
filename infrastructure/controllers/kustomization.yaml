@@ -9,3 +9,4 @@ resources:
   - cnpg
   - tekton
   - zot
+  - tofu-controller

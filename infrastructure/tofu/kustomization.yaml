@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# tofu/production run in-cluster by tofu-controller: plans every hour, never applies on its own.
+# Own Flux Kustomization (clusters/production/tofu.yaml), so a pending plan or drift
+# doesn't fail `config` and block the apps. See docs/src/opentofu.md.
+resources:
+  - gitrepository.yaml
+  - secret.yaml
+  - terraform.yaml

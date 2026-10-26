@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Lives in flux-system, whose network policies already cover the controller and its
+# runner pods. The Terraform objects are in infrastructure/tofu (own Flux Kustomization).
+namespace: flux-system
+resources:
+  - repository.yaml
+  - release.yaml
+configMapGenerator:
+  - name: tofu-controller-values
+    namespace: flux-system
+    files:
+      - values.yaml
+    options:
+      disableNameSuffixHash: true

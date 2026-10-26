@@ -1,0 +1,85 @@
+apiVersion: infra.contrib.fluxcd.io/v1alpha2
+kind: Terraform
+metadata:
+  name: production
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./tofu/production
+  sourceRef:
+    kind: GitRepository
+    name: infra-tofu
+  # approvePlan is deliberately not set here: manual mode. The plan ID is derived from the
+  # commit, so approving with a commit invalidates the plan; approve in-cluster instead
+  # (docs/src/opentofu.md). Drift detection runs on every interval once a plan is applied.
+  storeReadablePlan: human
+  # Keep the R2 backend from main.tf (written as backend_override.tf; must match it).
+  # Without this the controller would switch state to a Kubernetes Secret.
+  backendConfig:
+    customConfiguration: |
+      backend "s3" {
+        bucket                      = "tofu-state"
+        encrypt                     = true
+        endpoint                    = "https://997f91bd76e7456df317ac9ac3fff92b.r2.cloudflarestorage.com"
+        key                         = "homelab/terraform.tfstate"
+        region                      = "auto"
+        skip_credentials_validation = true
+        skip_metadata_api_check     = true
+        skip_region_validation      = true
+        skip_requesting_account_id  = true
+        skip_s3_checksum            = true
+        use_path_style              = true
+      }
+  fileMappings:
+    - location: workspace
+      path: terraform.tfvars
+      secretRef:
+        name: tofu-production
+        key: terraform.tfvars
+  runnerPodTemplate:
+    spec:
+      env:
+        # tofu from the init container below takes precedence over the runner's bundled one
+        - name: PATH
+          value: /opt/tofu:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: tofu-production
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tofu-production
+              key: AWS_SECRET_ACCESS_KEY
+      # The stock runner ships tofu 1.12.x; main.tf pins required_version exactly.
+      # Keep this tag equal to required_version.
+      initContainers:
+        - name: tofu
+          image: ghcr.io/opentofu/opentofu:1.13.1
+          command: ["cp", "/usr/local/bin/tofu", "/opt/tofu/tofu"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: tofu-bin
+              mountPath: /opt/tofu
+      volumes:
+        - name: tofu-bin
+          emptyDir: {}
+      volumeMounts:
+        - name: tofu-bin
+          mountPath: /opt/tofu
+          readOnly: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi

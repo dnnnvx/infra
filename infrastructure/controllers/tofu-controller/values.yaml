@@ -1,0 +1,14 @@
+# Only the Terraform objects in flux-system (infrastructure/tofu); runners run there too
+watchAllNamespaces: false
+concurrency: 2
+
+# Don't install the bundled AWS primitive modules
+awsPackage:
+  install: false
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 512Mi

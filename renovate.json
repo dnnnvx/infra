@@ -34,6 +34,11 @@
         "quay.io/cilium/cilium",
         "kubernetes-sigs/gateway-api"
       ]
+    },
+    {
+      "description": "The tofu-controller runner's tofu (infrastructure/tofu/terraform.yaml) must equal required_version in tofu/production/main.tf, which Renovate doesn't track: bump both by hand.",
+      "matchPackageNames": ["ghcr.io/opentofu/opentofu"],
+      "enabled": false
     }
   ]
 }
