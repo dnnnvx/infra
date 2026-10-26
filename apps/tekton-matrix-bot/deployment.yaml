@@ -51,7 +51,7 @@ spec:
             - name: MATRIX_HOMESERVER
               value: http://tuwunel.matrix.svc.cluster.local:8008
             - name: MATRIX_USER
-              value: tektonbot
+              value: alerts
           volumeMounts:
             - name: data
               mountPath: /data
