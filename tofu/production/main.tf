@@ -21,6 +21,14 @@ terraform {
     key_provider "pbkdf2" "this" {
       passphrase = var.passphrase
     }
+
+    method "aes_gcm" "this" {
+      keys = key_provider.pbkdf2.this
+    }
+
+    state {
+      method = method.aes_gcm.this
+    }
   }
 
   required_providers {
@@ -36,15 +44,15 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 5"
     }
-    external = {
-      source  = "hashicorp/external"
-      version = "~> 2.0"
-    }
   }
 }
 
 locals {
   atproto_did = "did:plc:qzac7ebdharodtvwlxb7wsof"
+
+  # Pinned rather than ssh-keyscan'd on every plan (tofu-controller runs this in-cluster).
+  # Re-check after a host key rotation: ssh-keyscan tangled.org
+  tangled_known_hosts = "tangled.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII2UShEm/FFPmYZUizaPnIqOJuynoCQpcLhl5PPHd02n\n"
 
   client_certificate     = base64decode(module.talos.kubernetes_client_configuration.client_certificate)
   client_key             = base64decode(module.talos.kubernetes_client_configuration.client_key)
@@ -69,10 +77,6 @@ provider "helm" {
 
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
-}
-
-data "external" "tangled_known_hosts" {
-  program = ["sh", "-c", "ssh-keyscan tangled.org 2>/dev/null | grep -v '^#' | jq -Rsc '{known_hosts: .}'"]
 }
 
 module "talos" {
@@ -228,7 +232,7 @@ module "k8s" {
       data = {
         identity       = var.flux_deploy_key
         "identity.pub" = var.flux_deploy_key_pub
-        known_hosts    = data.external.tangled_known_hosts.result.known_hosts
+        known_hosts    = local.tangled_known_hosts
       }
     },
     {

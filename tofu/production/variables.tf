@@ -1,3 +1,11 @@
+# State encryption (main.tf `encryption` block)
+
+variable "passphrase" {
+  description = "PBKDF2 passphrase for OpenTofu state encryption (min 16 chars); losing it makes the state unreadable"
+  type        = string
+  sensitive   = true
+}
+
 # Cloudflare
 
 variable "cloudflare_account_id" {
