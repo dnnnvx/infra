@@ -55,14 +55,15 @@ spec:
           value: --oci-worker-no-process-sandbox
         - name: DOCKER_CONFIG
           value: /docker-config
-      # The LimitRange default (2Gi) thrashes on Rust builds (matrix-sdk); 4Gi is its max
+      # The LimitRange default (2Gi) thrashes on Rust builds (matrix-sdk). CPU stays at 2 of the
+      # NUCs' 4 cores: at 3 a Rust build starved the kubelet and the node went NotReady.
       computeResources:
         requests:
-          cpu: 500m
-          memory: 2Gi
+          cpu: "1"
+          memory: 3Gi
         limits:
-          cpu: "3"
-          memory: 4Gi
+          cpu: "2"
+          memory: 3Gi
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
