@@ -14,6 +14,7 @@ resources:
   - silverbullet.yaml
   - casasulgorgo.yaml
   - tuwunel.yaml
+  - tekton-matrix-bot.yaml
   # - romm.yaml
   # - lightnvr.yaml
   # - llama-cpp.yaml

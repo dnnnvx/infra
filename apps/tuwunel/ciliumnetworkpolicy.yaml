@@ -22,6 +22,14 @@ spec:
         - ports:
             - port: "8008"
               protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: tekton-matrix-bot
+            app.kubernetes.io/name: tekton-matrix-bot
+      toPorts:
+        - ports:
+            - port: "8008"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:

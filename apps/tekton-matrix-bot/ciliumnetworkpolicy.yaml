@@ -1,0 +1,30 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: tekton-matrix-bot
+  namespace: tekton-matrix-bot
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: tekton-matrix-bot
+  # no ingress: nothing calls the bot (it only syncs outwards), the clusterwide default-deny covers it
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # homeserver, in-cluster (not through the Gateway)
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: matrix
+            app.kubernetes.io/name: tuwunel
+      toPorts:
+        - ports:
+            - port: "8008"
+              protocol: TCP

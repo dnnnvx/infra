@@ -1,0 +1,14 @@
+# session.json + the SQLite state/crypto store. Wipe both or neither: a new login is a new device
+# that can't decrypt what the old one received.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tekton-matrix-bot-data
+  namespace: tekton-matrix-bot
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: piraeus

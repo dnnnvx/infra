@@ -1,0 +1,111 @@
+# Build → deploy wiring for this app (Tekton Trigger, Flux image automation, flux-sync RBAC).
+# Copied from apps/casasulgorgo/ci.yaml; its Flux Kustomization is clusters/production/apps/tekton-matrix-bot.yaml.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: tekton-matrix-bot-bot
+  namespace: flux-system
+spec:
+  image: registry.local.casasulgorgo.net/tekton-matrix-bot/bot
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: tekton-matrix-bot-bot
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: tekton-matrix-bot-bot
+  filterTags:
+    pattern: '^production$'
+  policy:
+    alphabetical:
+      order: asc
+  # The tag is mutable: re-check its digest on every interval
+  digestReflectionPolicy: Always
+  interval: 5m
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: flux-sync-tekton-matrix-bot
+  namespace: flux-system
+rules:
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imagerepositories, imagepolicies]
+    resourceNames: [tekton-matrix-bot-bot]
+    verbs: [get, patch]
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imageupdateautomations]
+    resourceNames: [apps]
+    verbs: [get, patch]
+  - apiGroups: [kustomize.toolkit.fluxcd.io]
+    resources: [kustomizations]
+    resourceNames: [app-tekton-matrix-bot]
+    verbs: [get, patch]
+  - apiGroups: [source.toolkit.fluxcd.io]
+    resources: [gitrepositories]
+    resourceNames: [flux-system]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: flux-sync-tekton-matrix-bot
+  namespace: flux-system
+subjects:
+  - kind: ServiceAccount
+    name: flux-sync
+    namespace: tekton-ci
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: flux-sync-tekton-matrix-bot
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: tekton-matrix-bot
+  namespace: tekton-ci
+  labels:
+    ci.casasulgorgo.net/eventlistener: tangled
+spec:
+  interceptors:
+    - name: verify-signature
+      ref:
+        name: tangled
+        kind: ClusterInterceptor
+    - name: filter
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: filter
+          value: >-
+            header.match('X-Tangled-Event', 'push') &&
+            body.repository.name == 'tekton-matrix-bot' &&
+            body.ref == 'refs/heads/main' &&
+            body.after.matches('^[0-9a-f]{40}$') &&
+            body.after != '0000000000000000000000000000000000000000'
+        - name: overlays
+          value:
+            - key: tags
+              expression: "body.after + ' latest production'"
+  bindings:
+    - name: project
+      value: tekton-matrix-bot
+    # space-separated <name>,<dockerfile>,<context> per image (dockerfile relative to context)
+    - name: images
+      value: bot,Dockerfile,.
+    - name: flux-kustomization
+      value: app-tekton-matrix-bot
+    - name: repo-url
+      value: $(body.repository.clone_url)
+    - name: revision
+      value: $(body.after)
+    - name: tags
+      value: $(extensions.tags)
+  template:
+    ref: build-image

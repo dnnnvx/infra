@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tekton-matrix-bot
+  namespace: tekton-matrix-bot
+  annotations:
+    checkov.io/skip1: CKV_K8S_14=registry, tag and digest come from the kustomization images entry (Flux image automation)
+    checkov.io/skip2: CKV_K8S_8=no listening port or health command to probe
+    checkov.io/skip3: CKV_K8S_9=no listening port or health command to probe
+spec:
+  replicas: 1
+  # RWO volume, and two instances would fight over the same Matrix device
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tekton-matrix-bot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tekton-matrix-bot
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: tekton-matrix-bot
+          # Registry + tag are set by the kustomization (Flux image automation)
+          image: tekton-matrix-bot
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          envFrom:
+            # MATRIX_PASSWORD (first login only), STORE_PASSPHRASE
+            - secretRef:
+                name: tekton-matrix-bot-secrets
+          env:
+            - name: MATRIX_HOMESERVER
+              value: http://tuwunel.matrix.svc.cluster.local:8008
+            - name: MATRIX_USER
+              value: tektonbot
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: tekton-matrix-bot-data
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
