@@ -32,7 +32,7 @@ spec:
         set -eu
         tofu fmt -check -diff -recursive "$(params.path)"
     - name: tflint
-      image: ghcr.io/terraform-linters/tflint:v0.64.0
+      image: ghcr.io/terraform-linters/tflint:v0.65.0
       workingDir: $(workspaces.source.path)/$(params.subdirectory)/$(params.path)
       env:
         - name: HOME

@@ -74,7 +74,7 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-          image: ghcr.io/home-operations/gatus-sidecar:0.5.4
+          image: ghcr.io/home-operations/gatus-sidecar:0.5.5
           resources:
             requests:
               cpu: 5m

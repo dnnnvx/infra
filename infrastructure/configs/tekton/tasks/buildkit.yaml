@@ -47,7 +47,7 @@ spec:
             path: config.json
   steps:
     - name: build-and-push
-      image: moby/buildkit:v0.34.0-rootless
+      image: moby/buildkit:v0.34.1-rootless
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
         # No nested PID namespace: needed to run without privileged

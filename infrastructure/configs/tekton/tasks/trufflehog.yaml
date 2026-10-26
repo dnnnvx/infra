@@ -18,7 +18,7 @@ spec:
       readOnly: true
   steps:
     - name: scan
-      image: trufflesecurity/trufflehog:3.99.3
+      image: trufflesecurity/trufflehog:3.99.7
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
         - name: HOME

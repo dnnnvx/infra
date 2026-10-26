@@ -29,7 +29,7 @@ spec:
       description: How long to wait for the Kustomization to become ready.
   steps:
     - name: sync
-      image: ghcr.io/fluxcd/flux-cli:v2.9.6
+      image: ghcr.io/fluxcd/flux-cli:v2.10.0
       env:
         - name: HOME
           value: /tmp

@@ -1,10 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - https://github.com/tektoncd/pipeline/releases/download/v1.17.0/release.yaml
-  - https://github.com/tektoncd/triggers/releases/download/v0.37.1/release.yaml
-  - https://github.com/tektoncd/triggers/releases/download/v0.37.1/interceptors.yaml
-  - https://github.com/tektoncd/pruner/releases/download/v0.4.3/release.yaml
+  - https://github.com/tektoncd/pipeline/releases/download/v1.17.1/release.yaml
+  - https://github.com/tektoncd/triggers/releases/download/v0.37.2/release.yaml
+  - https://github.com/tektoncd/triggers/releases/download/v0.37.2/interceptors.yaml
+  - https://github.com/tektoncd/pruner/releases/download/v0.4.4/release.yaml
   # Full install (Rerun/Cancel/Delete buttons), behind oauth2-proxy + pocket-id: see
   # patch-dashboard.yaml and infrastructure/configs/tekton/dashboard-*.yaml
   - https://github.com/tektoncd/dashboard/releases/download/v0.73.0/release-full.yaml

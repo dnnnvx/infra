@@ -54,7 +54,7 @@ spec:
           printf '%s=%s@sha256:%s ' "$name" "$repo" "$(sha256sum "/sboms/$name.spdx.json" | cut -d' ' -f1)" >> "$(results.sboms.path)"
         done
     - name: attach
-      image: ghcr.io/oras-project/oras:v1.3.5
+      image: ghcr.io/oras-project/oras:v1.3.6
       volumeMounts:
         - name: registry-auth
           mountPath: /docker-config
