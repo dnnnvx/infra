@@ -55,6 +55,14 @@ spec:
           value: --oci-worker-no-process-sandbox
         - name: DOCKER_CONFIG
           value: /docker-config
+      # The LimitRange default (2Gi) thrashes on Rust builds (matrix-sdk); 4Gi is its max
+      computeResources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: "3"
+          memory: 4Gi
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
