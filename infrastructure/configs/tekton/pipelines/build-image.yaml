@@ -41,7 +41,9 @@ spec:
     - name: sboms
       value: $(tasks.sbom.results.sboms)
   tasks:
+    # retries only on network-bound tasks: a failed build is deterministic, retrying just burns time
     - name: clone
+      retries: 2
       taskRef:
         name: git-clone
       params:
@@ -71,6 +73,7 @@ spec:
         - name: source
           workspace: source
     - name: sbom
+      retries: 2
       runAfter:
         - build
       taskRef:
@@ -82,7 +85,9 @@ spec:
           value: $(params.project)
         - name: digests
           value: $(tasks.build.results.digests)
+    # grype's vulnerability DB download is the usual flake
     - name: scan
+      retries: 2
       runAfter:
         - build
       taskRef:

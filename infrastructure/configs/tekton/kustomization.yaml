@@ -9,6 +9,8 @@ resources:
   - rbac.yaml
   - secrets.yaml
   - dashboard-httproute.yaml
+  - dashboard-oauth2-proxy.yaml
+  - dashboard-oauth2-proxy-secret.yaml
   - tasks
   - pipelines
   - triggers

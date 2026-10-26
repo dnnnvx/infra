@@ -199,3 +199,14 @@ Rootless BuildKit needs Unconfined seccomp/AppArmor, so the namespace runs at Po
 - `kubectl -n tekton-chains logs deploy/tekton-chains-controller`; a signed run carries the annotation
   `chains.tekton.dev/signed: "true"`
 - `flux get images all -A`
+
+## Retries
+
+Network-bound tasks retry up to twice on their own (`retries: 2`): `clone`, `sbom`, `scan` (grype's DB download)
+and `release`. `build` and `deploy` don't: a failed compile or an unhealthy rollout fails the same way again.
+`git-clone` wipes its directory first, so a retry starts clean.
+
+To re-run a whole failed run by hand, use **Rerun** on the run in the Tekton Dashboard
+(`tekton.local.casasulgorgo.net`, pocket-id login), or push again (`git commit --allow-empty`).
+The dashboard is the full install, but its edit rights are limited to `tekton-ci`
+(`infrastructure/controllers/tekton/patch-dashboard.yaml`) and it's only reachable through its oauth2-proxy.

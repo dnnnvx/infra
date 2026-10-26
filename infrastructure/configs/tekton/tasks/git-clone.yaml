@@ -39,6 +39,8 @@ spec:
         #!/bin/sh
         set -eu
         dir="$(workspaces.source.path)/$(params.subdirectory)"
+        # Start clean, so a retry doesn't trip over the previous attempt's repo
+        rm -rf "$dir"
         mkdir -p "$dir"
         cd "$dir"
         git init -q

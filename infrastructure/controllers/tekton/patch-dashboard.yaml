@@ -1,0 +1,20 @@
+# The full dashboard install may edit runs in every namespace. Drop that: it only gets
+# tekton-aggregate-edit in tekton-ci (RoleBinding in infrastructure/configs/tekton/rbac.yaml).
+$patch: delete
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-dashboard-pipelines-edit
+---
+$patch: delete
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-dashboard-triggers-edit
+---
+# Empty namespace the full install ships for its resource import feature, which we don't use
+$patch: delete
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tekton-dashboard

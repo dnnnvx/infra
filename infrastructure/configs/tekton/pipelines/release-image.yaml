@@ -24,7 +24,9 @@ spec:
       default: ""
       description: The app's Flux Kustomization to reconcile and wait for. Empty skips the Flux sync.
   tasks:
+    # cosign verify + crane tag only talk to the registry: safe to retry
     - name: release
+      retries: 2
       taskRef:
         name: release-image
       params:

@@ -87,8 +87,8 @@ spec:
             - port: "443"
               protocol: TCP
 ---
-# Dashboard UI: reachable through the Gateway only (tekton.local.casasulgorgo.net, LAN). Egress
-# (DNS, kube-apiserver) is already covered by the namespace policy above.
+# Dashboard UI: reachable only through its oauth2-proxy (it can rerun/delete runs and has no
+# auth of its own). Egress (DNS, kube-apiserver) is already covered by the namespace policy above.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -99,8 +99,37 @@ spec:
     matchLabels:
       app.kubernetes.io/part-of: tekton-dashboard
   ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: tekton-dashboard-oauth2-proxy
+      toPorts:
+        - ports:
+            - port: "9097"
+              protocol: TCP
+---
+# Dashboard oauth2-proxy (infrastructure/configs/tekton/dashboard-oauth2-proxy.yaml): the Gateway
+# entry point for tekton.local.casasulgorgo.net. DNS and world:443 (pocket-id at auth.casasulgorgo.net
+# goes out through Cloudflare) are covered by the namespace policy above.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: dashboard-oauth2-proxy
+  namespace: tekton-pipelines
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: tekton-dashboard-oauth2-proxy
+  ingress:
     - fromEntities:
         - ingress
+      toPorts:
+        - ports:
+            - port: "4180"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/part-of: tekton-dashboard
       toPorts:
         - ports:
             - port: "9097"

@@ -19,6 +19,7 @@ spec:
       value: $(tasks.clone.results.commit)
   tasks:
     - name: clone
+      retries: 2
       taskRef:
         name: git-clone
       params:
