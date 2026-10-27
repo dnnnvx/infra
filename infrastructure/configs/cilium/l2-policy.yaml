@@ -10,6 +10,12 @@ kind: CiliumL2AnnouncementPolicy
 metadata:
   name: default
 spec:
+  # Not the control plane: it's the smallest node and busy with kube-apiserver, so answering for
+  # the Gateway and AdGuard DNS IPs there slowed every request down when it was under pressure.
+  nodeSelector:
+    matchExpressions:
+      - key: node-role.kubernetes.io/control-plane
+        operator: DoesNotExist
   loadBalancerIPs: true
   interfaces:
     - ^eth[0-9]+
