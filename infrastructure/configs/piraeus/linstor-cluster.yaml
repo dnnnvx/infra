@@ -28,6 +28,9 @@ spec:
     # the failure mode we rely on.
     - name: DrbdOptions/Resource/on-no-quorum
       value: suspend-io
+  # Only serves ReadWriteMany volumes, and nothing uses them. Re-enable before creating an RWX PVC.
+  nfsServer:
+    enabled: false
   # Same limit as clusters/production/revision-history.yaml, for the workloads the operator
   # creates (satellites: satellite-configuration.yaml)
   patches:

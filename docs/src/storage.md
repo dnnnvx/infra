@@ -7,49 +7,28 @@ Piraeus provides distributed storage via LINSTOR + DRBD, backed by the Talos nod
 | Class          | Pool          | Replicas | Nodes         | Use case                        |
 |----------------|---------------|----------|---------------|---------------------------------|
 | `piraeus`      | `file-thin`   | 2        | nuc-103/104   | Default — replicated app data   |
-| `piraeus-hdd`  | `lvm-thin-hdd`| 1        | nuc-102 only  | Bulk data — recordings, logs    |
 | `piraeus-scratch` | `file-thin` | 1      | nuc-103/104   | Throwaway — CI workspaces       |
 
 - **`piraeus`**: File-backed thin provisioning on NVMe/eMMC. 2 replicas across nuc-103 and nuc-104 via DRBD. No LVM needed — LINSTOR creates sparse files under `/var/lib/linstor-pool/` on the OS disk. Good for databases, app state, anything that needs redundancy.
-- **`piraeus-hdd`**: LVM thin provisioning on the 500GB HDD in nuc-102. Single replica (no replication). Uses a dedicated LVM Volume Group on the raw block device (`/dev/sda`), giving the HDD its own I/O path separate from the NVMe boot disk. Meant for large, replaceable data like NVR recordings.
+- **`piraeus-hdd`** (LVM thin pool on nuc-102's HDD) was removed with nuc-102; `storage-pool-hdd.yaml` and
+  `storage-class-hdd.yaml` are in git history. The disabled `lightnvr` app still asks for it.
 
 ## Volume snapshots
 
 `infrastructure/controllers/snapshot-controller` (kube-system) installs the VolumeSnapshot CRDs and the
 snapshot-controller; LINSTOR's csi-snapshotter sidecar takes the snapshots. `VolumeSnapshotClass` `piraeus`
-(default, `deletionPolicy: Delete`) works on both thin pools. Snapshots stay on the same nodes as the
+(default, `deletionPolicy: Delete`) works because `file-thin` is a thin pool. Snapshots stay on the same nodes as the
 volume, so they are not a backup.
 
 ## Pool configuration (GitOps)
 
-Both pools are declared as `LinstorSatelliteConfiguration` CRDs in `infrastructure/configs/piraeus/`:
+The pool is declared as a `LinstorSatelliteConfiguration` CRD in `infrastructure/configs/piraeus/`:
 - `storage-pool.yaml` — `file-thin` pool, applied to nodes with label `cluster.casasulgorgo.net/storage: local`
-- `storage-pool-hdd.yaml` — `lvm-thin-hdd` pool, applied to nodes with label `cluster.casasulgorgo.net/storage: hdd`
 
 The node labels are set by Tofu via the Talos machine config.
 
 `satellite-heap.yaml` caps the satellite JVM on the control plane (diskless tie-breaker) at `-Xmx256m`;
 the image default is `-Xmx2G`.
-
-## HDD pool prerequisites (nuc-102)
-
-The HDD pool requires the `dm_thin_pool` kernel module, loaded via the Talos machine config in `tofu/production/main.tf` → `extra_config_patches`. If the module is missing (`modprobe: FATAL: Module dm-thin-pool not found`), add it to the kernel modules list and run `tofu apply`.
-
-The VG `linstor-hdd-vg` and thin pool `linstor-hdd-thinpool` are created automatically by the `LinstorSatelliteConfiguration` when the satellite pod starts with the correct kernel module and node label.
-
-If the thin pool needs to be recreated manually:
-
-```bash
-# Check pool status
-kubectl exec -n piraeus-datastore deploy/linstor-controller -- linstor storage-pool list -n nuc-102
-
-# Create the thin pool (from the satellite pod)
-kubectl exec -n piraeus-datastore linstor-satellite.nuc-102-<suffix> -c linstor-satellite -- \
-  lvcreate -l 100%FREE -T linstor-hdd-vg/linstor-hdd-thinpool
-
-# Restart CSI controller to publish capacity (if scheduler shows "not enough storage")
-kubectl rollout restart deployment/linstor-csi-controller -n piraeus-datastore
-```
 
 ## Useful LINSTOR commands
 
