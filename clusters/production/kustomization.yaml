@@ -5,3 +5,8 @@ resources:
   - config.yaml
   - tofu.yaml
   - apps
+patches:
+  - path: revision-history.yaml
+    target:
+      group: kustomize.toolkit.fluxcd.io
+      kind: Kustomization

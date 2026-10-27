@@ -19,3 +19,9 @@ instance:
     multitenant: false
     networkPolicy: true
     domain: cluster.local
+  # Same limit as clusters/production/revision-history.yaml (the operator deploys the controllers)
+  kustomize:
+    patches:
+      - target:
+          kind: Deployment
+        patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'

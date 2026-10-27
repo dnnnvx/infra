@@ -1,0 +1,30 @@
+# Added to every Flux Kustomization by kustomization.yaml: keep at most 3 old ReplicaSets /
+# ControllerRevisions per workload (Kubernetes default 10) and 3 Helm release Secrets per
+# HelmRelease (helm-controller default 5). Kustomize matches target kinds exactly, hence one
+# entry per kind. This replaces spec.patches (and every HelmRelease's spec.postRenderers), so
+# extend this file instead of setting those fields elsewhere.
+- op: add
+  path: /spec/patches
+  value:
+    - target: {kind: Deployment}
+      patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'
+    - target: {kind: StatefulSet}
+      patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'
+    - target: {kind: DaemonSet}
+      patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'
+    - target: {kind: HelmRelease}
+      patch: |
+        - op: add
+          path: /spec/maxHistory
+          value: 3
+        - op: add
+          path: /spec/postRenderers
+          value:
+            - kustomize:
+                patches:
+                  - target: {kind: Deployment}
+                    patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'
+                  - target: {kind: StatefulSet}
+                    patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'
+                  - target: {kind: DaemonSet}
+                    patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'

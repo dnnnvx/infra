@@ -9,6 +9,11 @@ metadata:
   name: talos-loader-override
   namespace: piraeus-datastore
 spec:
+  # Same limit as clusters/production/revision-history.yaml
+  patches:
+    - target:
+        kind: DaemonSet
+      patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'
   podTemplate:
     spec:
       initContainers:

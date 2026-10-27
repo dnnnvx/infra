@@ -28,3 +28,12 @@ spec:
     # the failure mode we rely on.
     - name: DrbdOptions/Resource/on-no-quorum
       value: suspend-io
+  # Same limit as clusters/production/revision-history.yaml, for the workloads the operator
+  # creates (satellites: satellite-configuration.yaml)
+  patches:
+    - target:
+        kind: Deployment
+      patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'
+    - target:
+        kind: DaemonSet
+      patch: '[{"op": "add", "path": "/spec/revisionHistoryLimit", "value": 3}]'

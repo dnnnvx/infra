@@ -12,7 +12,8 @@ tofu/                    # OpenTofu (Terraform) — provisions the cluster
 clusters/production/     # Flux entry point (synced by FluxInstance)
 ├── infrastructure.yaml  # Flux Kustomization → ./infrastructure/controllers
 ├── config.yaml          # Flux Kustomization → ./infrastructure/configs (dependsOn infrastructure)
-└── apps/                # one Flux Kustomization per app: app-<name> → ./apps/<name> (dependsOn both)
+├── apps/                # one Flux Kustomization per app: app-<name> → ./apps/<name> (dependsOn both)
+└── revision-history.yaml # patched into every Flux Kustomization: revisionHistoryLimit/maxHistory 3
 
 infrastructure/
 ├── controllers/         # Operators and their CRDs: HelmReleases (+ values.yaml) or upstream manifests
