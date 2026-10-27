@@ -12,4 +12,4 @@ images:
   - name: tekton-matrix-bot
     newName: registry.local.casasulgorgo.net/tekton-matrix-bot/bot
     newTag: production
-    digest: sha256:0aaeab32af4805e79e2abc7305ea23ba78bc60d90fd144b974b5f09734015e11 # {"$imagepolicy": "flux-system:tekton-matrix-bot-bot:digest"}
+    digest: sha256:56a412a3221b7eff982df8f8cc5fedc932e0dd4b646d76e736be2ea404c0467c # {"$imagepolicy": "flux-system:tekton-matrix-bot-bot:digest"}
