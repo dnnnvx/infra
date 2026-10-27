@@ -60,7 +60,7 @@ locals {
               "default-watch-cache-size" = "20"
             }
             env = {
-              GOMEMLIMIT = "1200MiB"
+              GOMEMLIMIT = "1500MiB"
             }
           }
         }
