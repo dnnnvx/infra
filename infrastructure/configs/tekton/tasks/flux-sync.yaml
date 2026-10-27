@@ -45,6 +45,9 @@ spec:
           policy="$(params.project)-$(echo "$entry" | cut -d= -f1)"
           digest="$(echo "$entry" | cut -d= -f2)"
           flux reconcile image repository "$policy" -n "$ns" --timeout=2m
+          # The policy only reacts on its own when the scan's tag list changes. A rebuilt commit or a
+          # moved production tag leaves it unchanged, so the policy would wait for its interval (5m)
+          flux reconcile image policy "$policy" -n "$ns" --timeout=2m
           # The policy follows the repository scan asynchronously: wait for the pushed digest
           i=0
           until [ "$(kubectl -n "$ns" get imagepolicy "$policy" -o jsonpath='{.status.latestRef.digest}')" = "$digest" ]; do
