@@ -6,6 +6,7 @@ resources:
   - flux
   - metrics-server
   - piraeus
+  - snapshot-controller
   - cnpg
   - tekton
   - zot

@@ -13,6 +13,13 @@ Piraeus provides distributed storage via LINSTOR + DRBD, backed by the Talos nod
 - **`piraeus`**: File-backed thin provisioning on NVMe/eMMC. 2 replicas across nuc-103 and nuc-104 via DRBD. No LVM needed — LINSTOR creates sparse files under `/var/lib/linstor-pool/` on the OS disk. Good for databases, app state, anything that needs redundancy.
 - **`piraeus-hdd`**: LVM thin provisioning on the 500GB HDD in nuc-102. Single replica (no replication). Uses a dedicated LVM Volume Group on the raw block device (`/dev/sda`), giving the HDD its own I/O path separate from the NVMe boot disk. Meant for large, replaceable data like NVR recordings.
 
+## Volume snapshots
+
+`infrastructure/controllers/snapshot-controller` (kube-system) installs the VolumeSnapshot CRDs and the
+snapshot-controller; LINSTOR's csi-snapshotter sidecar takes the snapshots. `VolumeSnapshotClass` `piraeus`
+(default, `deletionPolicy: Delete`) works on both thin pools. Snapshots stay on the same nodes as the
+volume, so they are not a backup.
+
 ## Pool configuration (GitOps)
 
 Both pools are declared as `LinstorSatelliteConfiguration` CRDs in `infrastructure/configs/piraeus/`:

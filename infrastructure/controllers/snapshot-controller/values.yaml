@@ -1,0 +1,17 @@
+# VolumeSnapshot CRDs + the cluster-wide snapshot-controller. LINSTOR's csi-snapshotter sidecar
+# (linstor-csi-controller) does the actual snapshots; the VolumeSnapshotClass lives in
+# infrastructure/configs/piraeus.
+installCRDs: true
+controller:
+  args:
+    # LINSTOR has no group snapshots: drop the flag so the groupsnapshot CRDs (always installed) aren't watched
+    featureGates: null
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
