@@ -1,7 +1,8 @@
 # Successful build-image run → release-image run, with the build's params and results.
 # The event body carries the run as v1beta1 (results under status.pipelineResults).
 # The event itself isn't authenticated: release-image only promotes digests that verify against
-# the Tekton Chains key, i.e. images a successful build-image run actually produced.
+# the Tekton Chains key, i.e. images a successful build-image run actually produced. Tekton also
+# replays events of old runs; release-image refuses to move a tag back to an older commit.
 apiVersion: triggers.tekton.dev/v1beta1
 kind: Trigger
 metadata:

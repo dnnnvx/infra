@@ -82,11 +82,15 @@ release run with the build's `registry`, `project`, `tags`, `flux-kustomization`
 
 1. waits (up to 5 min) until each digest has a Chains signature and SLSA provenance, verifying both against
    `chains.pub`;
-2. moves the release tags with crane;
-3. runs `deploy` (flux-sync, below).
+2. moves the release tags with crane, unless the tag already points at a newer commit;
+3. runs `deploy` (flux-sync, below), skipped when step 2 moved nothing.
 
 The event isn't authenticated. That's fine: release-image only promotes digests signed by Chains, i.e. images that
-a successful build-image run produced. The worst a forged event can do is re-release such an image.
+a successful build-image run produced. The worst a forged event can do is re-release such an image, and even that
+can't roll back: buildkit stamps every image with the label `ci.casasulgorgo.net/commit-timestamp` (committer date
+from git-clone), and release-image leaves a tag alone when its current image has a later timestamp. Images without
+the label (built before it existed) are never released. Tekton does replay `successful` events for old, finished
+runs (seen on 2026-10-27: yesterday's casasulgorgo build re-released, `production` went back a version).
 
 To check an image from a laptop on the LAN:
 

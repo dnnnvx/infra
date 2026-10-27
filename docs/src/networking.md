@@ -40,6 +40,8 @@ plus the DNS-only WireGuard endpoint record (see [Remote access](./remote-access
 ## DNS notes
 
 - Router DHCP advertises AdGuard (`192.168.0.201`) as DNS server
+- LoadBalancer IPs (`.200`–`.202`) are ARP-announced only by workers (`infrastructure/configs/cilium/l2-policy.yaml`),
+  never the control plane: when nuc-101 is short on memory, everything entering through it slows down
 - IPv6 RA DNS must be disabled on the router — otherwise macOS prefers `fe80::1` over DHCP DNS
 - iCloud Private Relay ("Limit IP Address Tracking") intercepts DNS at `127.0.2.2` — disable per-network if custom DNS stops working
 - macOS DNS cache: `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`

@@ -8,7 +8,8 @@ spec:
     Releases built images: waits until Tekton Chains has signed each digest and attached its
     SLSA provenance, verifies both against the Chains public key, then moves the release tags
     (latest, production, …) to it. Only images that came out of a successful build-image run
-    can pass, whoever started this run.
+    can pass, whoever started this run. A tag already on a newer commit (image label
+    ci.casasulgorgo.net/commit-timestamp) stays put, so a replayed event for an old build can't roll back.
   params:
     - name: registry
       type: string
@@ -26,6 +27,9 @@ spec:
       type: string
       default: "30"
       description: How many 10s rounds to wait for Chains to sign a digest.
+  results:
+    - name: promoted
+      description: '"true" if every image was tagged, "false" if any was skipped as stale.'
   volumes:
     - name: chains-public-key
       configMap:
@@ -83,10 +87,30 @@ spec:
       script: |
         #!/busybox/sh
         set -eu
+        # Commit timestamp label of an image, empty if missing (images built before the label existed)
+        commit_ts() {
+          crane config "$1" 2> /dev/null |
+            sed -n 's|.*"ci\.casasulgorgo\.net/commit-timestamp":"\([0-9]*\)".*|\1|p'
+        }
+        promoted=true
         for entry in $(params.digests); do
-          ref="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)@$(echo "$entry" | cut -d= -f2)"
+          image="$(params.registry)/$(params.project)/$(echo "$entry" | cut -d= -f1)"
+          ref="$image@$(echo "$entry" | cut -d= -f2)"
+          ts="$(commit_ts "$ref")"
+          if [ -z "$ts" ]; then
+            echo "Skipping $ref: no commit-timestamp label, can't tell whether it's stale" >&2
+            promoted=false
+            continue
+          fi
           for tag in $(params.tags); do
+            current="$(commit_ts "$image:$tag")"
+            if [ -n "$current" ] && [ "$current" -gt "$ts" ]; then
+              echo "Skipping $image:$tag: it's on a newer commit ($current > $ts)" >&2
+              promoted=false
+              continue
+            fi
             crane tag "$ref" "$tag"
             echo "Tagged $ref as $tag"
           done
         done
+        printf %s "$promoted" > "$(results.promoted.path)"

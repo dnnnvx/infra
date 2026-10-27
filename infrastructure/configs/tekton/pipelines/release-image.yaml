@@ -45,6 +45,10 @@ spec:
         - input: $(params.flux-kustomization)
           operator: notin
           values: [""]
+        # A stale build (older than what the tags already point at) moved nothing: no rollout to wait for
+        - input: $(tasks.release.results.promoted)
+          operator: in
+          values: ["true"]
       timeout: 12m
       taskRef:
         name: flux-sync

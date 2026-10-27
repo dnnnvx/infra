@@ -22,6 +22,12 @@ spec:
     - name: tags
       type: string
       description: Space-separated tags to push (e.g. "<sha> latest production").
+    - name: commit-timestamp
+      type: string
+      default: ""
+      description: >-
+        Committer date (unix seconds) of the source, stored as the image label
+        ci.casasulgorgo.net/commit-timestamp. release-image never moves a tag back to an older one.
     - name: subdirectory
       type: string
       default: source
@@ -101,6 +107,7 @@ spec:
             --local context=. \
             --local dockerfile="$(dirname "$dockerfile")" \
             --opt filename="$(basename "$dockerfile")" \
+            --opt label:ci.casasulgorgo.net/commit-timestamp="$(params.commit-timestamp)" \
             --import-cache "type=registry,ref=$cache" \
             --export-cache "type=registry,ref=$cache,mode=max,image-manifest=true,oci-mediatypes=true" \
             --output "type=image,\"name=$names\",push=true" \

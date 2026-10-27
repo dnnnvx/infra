@@ -69,6 +69,8 @@ spec:
         # Only the immutable tag: release-image moves the others once Chains has signed the images
         - name: tags
           value: $(tasks.clone.results.commit)
+        - name: commit-timestamp
+          value: $(tasks.clone.results.commit-timestamp)
       workspaces:
         - name: source
           workspace: source
