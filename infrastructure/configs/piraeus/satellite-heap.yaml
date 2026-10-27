@@ -1,0 +1,18 @@
+# The satellite image defaults to -Xmx2G, too much for the 3.7 GB control plane, where the satellite
+# is only a diskless quorum tie-breaker. JAVA_OPTS comes after the default on the java command
+# line, so this -Xmx wins. An OOM restarts the satellite; DRBD (in the kernel) keeps quorum meanwhile.
+apiVersion: piraeus.io/v1
+kind: LinstorSatelliteConfiguration
+metadata:
+  name: control-plane-heap
+  namespace: piraeus-datastore
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  podTemplate:
+    spec:
+      containers:
+        - name: linstor-satellite
+          env:
+            - name: JAVA_OPTS
+              value: -Djdk.tls.acknowledgeCloseNotify=true -Xmx256m

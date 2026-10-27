@@ -28,6 +28,9 @@ Both pools are declared as `LinstorSatelliteConfiguration` CRDs in `infrastructu
 
 The node labels are set by Tofu via the Talos machine config.
 
+`satellite-heap.yaml` caps the satellite JVM on the control plane (diskless tie-breaker) at `-Xmx256m`;
+the image default is `-Xmx2G`.
+
 ## HDD pool prerequisites (nuc-102)
 
 The HDD pool requires the `dm_thin_pool` kernel module, loaded via the Talos machine config in `tofu/production/main.tf` → `extra_config_patches`. If the module is missing (`modprobe: FATAL: Module dm-thin-pool not found`), add it to the kernel modules list and run `tofu apply`.
