@@ -147,3 +147,7 @@ validate:
       exit 1
     fi
     echo "All checks passed!"
+
+push:
+    git push origin main
+    git push --force github main
