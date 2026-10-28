@@ -98,6 +98,16 @@ kubectl get events -n <namespace> --field-selector reason=FailedCreate
 
 Secrets are encrypted at rest using [SOPS](https://github.com/getsops/sops) with an age key. See [Secrets](./secrets.md) for details.
 
+## API audit log
+
+kube-apiserver writes `/var/log/audit/kube/kube-apiserver.log` on nuc-101 (read with
+`talosctl -n 192.168.0.101 read …`). Talos keeps 10 × 100 MB, so size limits retention, not the
+30-day max age: the log-everything default filled a file every ~27 min (~4.5 h of history). The policy (`auditPolicy` in
+`tofu/modules/talos/nodes.tf`) logs every write, every secret access and every request by a human at
+`Metadata` level (who, what, when; no bodies). It skips lease renewals, events, health/discovery
+endpoints and reads by service accounts, nodes and control-plane components: Talos' log-everything
+default produced ~120 events/s on the smallest node.
+
 ## Network Policies
 
 All namespaces have a `CiliumNetworkPolicy` with `endpointSelector: {}` (applies to all pods) providing default-deny ingress and egress, with explicit allow rules for only what each app needs.

@@ -62,6 +62,31 @@ locals {
             env = {
               GOMEMLIMIT = "1500MiB"
             }
+            # Talos' default logs every request (~120 events/s, mostly lease renewals and
+            # controllers' reads). Keep all writes, all secret access and everything humans do.
+            # First matching rule wins.
+            auditPolicy = {
+              apiVersion = "audit.k8s.io/v1"
+              kind       = "Policy"
+              omitStages = ["RequestReceived"]
+              rules = [
+                { level = "None", resources = [{ group = "coordination.k8s.io", resources = ["leases"] }] },
+                { level = "None", resources = [{ group = "", resources = ["events"] }, { group = "events.k8s.io", resources = ["events"] }] },
+                { level = "None", nonResourceURLs = ["/healthz*", "/livez*", "/readyz*", "/version", "/openapi*", "/metrics", "/api", "/api/*", "/apis", "/apis/*"] },
+                { level = "Metadata", resources = [{ group = "", resources = ["secrets"] }] },
+                {
+                  level      = "None"
+                  verbs      = ["get", "list", "watch"]
+                  userGroups = ["system:serviceaccounts", "system:nodes"]
+                },
+                {
+                  level = "None"
+                  verbs = ["get", "list", "watch"]
+                  users = ["system:kube-controller-manager", "system:kube-scheduler", "system:apiserver"]
+                },
+                { level = "Metadata" },
+              ]
+            }
           }
         }
       }),
