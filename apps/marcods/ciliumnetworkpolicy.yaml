@@ -1,0 +1,37 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: marcods
+  namespace: marcods
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: marcods
+  ingress:
+    - fromEntities:
+        - ingress
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+  egress:
+    # DNS through the Cilium proxy so toFQDNs can learn the Telegram IPs
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    # Telegram Bot API (form notifications)
+    - toFQDNs:
+        - matchName: api.telegram.org
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

@@ -14,3 +14,16 @@ spec:
     - "casasulgorgo.net"
     # LAN-only names served by the homelab-local Gateway (a wildcard covers one label only)
     - "*.local.casasulgorgo.net"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: marcods-dev
+  namespace: kube-system
+spec:
+  secretName: marcods-dev
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - "marcods.dev"

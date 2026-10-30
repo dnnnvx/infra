@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marcods
+  namespace: marcods
+  annotations:
+    checkov.io/skip1: CKV_K8S_14=registry, tag and digest come from the kustomization images entry (Flux image automation)
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: marcods
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: marcods
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: marcods
+          # Registry + tag are set by the overlay (Flux image automation)
+          image: marcods
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 2
+          envFrom:
+            # TELEGRAM_TOKEN, TELEGRAM_CHAT_ID (same bot/chat as casasulgorgo)
+            - secretRef:
+                name: marcods-secrets
+          env:
+            # adapter-node sits behind the Gateway; needed for form-action CSRF checks
+            - name: ORIGIN
+              value: https://marcods.dev

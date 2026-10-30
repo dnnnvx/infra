@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: marcods
+  namespace: marcods
+spec:
+  parentRefs:
+    - name: homelab
+      namespace: kube-system
+      sectionName: https-marcods
+  hostnames:
+    - marcods.dev
+  rules:
+    - backendRefs:
+        - name: marcods
+          port: 3000

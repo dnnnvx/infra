@@ -1,0 +1,24 @@
+# CI-built (apps/marcods/ci.yaml): the flux-sync task waits for this Kustomization after each build.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-marcods
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: infrastructure
+    - name: config
+  interval: 10m
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/marcods
+  prune: true
+  # commenting the app out of kustomization.yaml (deleting this object) keeps its resources
+  deletionPolicy: Orphan
+  wait: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

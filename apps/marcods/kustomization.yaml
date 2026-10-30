@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - ciliumnetworkpolicy.yaml
+  - deployment.yaml
+  - service.yaml
+  - httproute.yaml
+  - secrets.yaml
+  - ci.yaml
+images:
+  # The digest is a placeholder until the first build; Flux rewrites it.
+  - name: marcods
+    newName: registry.local.casasulgorgo.net/marcods/web
+    newTag: production
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000 # {"$imagepolicy": "flux-system:marcods-web:digest"}

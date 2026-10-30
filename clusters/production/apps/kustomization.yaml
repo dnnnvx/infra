@@ -13,6 +13,7 @@ resources:
   - bookorbit.yaml
   - silverbullet.yaml
   - casasulgorgo.yaml
+  - marcods.yaml
   - tuwunel.yaml
   - tekton-matrix-bot.yaml
   # - romm.yaml

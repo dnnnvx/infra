@@ -33,3 +33,16 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-marcods
+      protocol: HTTPS
+      port: 443
+      hostname: marcods.dev
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: marcods-dev
+            kind: Secret
+            namespace: kube-system
+      allowedRoutes:
+        namespaces:
+          from: All
