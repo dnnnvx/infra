@@ -34,8 +34,11 @@ The registry (UI and API) is LAN-only: `registry.local.casasulgorgo.net` on the 
 
 External access via Cloudflare proxy (orange cloud) → port-forward 443 → Cilium Gateway (HTTPS, port 443).
 TLS terminated at the Gateway using a Let's Encrypt wildcard cert (`*.casasulgorgo.net`) issued via DNS-01.
-DDNS (`favonia/cloudflare-ddns`) keeps the apex A record updated with the home public IP,
+DDNS (`favonia/cloudflare-ddns`) keeps the apex A records (`casasulgorgo.net`, `marcods.dev`) updated with the home public IP,
 plus the DNS-only WireGuard endpoint record (see [Remote access](./remote-access.md)).
+
+Domains are entries in the `cloudflare` tofu module's `domains` map. `marcods.dev` has no service yet: it needs a
+certificate, a Gateway listener and an HTTPRoute, since the wildcard cert only covers `*.casasulgorgo.net`.
 
 ## DNS notes
 

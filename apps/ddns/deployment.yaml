@@ -39,7 +39,7 @@ spec:
                 secretKeyRef:
                   name: cloudflare-api-token
                   key: api-token
-            # apex + WireGuard endpoint (hostname kept out of git); set by tofu
+            # apexes + WireGuard endpoint (hostname kept out of git); set by tofu
             - name: DOMAINS
               valueFrom:
                 secretKeyRef:
@@ -47,9 +47,9 @@ spec:
                   key: domains
             - name: CF_API_TOKEN
               value: ""
-            # only the apex is proxied; the WireGuard endpoint must be DNS-only (UDP)
+            # only the apexes are proxied; the WireGuard endpoint must be DNS-only (UDP)
             - name: PROXIED
-              value: "is(casasulgorgo.net)"
+              value: "is(casasulgorgo.net, marcods.dev)"
             - name: TTL
               value: "1"
             - name: UPDATE_CRON

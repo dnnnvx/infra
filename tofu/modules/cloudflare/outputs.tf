@@ -4,8 +4,8 @@ output "cluster_api_token" {
   sensitive   = true
 }
 
-output "zone_id" {
-  value = data.cloudflare_zone.main.zone_id
+output "zone_ids" {
+  value = { for domain, config in module.domain : domain => config.zone_id }
 }
 
 output "account_id" {

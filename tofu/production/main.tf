@@ -205,12 +205,19 @@ module "cloudflare" {
   source = "../modules/cloudflare"
 
   cloudflare_account_id = var.cloudflare_account_id
-  zone_name             = "casasulgorgo.net"
   cloudflare_api_token  = var.cloudflare_api_token
-  cname_subdomains      = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "ci", "matrix"]
   r2_buckets            = { "tofu-state" = {} }
-  atproto_did           = local.atproto_did
-  local_gateway_ip      = "192.168.0.202" # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)
+
+  domains = {
+    "casasulgorgo.net" = {
+      cname_subdomains = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "ci", "matrix"]
+      atproto_did      = local.atproto_did
+      local_gateway_ip = "192.168.0.202" # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)
+    }
+    "marcods.dev" = {
+      atproto_did = local.atproto_did
+    }
+  }
 }
 
 module "k8s" {
@@ -256,7 +263,7 @@ module "k8s" {
       data = {
         api-token = module.cloudflare.cluster_api_token
         # the WireGuard hostname exposes the home IP, so it's kept out of git
-        domains = join(",", compact(["casasulgorgo.net", var.wireguard_hostname]))
+        domains = join(",", compact(["casasulgorgo.net", "marcods.dev", var.wireguard_hostname]))
       }
     },
   ]
