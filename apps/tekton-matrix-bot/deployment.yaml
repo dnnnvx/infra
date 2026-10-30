@@ -18,7 +18,7 @@ spec:
       labels:
         app.kubernetes.io/name: tekton-matrix-bot
     spec:
-      automountServiceAccountToken: false
+      serviceAccountName: tekton-matrix-bot
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
@@ -64,6 +64,10 @@ spec:
               value: http://tuwunel.matrix.svc.cluster.local:8008
             - name: MATRIX_USER
               value: alerts
+            - name: TEKTON_DASHBOARD_URL
+              value: https://tekton.local.casasulgorgo.net
+            - name: OPS_ROOM
+              value: "!hcNOO-kFitB4fJ15jq8k5Ju5H56mGzLYXIIdbuhJvXM"
           volumeMounts:
             - name: data
               mountPath: /data

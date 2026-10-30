@@ -28,3 +28,6 @@ spec:
         - ports:
             - port: "8008"
               protocol: TCP
+    # !ci, !tofu and the CI alerts read the cluster (see rbac.yaml)
+    - toEntities:
+        - kube-apiserver
