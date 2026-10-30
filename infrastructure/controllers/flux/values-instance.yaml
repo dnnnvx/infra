@@ -10,7 +10,8 @@ instance:
   sync:
     interval: 30m
     kind: GitRepository
-    url: "ssh://git@tangled.org/casasulgorgo.net/infra"
+    # Repo DID rather than handle: the handle path 404s after an account handle change
+    url: "ssh://git@tangled.org/did:plc:mhpujlntihfhlixaayuearmr"
     ref: "refs/heads/main"
     path: ./clusters/production
     pullSecret: flux-system

@@ -30,7 +30,7 @@ spec:
             body.after != '0000000000000000000000000000000000000000'
   bindings:
     - name: repo-url
-      value: https://tangled.org/casasulgorgo.net/infra
+      value: https://tangled.org/did:plc:mhpujlntihfhlixaayuearmr
     - name: revision
       value: $(body.after)
   template:
