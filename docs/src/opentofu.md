@@ -57,17 +57,19 @@ Approving by committing `approvePlan` would create a new commit and invalidate t
 (`approvePlan` isn't set in git, so Flux leaves the field alone):
 
 ```bash
-kubectl -n flux-system get terraform production          # message shows the pending plan ID
-tfctl -n flux-system show plan production               # or the tfplan-* ConfigMaps (storeReadablePlan: human)
-kubectl -n flux-system patch terraform production --type merge --field-manager tofu-approve \
-  -p '{"spec":{"approvePlan":"plan-main-<sha>"}}'
+just tofu-plans            # pending plan ID and the stored plan (storeReadablePlan: human)
+just tofu-plan approve     # asks first, then sets spec.approvePlan to the pending ID
+just tofu-plan reject      # drops the pending plan and re-plans
 ```
 
 If a new commit lands before the apply, the re-plan gets a new ID and waits for approval again.
 
+The controller has no real reject: re-planning the same commit gives the same plan, so revert or fix the commit
+to discard a change for good. Until then the plan keeps waiting, and nothing is applied.
+
 When drift is detected the controller only reports it (`DriftDetected`) and doesn't plan. The next commit
-triggers a plan, or `tfctl replan production -n flux-system` forces one; then approve it as above (applying
-reverts the drift), or change the code to match.
+triggers a plan, or `just tofu-plan reject` forces one; then approve it as above (applying reverts the drift),
+or change the code to match.
 
 ## Modules
 

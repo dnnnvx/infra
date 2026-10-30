@@ -74,6 +74,48 @@ tofu *args:
     unset secret
     tofu -chdir=tofu/{{ environment }} {{ args }}
 
+# list pending tofu-controller plans and print the stored plan
+tofu-plans:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tf=$(kubectl --context {{ context }} -n flux-system get terraform {{ environment }} -o json)
+    jq -r '["NAME", "PENDING", "LAST APPLIED", "READY", "REASON"], [.metadata.name, (.status.plan.pending // "-" | select(. != "") // "-"), (.status.plan.lastApplied // "-"),
+      (.status.conditions[] | select(.type == "Ready") | .status, .reason)] | @tsv' <<<"$tf" | column -t -s $'\t'
+    pending=$(jq -r '.status.plan.pending // ""' <<<"$tf")
+    [ -n "$pending" ] || exit 0
+    plans=$(kubectl --context {{ context }} -n flux-system get configmap -l infra.contrib.fluxcd.io/plan-name={{ environment }} -o json)
+    saved=$(jq -r '.items[0].metadata.annotations.savedPlan // ""' <<<"$plans")
+    [ "$saved" = "$pending" ] || echo "warning: stored plan is $saved, pending is $pending"
+    echo
+    jq -r '.items[].data.tfplan' <<<"$plans"
+
+# approve the pending plan, or reject it (re-plan from the current commit): just tofu-plan approve|reject
+tofu-plan action:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    k=(kubectl --context {{ context }} -n flux-system)
+    pending=$("${k[@]}" get terraform {{ environment }} -o json | jq -r '.status.plan.pending // ""')
+    case '{{ action }}' in
+      approve)
+        [ -n "$pending" ] || { echo "no pending plan"; exit 1; }
+        read -r -p "apply $pending? [y/N] " answer
+        [ "$answer" = y ] || { echo "not approved"; exit 1; }
+        "${k[@]}" patch terraform {{ environment }} --type merge --field-manager tofu-approve \
+          -p "{\"spec\":{\"approvePlan\":\"$pending\"}}"
+        ;;
+      reject)
+        # The controller has no reject: drop the plan and re-plan, as tfctl replan does.
+        # The same commit yields the same plan, so revert or fix the commit to discard the change for good.
+        "${k[@]}" patch terraform {{ environment }} --subresource=status --type merge --field-manager tf-controller \
+          -p '{"status":{"plan":{"pending":""},"lastPlannedRevision":"","lastAttemptedRevision":""}}'
+        "${k[@]}" annotate terraform {{ environment }} --overwrite "reconcile.fluxcd.io/requestedAt=$(date +%s)"
+        ;;
+      *)
+        echo "usage: just tofu-plan approve|reject"
+        exit 1
+        ;;
+    esac
+
 # encrypt a secret file in-place with sops (needs only the public key in .sops.yaml)
 encrypt file:
     sops --encrypt --in-place {{ file }}
