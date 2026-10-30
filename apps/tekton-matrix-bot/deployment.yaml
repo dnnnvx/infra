@@ -5,6 +5,7 @@ metadata:
   namespace: tekton-matrix-bot
   annotations:
     checkov.io/skip1: CKV_K8S_14=registry, tag and digest come from the kustomization images entry (Flux image automation)
+    checkov.io/skip2: CKV_K8S_38=!ci, !tofu and the CI alerts read the cluster through the API (read-only, see rbac.yaml)
 spec:
   replicas: 1
   # RWO volume, and two instances would fight over the same Matrix device
