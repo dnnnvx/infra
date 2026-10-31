@@ -148,9 +148,9 @@ module "talos" {
     "nuc-102" = {
       machine_type = "worker"
       ip           = "192.168.0.102"
-      endpoint     = "192.168.0.20"
+      # endpoint     = "192.168.0.20"
       gateway      = "192.168.0.1"
-      install_disk = "/dev/nvme0n1"
+      install_disk = "/dev/sda" # "/dev/nvme0n1"
       region       = "production"
       zone         = "office"
       node-type    = "nuc"
