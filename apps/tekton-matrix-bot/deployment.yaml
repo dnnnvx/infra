@@ -57,7 +57,7 @@ spec:
             limits:
               memory: 256Mi
           envFrom:
-            # MATRIX_PASSWORD (first login only), STORE_PASSPHRASE
+            # MATRIX_PASSWORD (first login only), STORE_PASSPHRASE, RECOVERY_PASSPHRASE
             - secretRef:
                 name: tekton-matrix-bot-secrets
           env:
