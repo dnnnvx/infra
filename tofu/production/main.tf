@@ -150,7 +150,7 @@ module "talos" {
       ip           = "192.168.0.102"
       # endpoint     = "192.168.0.20"
       gateway      = "192.168.0.1"
-      install_disk = "/dev/sda" # "/dev/nvme0n1"
+      install_disk = "/dev/sda" # not the NVMe: its PM961 hangs on cold boot (docs/src/hardware.md)
       region       = "production"
       zone         = "office"
       node-type    = "nuc"

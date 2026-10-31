@@ -15,8 +15,8 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  # On `piraeus` (file-thin, placementCount 2) rather than `piraeus-hdd`, because
-  # nuc-102 — the only `storage: hdd` node — was removed from the cluster, leaving
-  # that pool with no backing node (lightnvr has been unschedulable since).
-  # Costs 40Gi raw for a 20Gi library; revisit if nuc-102 comes back.
+  # On `piraeus` (file-thin, placementCount 2) because `piraeus-hdd` no longer exists:
+  # nuc-102 is back, but its HDD is now the system disk, with no LINSTOR pool
+  # (lightnvr is still unschedulable).
+  # Costs 40Gi raw for a 20Gi library; revisit if a bulk pool is added on nuc-102.
   storageClassName: piraeus

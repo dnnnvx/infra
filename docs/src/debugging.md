@@ -188,6 +188,19 @@ kubectl exec -n <namespace> <pod> -- ls -la /data
 
 ---
 
+## Talos node restarts
+
+A plain `talosctl reboot` normally uses kexec and skips the firmware, and so does the restart after an install.
+To test that a node really boots from its disk, remove any USB stick and force a power cycle. If it hangs, see
+[Hardware](hardware.md).
+
+```bash
+talosctl -n <ip> -e <ip> reboot --mode powercycle
+kubectl get node <name> -w
+```
+
+---
+
 ## Flux
 
 ```bash

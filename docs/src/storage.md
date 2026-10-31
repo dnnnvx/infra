@@ -9,9 +9,12 @@ Piraeus provides distributed storage via LINSTOR + DRBD, backed by the Talos nod
 | `piraeus`      | `file-thin`   | 2        | nuc-103/104   | Default — replicated app data   |
 | `piraeus-scratch` | `file-thin` | 1      | nuc-103/104   | Throwaway — CI workspaces       |
 
-- **`piraeus`**: File-backed thin provisioning on NVMe/eMMC. 2 replicas across nuc-103 and nuc-104 via DRBD. No LVM needed — LINSTOR creates sparse files under `/var/lib/linstor-pool/` on the OS disk. Good for databases, app state, anything that needs redundancy.
-- **`piraeus-hdd`** (LVM thin pool on nuc-102's HDD) was removed with nuc-102; `storage-pool-hdd.yaml` and
-  `storage-class-hdd.yaml` are in git history. The disabled `lightnvr` app still asks for it.
+- **`piraeus`**: File-backed thin provisioning on the nodes' SATA SSDs. 2 replicas across nuc-103 and nuc-104 via DRBD. No LVM needed — LINSTOR creates sparse files under `/var/lib/linstor-pool/` on the OS disk. Good for databases, app state, anything that needs redundancy.
+- **`piraeus-hdd`** (LVM thin pool on nuc-102's HDD) was removed; `storage-pool-hdd.yaml` and
+  `storage-class-hdd.yaml` are in git history. The disabled `lightnvr` app still asks for it. nuc-102 is back, but
+  the HDD is now its system disk (see [Hardware](hardware.md)) and the old volume group was erased, so it has no pool.
+  A bulk class would be a one-replica pool on that disk, with only one copy of the data: back up anything that
+  can't be downloaded again.
 
 ## Volume snapshots
 
