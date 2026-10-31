@@ -86,7 +86,7 @@ module "talos" {
   cluster_vip  = "192.168.0.100"
 
   talos_version      = "v1.13"
-  talos_version_full = "v1.13.10"
+  talos_version_full = "v1.13.12"
   kubernetes_version = "v1.36.4"
 
   # waits for all nodes to be healthy after apply (blocks if a node is down)
@@ -145,19 +145,19 @@ module "talos" {
       # WireGuard endpoint: must hold the VIP, so keep it on a controlplane node
       extra_patches = [module.wireguard.config_patch]
     }
-    # "nuc-102" = {
-    #   machine_type = "worker"
-    #   ip           = "192.168.0.102"
-    #   # endpoint     = "192.168.0.19"
-    #   gateway      = "192.168.0.1"
-    #   install_disk = "/dev/nvme0n1"
-    #   region       = "production"
-    #   zone         = "office"
-    #   node-type    = "nuc"
-    #   cpu-class    = "i3-7100U"
-    #   gpu-class    = "HD620"
-    #   storage      = "hdd"
-    # }
+    "nuc-102" = {
+      machine_type = "worker"
+      ip           = "192.168.0.102"
+      endpoint     = "192.168.0.20"
+      gateway      = "192.168.0.1"
+      install_disk = "/dev/nvme0n1"
+      region       = "production"
+      zone         = "office"
+      node-type    = "nuc"
+      cpu-class    = "i3-7100U"
+      gpu-class    = "HD620"
+      storage      = "hdd"
+    }
     "nuc-103" = {
       machine_type = "worker"
       ip           = "192.168.0.103"
