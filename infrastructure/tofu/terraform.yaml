@@ -56,7 +56,7 @@ spec:
       # Keep this tag equal to required_version.
       initContainers:
         - name: tofu
-          image: ghcr.io/opentofu/opentofu:1.13.1
+          image: ghcr.io/opentofu/opentofu:1.13.2
           command: ["cp", "/usr/local/bin/tofu", "/opt/tofu/tofu"]
           securityContext:
             allowPrivilegeEscalation: false

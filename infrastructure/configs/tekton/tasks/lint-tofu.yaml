@@ -21,7 +21,7 @@ spec:
       readOnly: true
   steps:
     - name: fmt
-      image: ghcr.io/opentofu/opentofu:1.13.1
+      image: ghcr.io/opentofu/opentofu:1.13.2
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       securityContext:
         allowPrivilegeEscalation: false

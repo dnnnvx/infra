@@ -34,7 +34,7 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-          image: twinproduction/gatus:v5.37.0
+          image: twinproduction/gatus:v5.38.0
           resources:
             requests:
               cpu: 10m
@@ -74,7 +74,7 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-          image: ghcr.io/home-operations/gatus-sidecar:0.5.5
+          image: ghcr.io/home-operations/gatus-sidecar:0.6.1
           resources:
             requests:
               cpu: 5m
