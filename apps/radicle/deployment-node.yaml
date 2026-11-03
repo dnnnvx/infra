@@ -127,7 +127,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: data
+            claimName: radicle-data
         - name: config
           configMap:
             name: radicle-config
