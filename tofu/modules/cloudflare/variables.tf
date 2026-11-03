@@ -14,6 +14,7 @@ variable "domains" {
   type = map(object({
     cname_subdomains = optional(list(string), [])
     local_gateway_ip = optional(string)
+    local_hosts      = optional(map(string), {})
     atproto_did      = optional(string)
   }))
 }

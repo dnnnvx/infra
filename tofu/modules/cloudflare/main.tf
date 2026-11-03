@@ -5,6 +5,7 @@ module "domain" {
   zone_name        = each.key
   cname_subdomains = each.value.cname_subdomains
   local_gateway_ip = each.value.local_gateway_ip
+  local_hosts      = each.value.local_hosts
   atproto_did      = each.value.atproto_did
 }
 

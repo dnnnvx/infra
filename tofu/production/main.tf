@@ -212,7 +212,12 @@ module "cloudflare" {
     "casasulgorgo.net" = {
       cname_subdomains = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "ci", "matrix"]
       atproto_did      = local.atproto_did
-      local_gateway_ip = "192.168.0.202" # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)
+      # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)
+      local_gateway_ip = "192.168.0.202"
+      # Raspberry Pis (Nix), each IP is a DHCP reservation on the router
+      local_hosts = {
+        "rpi-1" = "192.168.0.111"
+      }
     }
     "marcods.dev" = {
       cname_subdomains = ["rad", "git"]

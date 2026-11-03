@@ -18,6 +18,13 @@ TLS uses the same Let's Encrypt cert, which also covers `*.local.casasulgorgo.ne
 DNS: a DNS-only (not proxied) Cloudflare record `*.local.casasulgorgo.net → 192.168.0.202` (tofu, `local_gateway_ip`),
 so every resolver, including browser DoH, gets the same answer. Publishing the private IP is harmless.
 
+LAN devices outside the cluster get their own record, which wins over the wildcard (tofu, `local_hosts`).
+Each IP is a DHCP reservation on the router:
+
+| Hostname                        | IP              | Device                             |
+|---------------------------------|-----------------|------------------------------------|
+| `rpi-1.local.casasulgorgo.net`  | `192.168.0.111` | Pi 4B: mic RTSP `:8554`, BME280 `:9280` |
+
 Don't attach LAN-only routes to the `homelab` Gateway: its port 443 is forwarded from the internet,
 so any route on it is publicly reachable by SNI/Host even without a DNS record.
 

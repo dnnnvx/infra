@@ -15,6 +15,12 @@ variable "local_gateway_ip" {
   default     = null
 }
 
+variable "local_hosts" {
+  description = "LAN devices outside the cluster, name → private IP; creates DNS-only <name>.local A records)"
+  type        = map(string)
+  default     = {}
+}
+
 variable "atproto_did" {
   description = "AT Protocol DID for handle verification via _atproto TXT record (e.g. did:plc:xxxx). Leave null to skip."
   type        = string

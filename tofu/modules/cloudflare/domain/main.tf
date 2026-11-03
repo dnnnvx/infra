@@ -54,3 +54,15 @@ resource "cloudflare_dns_record" "local_wildcard" {
   ttl     = 300
   proxied = false
 }
+
+# LAN devices reached directly rather than through the Gateway; a specific record wins over the wildcard
+resource "cloudflare_dns_record" "local_hosts" {
+  for_each = var.local_hosts
+
+  zone_id = data.cloudflare_zone.main.zone_id
+  name    = "${each.key}.local"
+  content = each.value
+  type    = "A"
+  ttl     = 300
+  proxied = false
+}
