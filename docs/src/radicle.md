@@ -19,15 +19,62 @@ A [Radicle](https://radicle.dev) seed node for publishing git repos (`apps/radic
   replicated. The seed has its own key, generated on first start into the PVC (`keys/radicle`, no passphrase).
   Back up the PVC if the node ID should survive.
 
+## Identities
+
+Two keys, never shared:
+
+| Key | Where | Purpose |
+|---|---|---|
+| Personal | laptop, `~/.radicle/keys/`, passphrase-protected | owns and signs your repos (`rad self --did`) |
+| Seed | the PVC, unencrypted so the node starts unattended | identifies the server only |
+
+Don't sign with the seed key or copy it to a laptop. Two nodes with one Node ID break routing, and a
+key that sits unencrypted on a cluster volume shouldn't own anything. Radicle keys can't be rotated:
+back up `~/.radicle/keys/`, because losing the key or its passphrase loses control of every repo it published.
+
+`rad` comes with the dev shell (`radicle-node` in `flake.nix`). Create the personal key once with `rad auth`.
+
+## Public repos only
+
+Radicle's node-to-node protocol is currently broken for private repos
+([disclosure, 2026-09-23](https://radicle.dev/2026/09/23/disclosure-of-vulnerability-in-network-protocol)).
+Traffic isn't encrypted, and a peer can claim someone else's Node ID in the handshake, so an on-path
+attacker can read a private repo or fetch it by posing as an allow-listed peer. Every release so far is
+affected. The fix will be a breaking major release that moves the transport to iroh, and old and new
+nodes won't talk to each other. Public repos are fine: their content is public anyway, and signed refs
+still catch tampering, so code and identities can't be forged.
+
+Until a fixed release:
+
+- **Never `rad init --private`.** Keep private code on Tangled or GitHub.
+- The seed already only serves what's listed in `config/repos` (`seedingPolicy` is `block`).
+- nixpkgs marks `radicle-node` insecure for this reason. `flake.nix` permits exactly `radicle-node-1.10.3`:
+  a newer release that's still flagged fails evaluation again, as a reminder to re-check this section.
+- When the fixed major ships: bump the seed and the laptop together (they can't talk across versions),
+  drop `permittedInsecurePackages`, and update this section.
+
 ## Publishing a repo
 
-1. On the laptop: `rad init` in the repo (public), then `git push rad`.
-2. Add `<alias> <rid>` to `apps/radicle/config/repos`. The init container runs `rad seed` for it, and httpd
-   serves it under the alias: `https://git.marcods.dev/nodes/rad.marcods.dev/<alias>`.
-3. At home, connect the laptop directly: `rad node connect <seed-nid>@192.168.0.203:8776`
-   (the seed's NID is printed by the init container: `kubectl -n radicle logs deploy/radicle-node -c init`).
+1. On the laptop, with the local node running (`rad node start`): `rad init` in the repo (public, never
+   `--private`). This copies it into `~/.radicle/storage` and announces it. Later, `git push rad` updates that
+   local copy, and the node announces the new refs.
+2. Add `<alias> <rid>` (the RID comes from `rad .`) to `apps/radicle/config/repos` and push. The ConfigMap
+   hash changes, so the pod restarts, the init container runs `rad seed`, and httpd serves the repo under its
+   alias: `https://git.marcods.dev/nodes/rad.marcods.dev/<alias>`.
+3. Get the code onto the seed. If it isn't there yet, run
+   `kubectl -n radicle exec deploy/radicle-node -c node -- rad sync --fetch <rid>`.
 
-Removing a line from `repos` doesn't unseed: `kubectl -n radicle exec deploy/radicle-node -c node -- rad unseed <rid>`.
+Neither the laptop nor the seed accepts connections from the internet, so away from home they never talk
+directly. The copy goes through the bootstrap seeds instead: iris and rosa seed every public repo, so it
+travels laptop → iris/rosa → seed. At home, `rad node connect <seed-nid>@192.168.0.203:8776` gives a direct
+path. That's faster and doesn't depend on a third party. Connections work both ways, so the seed fetches
+over the one the laptop opened. The seed's NID is printed by the init container:
+`kubectl -n radicle logs deploy/radicle-node -c init`.
+
+Removing a line from `repos` doesn't stop seeding it. Block it by hand:
+`kubectl -n radicle exec deploy/radicle-node -c node -- rad block <rid>`. Upstream recommends `block` over
+`unseed`, because unseeding falls back to the default policy, which would keep serving the repo if the default
+ever becomes `allow`.
 
 ## Making P2P public
 
