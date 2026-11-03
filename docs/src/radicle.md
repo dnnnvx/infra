@@ -31,9 +31,6 @@ Two keys, never shared:
 Don't sign with the seed key or copy it to a laptop. Two nodes with one Node ID break routing, and a
 key that sits unencrypted on a cluster volume shouldn't own anything. Radicle keys can't be rotated:
 back up `~/.radicle/keys/`, because losing the key or its passphrase loses control of every repo it published.
-
-`rad` comes with the dev shell (`radicle-node` in `flake.nix`). Create the personal key once with `rad auth`.
-
 ## Public repos only
 
 Radicle's node-to-node protocol is currently broken for private repos
@@ -48,7 +45,7 @@ Until a fixed release:
 
 - **Never `rad init --private`.** Keep private code on Tangled or GitHub.
 - The seed already only serves what's listed in `config/repos` (`seedingPolicy` is `block`).
-- nixpkgs marks `radicle-node` insecure for this reason. `flake.nix` permits exactly `radicle-node-1.10.3`:
+- nixpkgs marks `radicle-node` insecure for this reason. `~/.config/nix/flake.nix` permits exactly `radicle-node-1.10.3`:
   a newer release that's still flagged fails evaluation again, as a reminder to re-check this section.
 - When the fixed major ships: bump the seed and the laptop together (they can't talk across versions),
   drop `permittedInsecurePackages`, and update this section.
