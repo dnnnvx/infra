@@ -27,3 +27,4 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - "marcods.dev"
+    - "*.marcods.dev"

@@ -215,7 +215,8 @@ module "cloudflare" {
       local_gateway_ip = "192.168.0.202" # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)
     }
     "marcods.dev" = {
-      atproto_did = local.atproto_did
+      cname_subdomains = ["rad", "git"]
+      atproto_did      = local.atproto_did
     }
   }
 }

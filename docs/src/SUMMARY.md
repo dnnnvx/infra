@@ -7,6 +7,7 @@
 - [Remote access](./remote-access.md)
 - [Storage](./storage.md)
 - [CI/CD](./cicd.md)
+- [Radicle](./radicle.md)
 - [OpenTofu](./opentofu.md)
 - [Secrets](./secrets.md)
 - [Security](./security.md)

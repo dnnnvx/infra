@@ -16,6 +16,7 @@ resources:
   - marcods.yaml
   - tuwunel.yaml
   - tekton-matrix-bot.yaml
+  - radicle.yaml
   # - romm.yaml
   # - lightnvr.yaml
   # - llama-cpp.yaml

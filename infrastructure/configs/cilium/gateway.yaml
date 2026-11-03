@@ -46,3 +46,17 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    # Subdomains (e.g. the radicle seed); a listener matches one hostname, so the apex has its own
+    - name: https-marcods-sub
+      protocol: HTTPS
+      port: 443
+      hostname: "*.marcods.dev"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: marcods-dev
+            kind: Secret
+            namespace: kube-system
+      allowedRoutes:
+        namespaces:
+          from: All

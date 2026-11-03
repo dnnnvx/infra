@@ -1,0 +1,65 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: radicle-node
+  namespace: radicle
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: radicle-node
+  ingress:
+    # httpd via the Gateway, and gatus probing it through the Gateway hostname
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    # P2P through the radicle-p2p LoadBalancer (LAN clients arrive as world)
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "8776"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Radicle peers (public seeds and whoever they gossip)
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "8776"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: radicle-explorer
+  namespace: radicle
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: radicle-explorer
+  ingress:
+    - fromEntities:
+        - ingress
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus

@@ -1,0 +1,3 @@
+# Repositories this node seeds, one "<alias> <rid>" per line.
+# The alias is the short name in URLs: https://git.marcods.dev/nodes/rad.marcods.dev/<alias>
+# Example: heartwood rad:z3gqcJUoA1n9HaHKufZs5FCSGazv5

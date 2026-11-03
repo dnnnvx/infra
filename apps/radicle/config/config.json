@@ -1,0 +1,19 @@
+{
+  "publicExplorer": "https://git.marcods.dev/nodes/$host/$rid$path",
+  "preferredSeeds": [
+    "z6MkrLMMsiPWUcNPHcRajuMi9mDfYckSoJyPwwnknocNYPm7@iris.radicle.network:8776",
+    "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@rosa.radicle.network:8776"
+  ],
+  "node": {
+    "alias": "marcods",
+    "listen": ["0.0.0.0:8776"],
+    "externalAddresses": [],
+    "connect": [
+      "z6MkrLMMsiPWUcNPHcRajuMi9mDfYckSoJyPwwnknocNYPm7@iris.radicle.network:8776",
+      "z6Mkmqogy2qEM2ummccUthFEaaHvyYmYBYh3dbe9W4ebScxo@rosa.radicle.network:8776"
+    ],
+    "seedingPolicy": {
+      "default": "block"
+    }
+  }
+}

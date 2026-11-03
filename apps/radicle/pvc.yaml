@@ -1,0 +1,14 @@
+# RAD_HOME: node key (generated on first start), repository storage, policy and routing DBs.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: radicle
+  labels:
+    app.kubernetes.io/part-of: radicle
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

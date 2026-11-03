@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: radicle-httpd
+  namespace: radicle
+spec:
+  selector:
+    app.kubernetes.io/name: radicle-node
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radicle-explorer
+  namespace: radicle
+spec:
+  selector:
+    app.kubernetes.io/name: radicle-explorer
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+---
+# P2P for LAN peers (e.g. `rad node connect <nid>@192.168.0.203:8776` from a laptop).
+# Public only once the router forwards 8776 here.
+apiVersion: v1
+kind: Service
+metadata:
+  name: radicle-p2p
+  namespace: radicle
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.0.203"
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: radicle-node
+  ports:
+    - name: p2p
+      port: 8776
+      targetPort: p2p
+      protocol: TCP

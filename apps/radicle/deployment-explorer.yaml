@@ -1,0 +1,65 @@
+# Static web explorer; the browser calls radicle-httpd (rad.marcods.dev) directly.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radicle-explorer
+  namespace: radicle
+  annotations:
+    checkov.io/skip1: CKV_K8S_14=registry, tag and digest come from the kustomization images entry (Flux image automation)
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radicle-explorer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radicle-explorer
+        app.kubernetes.io/part-of: radicle
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: explorer
+          # Registry + tag are set by kustomization.yaml (Flux image automation)
+          image: radicle-explorer
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/nginx/html/config.json
+              subPath: explorer.json
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+      volumes:
+        - name: config
+          configMap:
+            name: radicle-explorer-config
+        - name: tmp
+          emptyDir: {}

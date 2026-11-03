@@ -1,0 +1,135 @@
+# Build → deploy wiring (copied from apps/casasulgorgo/ci.yaml). Images are built from the
+# Tangled repo `radicle-images` (node/, explorer/); its Flux Kustomization is clusters/production/apps/radicle.yaml.
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: radicle-node
+  namespace: flux-system
+spec:
+  image: registry.local.casasulgorgo.net/radicle/node
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: radicle-node
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: radicle-node
+  filterTags:
+    pattern: '^production$'
+  policy:
+    alphabetical:
+      order: asc
+  digestReflectionPolicy: Always
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: radicle-explorer
+  namespace: flux-system
+spec:
+  image: registry.local.casasulgorgo.net/radicle/explorer
+  interval: 5m
+---
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImagePolicy
+metadata:
+  name: radicle-explorer
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: radicle-explorer
+  filterTags:
+    pattern: '^production$'
+  policy:
+    alphabetical:
+      order: asc
+  digestReflectionPolicy: Always
+  interval: 5m
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: flux-sync-radicle
+  namespace: flux-system
+rules:
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imagerepositories, imagepolicies]
+    resourceNames: [radicle-node, radicle-explorer]
+    verbs: [get, patch]
+  - apiGroups: [image.toolkit.fluxcd.io]
+    resources: [imageupdateautomations]
+    resourceNames: [apps]
+    verbs: [get, patch]
+  - apiGroups: [kustomize.toolkit.fluxcd.io]
+    resources: [kustomizations]
+    resourceNames: [app-radicle]
+    verbs: [get, patch]
+  - apiGroups: [source.toolkit.fluxcd.io]
+    resources: [gitrepositories]
+    resourceNames: [flux-system]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: flux-sync-radicle
+  namespace: flux-system
+subjects:
+  - kind: ServiceAccount
+    name: flux-sync
+    namespace: tekton-ci
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: flux-sync-radicle
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: radicle
+  namespace: tekton-ci
+  labels:
+    ci.casasulgorgo.net/eventlistener: tangled
+spec:
+  interceptors:
+    - name: verify-signature
+      ref:
+        name: tangled
+        kind: ClusterInterceptor
+    - name: filter
+      ref:
+        name: cel
+        kind: ClusterInterceptor
+      params:
+        - name: filter
+          value: >-
+            header.match('X-Tangled-Event', 'push') &&
+            body.repository.name == 'radicle-images' &&
+            body.ref == 'refs/heads/main' &&
+            body.after.matches('^[0-9a-f]{40}$') &&
+            body.after != '0000000000000000000000000000000000000000'
+        - name: overlays
+          value:
+            - key: tags
+              expression: "body.after + ' latest production'"
+  bindings:
+    - name: project
+      value: radicle
+    # space-separated <name>,<dockerfile>,<context> per image (dockerfile relative to context)
+    - name: images
+      value: node,Dockerfile,node explorer,Dockerfile,explorer
+    - name: flux-kustomization
+      value: app-radicle
+    - name: repo-url
+      value: $(body.repository.clone_url)
+    - name: revision
+      value: $(body.after)
+    - name: tags
+      value: $(extensions.tags)
+  template:
+    ref: build-image
