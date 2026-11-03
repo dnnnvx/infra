@@ -7,7 +7,7 @@ A [Radicle](https://radicle.dev) seed node for publishing git repos (`apps/radic
 | `radicle-node` (P2P, TCP 8776) | `radicle-node` Deployment, LAN-only LoadBalancer `192.168.0.203` |
 | `radicle-httpd` (read-only JSON API) | same pod, public at `https://rad.marcods.dev` |
 | Web explorer | `radicle-explorer` Deployment, public at `https://git.marcods.dev` |
-| Images | Tangled repo `radicle-images` → `registry.local.casasulgorgo.net/radicle/{node,explorer}` |
+| Images | [`dnnnvx/radicle-images`](https://github.com/dnnnvx/radicle-images) → `ghcr.io/dnnnvx/radicle-{node,httpd,explorer}:<x.y.z>` (upstream versions; a daily job there builds new releases after checking their signatures). Renovate bumps the tags here |
 
 ## How it fits together
 

@@ -4,8 +4,6 @@ kind: Deployment
 metadata:
   name: radicle-explorer
   namespace: radicle
-  annotations:
-    checkov.io/skip1: CKV_K8S_14=registry, tag and digest come from the kustomization images entry (Flux image automation)
 spec:
   replicas: 1
   selector:
@@ -26,8 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: explorer
-          # Registry + tag are set by kustomization.yaml (Flux image automation)
-          image: radicle-explorer
+          image: ghcr.io/dnnnvx/radicle-explorer:0.30.0
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

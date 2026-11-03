@@ -36,6 +36,14 @@
       ]
     },
     {
+      "description": "The explorer is built from the radicle-httpd release it shares a version with and speaks its API.",
+      "groupName": "radicle httpd and explorer",
+      "matchPackageNames": [
+        "ghcr.io/dnnnvx/radicle-httpd",
+        "ghcr.io/dnnnvx/radicle-explorer"
+      ]
+    },
+    {
       "description": "The tofu-controller runner's tofu (infrastructure/tofu/terraform.yaml) must equal required_version in tofu/production/main.tf, which Renovate doesn't track: bump both by hand.",
       "matchPackageNames": ["ghcr.io/opentofu/opentofu"],
       "enabled": false

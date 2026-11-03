@@ -6,8 +6,6 @@ kind: Deployment
 metadata:
   name: radicle-node
   namespace: radicle
-  annotations:
-    checkov.io/skip1: CKV_K8S_14=registry, tag and digest come from the kustomization images entry (Flux image automation)
 spec:
   replicas: 1
   strategy:
@@ -33,7 +31,7 @@ spec:
         # First start: create the node's own key (no passphrase). Every start: apply the
         # seeding policy for config/repos. Removing a line doesn't unseed (`rad unseed` by hand).
         - name: init
-          image: radicle-node
+          image: ghcr.io/dnnnvx/radicle-node:1.10.3
           command:
             - sh
             - -euc
@@ -69,8 +67,7 @@ spec:
               memory: 128Mi
       containers:
         - name: node
-          # Registry + tag are set by kustomization.yaml (Flux image automation)
-          image: radicle-node
+          image: ghcr.io/dnnnvx/radicle-node:1.10.3
           # --force: a crashed node leaves its control socket behind on the PVC
           args: ["--force"]
           env: *env
@@ -94,7 +91,7 @@ spec:
             tcpSocket:
               port: p2p
         - name: httpd
-          image: radicle-node
+          image: ghcr.io/dnnnvx/radicle-httpd:0.30.0
           command:
             - sh
             - -euc

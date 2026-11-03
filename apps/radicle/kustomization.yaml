@@ -8,7 +8,6 @@ resources:
   - deployment-explorer.yaml
   - service.yaml
   - httproute.yaml
-  - ci.yaml
 # Hashed names: editing config/ rolls the pods
 configMapGenerator:
   - name: radicle-config
@@ -20,13 +19,3 @@ configMapGenerator:
     namespace: radicle
     files:
       - config/explorer.json
-images:
-  # The digests are placeholders until the first build; Flux rewrites them.
-  - name: radicle-node
-    newName: registry.local.casasulgorgo.net/radicle/node
-    newTag: production
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000 # {"$imagepolicy": "flux-system:radicle-node:digest"}
-  - name: radicle-explorer
-    newName: registry.local.casasulgorgo.net/radicle/explorer
-    newTag: production
-    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000 # {"$imagepolicy": "flux-system:radicle-explorer:digest"}
