@@ -42,7 +42,7 @@ spec:
         mountPath: /sboms
   steps:
     - name: generate
-      image: anchore/syft:v1.55.0-debug
+      image: anchore/syft:v1.56.0-debug
       script: |
         #!/busybox/sh
         set -eu

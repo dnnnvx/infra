@@ -44,8 +44,14 @@
       ]
     },
     {
-      "description": "The tofu-controller runner's tofu (infrastructure/tofu/terraform.yaml) must equal required_version in tofu/production/main.tf, which Renovate doesn't track: bump both by hand.",
+      "description": "The tofu-controller runner's tofu (infrastructure/tofu/terraform.yaml) must equal required_version in tofu/production/main.tf: bump both by hand.",
       "matchPackageNames": ["ghcr.io/opentofu/opentofu"],
+      "enabled": false
+    },
+    {
+      "description": "required_version in tofu/production/main.tf pins OpenTofu, but the terraform manager looks it up as hashicorp/terraform releases. Bumped by hand with the opentofu image (rule above).",
+      "matchManagers": ["terraform"],
+      "matchDepTypes": ["required_version"],
       "enabled": false
     }
   ]
