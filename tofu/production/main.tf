@@ -210,7 +210,7 @@ module "cloudflare" {
 
   domains = {
     "casasulgorgo.net" = {
-      cname_subdomains = ["ha", "auth", "uptime", "recipes", "notes", "flux", "books", "ci", "matrix"]
+      cname_subdomains = ["ha", "auth", "uptime", "recipes", "flux", "books", "ci", "matrix"]
       atproto_did      = local.atproto_did
       # homelab-local Gateway (infrastructure/configs/cilium/gateway-local.yaml)
       local_gateway_ip = "192.168.0.202"
@@ -220,7 +220,7 @@ module "cloudflare" {
       }
     }
     "marcods.dev" = {
-      cname_subdomains = ["rad", "git"]
+      cname_subdomains = ["rad", "git", "notes"]
       atproto_did      = local.atproto_did
     }
   }

@@ -14,7 +14,7 @@ spec:
       namespace: kube-system
       sectionName: https
   hostnames:
-    - notes.casasulgorgo.net
+    - notes.marcods.dev
   rules:
     - backendRefs:
         - name: silverbullet
