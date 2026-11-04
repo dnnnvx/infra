@@ -12,7 +12,7 @@ spec:
   parentRefs:
     - name: homelab
       namespace: kube-system
-      sectionName: https
+      sectionName: https-marcods-sub
   hostnames:
     - notes.marcods.dev
   rules:
