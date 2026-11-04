@@ -13,8 +13,13 @@ spec:
     - name: homelab
       namespace: kube-system
       sectionName: https-marcods-sub
+    # TEMP: old hostname (LAN-only via AdGuard) to reach /.dashboard and change the primary URL; remove after
+    - name: homelab
+      namespace: kube-system
+      sectionName: https
   hostnames:
     - notes.marcods.dev
+    - notes.casasulgorgo.net
   rules:
     - backendRefs:
         - name: silverbullet
