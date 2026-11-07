@@ -24,7 +24,7 @@ spec:
       description: Lowest grype severity that fails the run (only vulnerabilities that have a fix count).
   steps:
     - name: grype
-      image: anchore/grype:v0.121.1-debug
+      image: anchore/grype:v0.121.2-debug
       env:
         - name: HOME
           value: /tmp
