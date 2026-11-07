@@ -74,7 +74,8 @@ signs every image named in the type-hinted `IMAGES` result and generates a SLSA 
 (deep inspection: every TaskRun, its params, results and step images). Both go to zot as Sigstore bundles
 referring to the image (OCI 1.1 referrers). Same choices as Konflux's Chains config, see
 `infrastructure/controllers/tekton/chains/patch-chains.yaml`. Nothing goes to the public Rekor log, so verification
-skips the tlog. Chains authenticates to zot with `pipeline-runner`'s `imagePullSecrets` (`registry-push`).
+skips the tlog. Chains authenticates to zot with `pipeline-runner`'s `secrets` (`registry-push`); since v0.30.0 it ignores
+`imagePullSecrets`.
 
 **release-image** is started by the `release` Trigger on the internal `tekton-events` EventListener, which receives
 Tekton's own CloudEvents. A `dev.tekton.event.pipelinerun.successful.v1` event of a `build-image` run becomes a
@@ -171,7 +172,7 @@ clone URL, repo name and commit from it.
 | Who | How | Rights |
 |-----|-----|--------|
 | Humans | `registry.local.casasulgorgo.net` UI (LAN), Pocket-ID login (`registry_admins` group = admin) | read; admins delete |
-| Tekton (pipelines, Chains) | `tekton` htpasswd user, `tekton-ci/registry-push` (Chains via `pipeline-runner`'s `imagePullSecrets`) | read, create, update |
+| Tekton (pipelines, Chains) | `tekton` htpasswd user, `tekton-ci/registry-push` (Chains via `pipeline-runner`'s `secrets`) | read, create, update |
 | containerd (nodes), Flux | anonymous (zot `anonymousPolicy`) | read |
 
 Anonymous read is enabled because the kubelet's pulls don't use the Talos `RegistryAuthConfig`

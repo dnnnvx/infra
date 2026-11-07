@@ -14,7 +14,8 @@ data:
   artifacts.oci.storage: oci
   # Rekor is public: it would publish our image names and digests
   transparency.enabled: "false"
-  # Credentials: imagePullSecrets of the run's ServiceAccount (tekton-ci/pipeline-runner → registry-push)
+  # Credentials: `secrets` of the run's ServiceAccount (tekton-ci/pipeline-runner → registry-push).
+  # Since v0.30.0 Chains ignores imagePullSecrets.
   storage.oci.encoding-format: sigstore-bundle
 ---
 # The key is a SOPS Secret in ../secrets-chains.yaml; drop the release manifest's empty placeholder

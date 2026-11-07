@@ -23,7 +23,7 @@ spec:
           - name: revision
             value: $(tt.params.revision)
         taskRunTemplate:
-          serviceAccountName: pipeline-runner
+          serviceAccountName: validate-runner
           podTemplate:
             securityContext:
               runAsNonRoot: true
