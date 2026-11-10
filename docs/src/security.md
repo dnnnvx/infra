@@ -166,3 +166,20 @@ spec:
   noisy hooks (`tcp_connect`, `cap_capable`) with selectors. It runs from the Cilium Helm repo and
   needs `/sys/kernel/tracing` mounted plus `kernel.kptr_restrict = 1` on Talos (currently `2`, see
   `tofu/modules/talos/nodes.tf`).
+- **Keyless registry pushes (zot workload identity):** zot v2.1.x can authenticate projected
+  ServiceAccount tokens (`http.auth.bearer.oidc`, zot#3711), which would replace the static
+  `registry-push` htpasswd credential. Blockers found (Nov 2026):
+  - zot fetches the issuer's discovery and JWKS anonymously, with no static-JWKS option. Talos runs
+    kube-apiserver with `--anonymous-auth=false`, so `https://192.168.0.100:6443/.well-known/openid-configuration`
+    returns 401. Fixing it would need an `AuthenticationConfiguration` that allows anonymous access to
+    only the two discovery paths, plus binding `system:service-account-issuer-discovery` to
+    `system:unauthenticated`. That's a control-plane auth change.
+  - Enabling `bearer` turns every push challenge into Bearer. zot's `/zot/auth/token` accepts only
+    API keys or trusted JWTs, never htpasswd passwords, so `buildkit`, `sbom`, `release-image` and
+    Chains must all switch in the same change. Anonymous pulls (containerd, Flux) are unaffected.
+  - Chains only reads static credentials from `pipeline-runner`'s `secrets`. It needs a CronJob that
+    refreshes a short-lived TokenRequest (`aud: registry.local.casasulgorgo.net`) into that Secret, or
+    a zot API key.
+
+  Revisit if zot gains a static JWKS file or authenticated discovery (worth a feature request). Then
+  it becomes a projected token in the three tasks, plus the Chains token refresher.
