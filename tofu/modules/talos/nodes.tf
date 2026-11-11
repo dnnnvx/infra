@@ -60,7 +60,7 @@ locals {
               "default-watch-cache-size" = "20"
             }
             env = {
-              GOMEMLIMIT = "1500MiB"
+              GOMEMLIMIT = "3000MiB"
             }
             # Talos' default logs every request (~120 events/s, mostly lease renewals and
             # controllers' reads). Keep all writes, all secret access and everything humans do.
