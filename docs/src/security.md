@@ -25,7 +25,7 @@ spec:
 
 ### Partial (apps requiring root)
 
-Used for: `home-assistant`, `lightnvr` — these need root for hardware/device access.
+Used for: `home-assistant` — needs root for hardware/device access.
 
 ```yaml
 spec:

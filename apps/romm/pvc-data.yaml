@@ -16,7 +16,6 @@ spec:
     requests:
       storage: 8Gi
   # On `piraeus` (file-thin, placementCount 2) because `piraeus-hdd` no longer exists:
-  # nuc-102 is back, but its HDD is now the system disk, with no LINSTOR pool
-  # (lightnvr is still unschedulable).
+  # nuc-102 is back, but its HDD is now the system disk, with no LINSTOR pool.
   # Costs 40Gi raw for a 20Gi library; revisit if a bulk pool is added on nuc-102.
   storageClassName: piraeus
