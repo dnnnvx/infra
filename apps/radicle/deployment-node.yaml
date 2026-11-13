@@ -91,7 +91,7 @@ spec:
             tcpSocket:
               port: p2p
         - name: httpd
-          image: ghcr.io/dnnnvx/radicle-httpd:0.30.0
+          image: ghcr.io/dnnnvx/radicle-httpd:0.31.0
           command:
             - sh
             - -euc

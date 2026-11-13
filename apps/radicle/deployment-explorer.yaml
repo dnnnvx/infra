@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: explorer
-          image: ghcr.io/dnnnvx/radicle-explorer:0.30.0
+          image: ghcr.io/dnnnvx/radicle-explorer:0.31.0
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
