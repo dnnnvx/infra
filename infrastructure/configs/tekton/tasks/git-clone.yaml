@@ -24,7 +24,7 @@ spec:
       description: Committer date as unix seconds, used to build sortable image tags.
   steps:
     - name: clone
-      image: alpine/git:v2.54.0
+      image: alpine/git:v2.54.1
       env:
         - name: HOME
           value: /tmp
