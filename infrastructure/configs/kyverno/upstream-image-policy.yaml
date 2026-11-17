@@ -1,0 +1,155 @@
+# Audit-only check that upstream images were signed (cosign keyless) by their own project's CI.
+# Never blocks: results land in PolicyReports (`kubectl get policyreports -A`), also for running pods
+# via the hourly background scan, which also covers kube-system and kyverno (never sent through the
+# webhook). Only projects whose running images were verified as signed with these identities
+# (2026-11-17) are listed; images of other projects aren't checked. Not covered yet: cert-manager and
+# Tekton (signed with keys we couldn't verify), Hubble UI and the app images without signatures.
+# Verify a candidate before adding it:
+#   cosign verify --certificate-identity-regexp '^https://github.com/<org>/' \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com <image>@<digest>
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
+metadata:
+  name: upstream-signed-images
+spec:
+  validationActions: [Audit]
+  failurePolicy: Ignore
+  webhookConfiguration:
+    timeoutSeconds: 15
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  evaluation:
+    background:
+      enabled: true
+  matchImageReferences:
+    - glob: 'ghcr.io/fluxcd/*'
+    - glob: 'ghcr.io/controlplaneio-fluxcd/*'
+    - glob: 'ghcr.io/flux-iac/*'
+    - glob: 'ghcr.io/cloudnative-pg/*'
+    - glob: 'quay.io/piraeusdatastore/*'
+    - glob: 'quay.io/cilium/cilium*'
+    - glob: 'quay.io/cilium/operator*'
+    - glob: 'quay.io/cilium/hubble-relay*'
+    - glob: 'registry.k8s.io/*'
+    - glob: 'ghcr.io/opentofu/opentofu*'
+    - glob: 'ghcr.io/home-assistant/home-assistant*'
+    - glob: 'favonia/cloudflare-ddns*'
+    - glob: 'docker.io/favonia/cloudflare-ddns*'
+    - glob: 'reg.kyverno.io/kyverno/*'
+  validationConfigurations:
+    mutateDigest: false
+    verifyDigest: false
+    required: false
+  # Keyless: Fulcio certificate + Rekor inclusion proof, checked offline against Sigstore's public
+  # TUF root (no ctlog block = default trust root).
+  attestors:
+    - name: fluxcd
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/fluxcd/'
+    - name: fluxoperator
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/controlplaneio-fluxcd/'
+    - name: tofucontroller
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/flux-iac/'
+    - name: cnpg
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/cloudnative-pg/'
+    - name: piraeus
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/piraeusdatastore/'
+    - name: cilium
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/cilium/'
+    - name: kubernetes
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://accounts.google.com
+              subject: 'krel-trust@k8s-releng-prod.iam.gserviceaccount.com'
+    - name: opentofu
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/opentofu/opentofu/'
+    - name: homeassistant
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/home-assistant/'
+    - name: favonia
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/favonia/'
+    # Kyverno publishes its signatures in a separate repository
+    - name: kyverno
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: '^https://github\.com/kyverno/'
+        source:
+          repository: ghcr.io/kyverno/signatures
+  variables:
+    - name: images
+      expression: images.containers + images.initContainers + images.ephemeralContainers
+  validations:
+    - expression: >-
+        variables.images.filter(i, i.startsWith("ghcr.io/fluxcd/")).all(i, verifyImageSignatures(i, [attestors.fluxcd]) > 0)
+      message: 'Flux image is not signed by its project (^https://github\.com/fluxcd/)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("ghcr.io/controlplaneio-fluxcd/")).all(i, verifyImageSignatures(i, [attestors.fluxoperator]) > 0)
+      message: 'Flux Operator image is not signed by its project (^https://github\.com/controlplaneio-fluxcd/)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("ghcr.io/flux-iac/")).all(i, verifyImageSignatures(i, [attestors.tofucontroller]) > 0)
+      message: 'tofu-controller image is not signed by its project (^https://github\.com/flux-iac/)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("ghcr.io/cloudnative-pg/")).all(i, verifyImageSignatures(i, [attestors.cnpg]) > 0)
+      message: 'CloudNativePG image is not signed by its project (^https://github\.com/cloudnative-pg/)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("quay.io/piraeusdatastore/")).all(i, verifyImageSignatures(i, [attestors.piraeus]) > 0)
+      message: 'Piraeus image is not signed by its project (^https://github\.com/piraeusdatastore/)'
+    - expression: >-
+        variables.images.filter(i, i.matches(r"^quay\.io/cilium/(cilium|cilium-envoy|operator-generic|hubble-relay)[:@]")).all(i, verifyImageSignatures(i, [attestors.cilium]) > 0)
+      message: 'Cilium image is not signed by its project (^https://github\.com/cilium/)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("registry.k8s.io/")).all(i, verifyImageSignatures(i, [attestors.kubernetes]) > 0)
+      message: 'Kubernetes (registry.k8s.io) image is not signed by its project (krel-trust@k8s-releng-prod.iam.gserviceaccount.com)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("ghcr.io/opentofu/opentofu")).all(i, verifyImageSignatures(i, [attestors.opentofu]) > 0)
+      message: 'OpenTofu image is not signed by its project (^https://github\.com/opentofu/opentofu/)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("ghcr.io/home-assistant/home-assistant")).all(i, verifyImageSignatures(i, [attestors.homeassistant]) > 0)
+      message: 'Home Assistant image is not signed by its project (^https://github\.com/home-assistant/)'
+    - expression: >-
+        variables.images.filter(i, (i.startsWith("favonia/cloudflare-ddns") || i.startsWith("docker.io/favonia/cloudflare-ddns"))).all(i, verifyImageSignatures(i, [attestors.favonia]) > 0)
+      message: 'cloudflare-ddns image is not signed by its project (^https://github\.com/favonia/)'
+    - expression: >-
+        variables.images.filter(i, i.startsWith("reg.kyverno.io/kyverno/")).all(i, verifyImageSignatures(i, [attestors.kyverno]) > 0)
+      message: 'Kyverno image is not signed by its project (^https://github\.com/kyverno/)'

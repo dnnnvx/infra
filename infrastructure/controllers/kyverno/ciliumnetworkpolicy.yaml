@@ -45,3 +45,11 @@ spec:
         - ports:
             - port: "5000"
               protocol: TCP
+    # Upstream signatures (infrastructure/configs/kyverno): public registries (ghcr.io, quay.io,
+    # registry.k8s.io, docker.io and the CDNs they redirect to) and Sigstore's TUF root
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

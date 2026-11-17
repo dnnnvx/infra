@@ -1,6 +1,7 @@
-# Only image verification at admission: no background scans, cleanup/generate
-# policies or policy reports.
-# The image policy's webhook fails closed for app namespaces: keep one replica up through
+# Image verification only (ImageValidatingPolicies): no generate/mutate-existing or cleanup policies.
+# The reports controller stays on: it rescans running pods (backgroundScan, hourly) and turns Audit
+# results into PolicyReports (`kubectl get policyreports -A`).
+# The Chains policy's webhook fails closed for app namespaces: keep one replica up through
 # node drains and reboots.
 admissionController:
   replicas: 2
@@ -11,23 +12,14 @@ backgroundController:
   enabled: false
 cleanupController:
   enabled: false
-reportsController:
-  enabled: false
 features:
-  admissionReports:
-    enabled: false
-  aggregateReports:
-    enabled: false
-  policyReports:
-    enabled: false
   validatingAdmissionPolicyReports:
-    enabled: false
-  backgroundScan:
     enabled: false
   # ImageValidatingPolicies are enforced by Kyverno's own webhook
   generateValidatingAdmissionPolicy:
     enabled: false
-  # zot allows anonymous reads; skip the cloud helpers probing metadata endpoints
+  # zot allows anonymous reads and public registries need no login; skip the cloud
+  # helpers probing metadata endpoints
   registryClient:
     credentialHelpers:
       - default

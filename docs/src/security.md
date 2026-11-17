@@ -158,6 +158,36 @@ spec:
               protocol: TCP
 ```
 
+## Image signatures (Kyverno)
+
+Kyverno (`infrastructure/controllers/kyverno`) runs two ImageValidatingPolicies:
+
+- **`chains-signed-images`** (`infrastructure/configs/tekton/image-policy.yaml`), enforced: images from our
+  registry need a Tekton Chains signature and provenance. See [CI/CD](cicd.md#build-sign-release).
+- **`upstream-signed-images`** (`infrastructure/configs/kyverno/upstream-image-policy.yaml`), audit-only
+  (`failurePolicy: Ignore`, never blocks): images of projects that sign with cosign keyless must carry a
+  signature from that project's CI identity: Flux, Flux Operator, tofu-controller, CloudNativePG, Piraeus,
+  Cilium, everything from `registry.k8s.io` (`krel-trust@k8s-releng-prod`), OpenTofu, Home Assistant,
+  cloudflare-ddns, Kyverno (signatures in `ghcr.io/kyverno/signatures`). The list only holds identities
+  verified against the running digests (Nov 2026). Other images aren't checked.
+
+Results: `kubectl get policyreports -A` (one per namespace; `FAIL` rows name the pod and the message). The
+reports controller rescans running pods hourly, so a report also covers pods admitted before a policy
+existed, plus kube-system and kyverno, which never go through the webhook. Keyless checks are offline
+against Sigstore's public TUF root, so Kyverno needs `world:443` egress (registries and their CDNs, TUF).
+
+To add a project: verify its running digest first, then add a glob, an attestor and a validation:
+
+```bash
+cosign verify --certificate-identity-regexp '^https://github.com/<org>/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com <image>@<digest>
+```
+
+Not covered: cert-manager and Tekton sign with keys (their legacy `.sig`s didn't verify against the published
+`cert-manager-pubkey-2021-09-20.pem` / `tektoncd/chains/tekton.pub`), Hubble UI and most app images are
+unsigned. Once a project has a clean report for a while, its validation could move to an enforced policy
+(scoped like `chains-signed-images`, without the infrastructure namespaces).
+
 ## Future improvements
 
 - **Runtime security with [Tetragon](https://tetragon.io):** eBPF observability (and optional
