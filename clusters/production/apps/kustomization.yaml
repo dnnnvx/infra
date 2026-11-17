@@ -17,5 +17,4 @@ resources:
   - tuwunel.yaml
   - tekton-matrix-bot.yaml
   - radicle.yaml
-  # - romm.yaml
   # - llama-cpp.yaml
