@@ -1,0 +1,7 @@
+# Pre-created by tofu (bootstrap secret), adopted here for its labels (tofu ignores label drift)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ddns
+  labels:
+    pod-security.kubernetes.io/enforce: restricted

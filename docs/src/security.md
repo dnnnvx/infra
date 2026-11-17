@@ -77,22 +77,24 @@ spec:
 
 ## Pod Security Admission (PSA)
 
-All namespaces are labeled with PSA `warn` and `audit` mode to surface violations without blocking workloads. Once all images are confirmed compliant, enforce mode can be enabled per namespace.
+Talos enforces `baseline` cluster-wide. Namespaces then pick a level with labels:
 
-```yaml
-metadata:
-  labels:
-    pod-security.kubernetes.io/warn: restricted
-    pod-security.kubernetes.io/audit: restricted
-```
+| Level | Namespaces |
+|-------|------------|
+| `enforce: restricted` | bookorbit, casasulgorgo, ddns, gatus, marcods, matrix, norish, radicle, silverbullet, tekton-matrix-bot (+ tekton-pipelines, tekton-pipelines-resolvers from upstream) |
+| `warn` + `audit: restricted` (not compliant yet, or has hook/runner pods we can't vouch for) | adguard-home (root), webauth/pocket-id (root, `su-exec` caps), zot (root), cert-manager, cnpg-system, kyverno, flux-system |
+| `enforce: privileged` | home-assistant (`hostNetwork`, matter-server), piraeus-datastore, tekton-ci (BuildKit; fenced by its ValidatingAdmissionPolicy) |
 
-Apps that require root (home-assistant uses `hostNetwork`, pocket-id uses `su-exec`) use `privileged` or `baseline` enforce levels set explicitly on their namespace.
-
-To move a namespace from warn to enforce, change `warn` → `enforce` after confirming no PSA warnings appear in events:
+New apps should start at `enforce: restricted`. To check whether a namespace can move up, ask kube-apiserver which
+running pods would violate it (server-side dry run, changes nothing):
 
 ```bash
-kubectl get events -n <namespace> --field-selector reason=FailedCreate
+kubectl label --dry-run=server --overwrite ns <namespace> pod-security.kubernetes.io/enforce=restricted
 ```
+
+No `Warning:` lines means it's safe to set `enforce: restricted` in the namespace manifest. Only running pods are
+checked: Jobs/hook pods that come and go (Helm hooks, tofu-controller runners) aren't, which is why infrastructure
+namespaces stay at `warn`.
 
 ## Secrets
 

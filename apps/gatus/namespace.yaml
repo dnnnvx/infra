@@ -3,6 +3,5 @@ kind: Namespace
 metadata:
   name: gatus
   labels:
-    pod-security.kubernetes.io/warn: restricted
-    pod-security.kubernetes.io/audit: restricted
     app.kubernetes.io/part-of: gatus
+    pod-security.kubernetes.io/enforce: restricted

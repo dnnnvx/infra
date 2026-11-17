@@ -4,3 +4,4 @@ metadata:
   name: silverbullet
   labels:
     app.kubernetes.io/part-of: silverbullet
+    pod-security.kubernetes.io/enforce: restricted

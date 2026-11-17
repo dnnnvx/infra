@@ -3,6 +3,5 @@ kind: Namespace
 metadata:
   name: matrix
   labels:
-    pod-security.kubernetes.io/warn: restricted
-    pod-security.kubernetes.io/audit: restricted
     app.kubernetes.io/part-of: matrix
+    pod-security.kubernetes.io/enforce: restricted
