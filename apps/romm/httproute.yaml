@@ -9,6 +9,7 @@ metadata:
       name: RomM
       conditions:
         - "[STATUS] < 500"
+    gateway.casasulgorgo.net/public: "true"
 spec:
   parentRefs:
     - name: homelab

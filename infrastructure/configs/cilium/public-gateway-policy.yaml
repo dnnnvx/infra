@@ -1,0 +1,52 @@
+# The homelab Gateway's port 443 is forwarded from the internet and its listeners take any hostname,
+# so every route attached to it is public (by SNI/Host, even without a DNS record). Guard against
+# exposing something by mistake, e.g. a LAN-only route copied with the wrong parentRef:
+#  - a route on homelab must opt in with the annotation gateway.casasulgorgo.net/public: "true"
+#  - it must name its hostnames (no catch-all), and none may be a LAN-only name
+# LAN-only routes belong on homelab-local (docs/src/networking.md).
+# Native admission (runs in kube-apiserver), so it doesn't depend on any controller being up.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: public-gateway-routes
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["gateway.networking.k8s.io"]
+        apiVersions: ["*"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["httproutes", "grpcroutes", "tlsroutes"]
+  # Only routes attached to homelab (parentRef namespace defaults to the route's own, kind to Gateway)
+  matchConditions:
+    - name: on-public-gateway
+      expression: >-
+        has(object.spec.parentRefs) &&
+        object.spec.parentRefs.exists(p, p.name == "homelab" &&
+        (has(p.kind) ? p.kind : "Gateway") == "Gateway" &&
+        (has(p.namespace) ? p.namespace : object.metadata.namespace) == "kube-system")
+  variables:
+    - name: hostnames
+      expression: "has(object.spec.hostnames) ? object.spec.hostnames : []"
+  validations:
+    - expression: >-
+        has(object.metadata.annotations) &&
+        "gateway.casasulgorgo.net/public" in object.metadata.annotations &&
+        object.metadata.annotations["gateway.casasulgorgo.net/public"] == "true"
+      message: >-
+        routes on the homelab Gateway are reachable from the internet: set the annotation
+        gateway.casasulgorgo.net/public: "true" to confirm, or attach LAN-only routes to homelab-local
+    - expression: size(variables.hostnames) > 0
+      message: routes on the homelab Gateway must list their hostnames (a route without hostnames catches every Host)
+    - expression: >-
+        variables.hostnames.all(h, !h.endsWith(".local.casasulgorgo.net") &&
+        !h.endsWith(".home") && !h.endsWith(".local") && !h.endsWith(".lan"))
+      message: LAN-only hostnames (*.local.casasulgorgo.net, *.home, *.local, *.lan) belong on the homelab-local Gateway
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: public-gateway-routes
+spec:
+  policyName: public-gateway-routes
+  validationActions: [Deny]

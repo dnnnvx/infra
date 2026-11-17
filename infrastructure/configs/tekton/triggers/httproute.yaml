@@ -4,6 +4,8 @@ kind: HTTPRoute
 metadata:
   name: eventlistener-tangled
   namespace: tekton-ci
+  annotations:
+    gateway.casasulgorgo.net/public: "true"
 spec:
   parentRefs:
     - name: homelab

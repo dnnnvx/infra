@@ -28,6 +28,7 @@ metadata:
       name: Flux Operator
       group: infrastructure
       path: ""
+    gateway.casasulgorgo.net/public: "true"
 spec:
   parentRefs:
     - name: homelab

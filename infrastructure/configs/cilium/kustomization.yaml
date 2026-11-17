@@ -6,4 +6,5 @@ resources:
   - l2-policy.yaml
   - gateway.yaml
   - gateway-local.yaml
+  - public-gateway-policy.yaml
   - hubble-httproute.yaml

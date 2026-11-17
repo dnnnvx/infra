@@ -24,6 +24,7 @@ metadata:
     gatus.home-operations.com/enabled: "true"
     gatus.home-operations.com/endpoint: |
       name: Home Assistant
+    gateway.casasulgorgo.net/public: "true"
 spec:
   parentRefs:
     - name: homelab

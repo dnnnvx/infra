@@ -27,6 +27,11 @@ Each IP is a DHCP reservation on the router:
 
 Don't attach LAN-only routes to the `homelab` Gateway: its port 443 is forwarded from the internet,
 so any route on it is publicly reachable by SNI/Host even without a DNS record.
+The ValidatingAdmissionPolicy `public-gateway-routes` (`infrastructure/configs/cilium/public-gateway-policy.yaml`)
+enforces it: a route (HTTP/GRPC/TLS) attached to `homelab` must carry the annotation
+`gateway.casasulgorgo.net/public: "true"`, list its hostnames, and use none of `*.local.casasulgorgo.net`,
+`*.home`, `*.local`, `*.lan`. Otherwise kube-apiserver rejects it (Flux shows the message on the Kustomization).
+It runs in kube-apiserver, so it doesn't depend on Kyverno.
 
 ## External (Internet)
 

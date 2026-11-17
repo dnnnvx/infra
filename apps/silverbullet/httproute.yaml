@@ -8,6 +8,7 @@ metadata:
     gatus.home-operations.com/endpoint: |
       name: Silverbullet
       path: /.instance
+    gateway.casasulgorgo.net/public: "true"
 spec:
   parentRefs:
     - name: homelab
