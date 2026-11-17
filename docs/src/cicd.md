@@ -45,9 +45,10 @@ so they don't clutter the real repositories.
 
 | Path | What |
 |------|------|
-| `infrastructure/controllers/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Chains, Dashboard (read-only, `tekton.local.casasulgorgo.net`): upstream release manifests, versions bumped by Renovate. `chains/` (release + config), `secrets-chains.yaml` (SOPS signing key, applied with the controller that mounts it), `patch-events.yaml` (CloudEvents sink) |
+| `infrastructure/controllers/tekton/` | Tekton Pipelines, Triggers (+ core interceptors), Pruner, Chains, Dashboard (`tekton.local.casasulgorgo.net`, behind oauth2-proxy + pocket-id): upstream release manifests, versions bumped by Renovate. `chains/` (release + config), `secrets-chains.yaml` (SOPS signing key, applied with the controller that mounts it), `patch-events.yaml` (CloudEvents sink) |
 | `infrastructure/controllers/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
-| `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, RBAC, push credentials, Chains public key (`chains.pub` → ConfigMap `chains-public-key`), webhook HMAC secret, dashboard HTTPRoute |
+| `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, RBAC, push credentials, Chains public key (`chains.pub` → ConfigMap `chains-public-key` and the Kyverno policy `image-policy.yaml`), webhook HMAC secret, dashboard HTTPRoute |
+| `infrastructure/controllers/kyverno/` | Kyverno (admission controller only), enforcing `image-policy.yaml` |
 | `infrastructure/configs/tekton/tasks/` | one file per Task (`git-clone`, `buildkit`, `sbom`, `scan-image`, `release-image`, `flux-sync`, `validate-manifests`, `lint-tofu`, `checkov`, `trufflehog`) |
 | `infrastructure/configs/tekton/pipelines/` | one file per Pipeline (`build-image`, `release-image`, `validate-infra`) |
 | `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`tangled`: public webhooks; `tekton-events`: internal CloudEvents), the `tangled` ClusterInterceptor, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
@@ -103,8 +104,24 @@ cosign verify-attestation --type slsaprovenance1 --key infrastructure/configs/te
 oras discover registry.local.casasulgorgo.net/casasulgorgo/web:production   # signature, provenance, SBOM
 ```
 
-Not done yet (Konflux has them): an admission policy that rejects unsigned images (Kyverno or Conforma), and
-policy checks on the provenance's content (e.g. "built by build-image from a main commit").
+**Admission check.** release-image guards the tags, but anyone able to push to zot could still move `production` to an
+unsigned image and Flux would deploy it. So Kyverno (`infrastructure/controllers/kyverno`, admission controller only)
+enforces the ImageValidatingPolicy `chains-signed-images` (`infrastructure/configs/tekton/image-policy.yaml`): in every
+namespace except the infrastructure ones listed in the policy (flux-system, piraeus-datastore, cnpg-system,
+cert-manager, zot, tekton-*, kube-system, kyverno; add new ones there), every `registry.local.casasulgorgo.net/*` image needs a digest, a
+Chains signature and a Chains-signed SLSA provenance, checked against `chains.pub` (injected by a kustomize replacement,
+so the key lives in one file) without Rekor. The image reference is the selector, so a new CI app is covered without
+opting in. Autogen rules cover Deployments etc., so Flux's apply fails instead of a ReplicaSet silently not creating
+pods. Other images aren't checked. The webhook is `failurePolicy: Fail`, so Kyverno runs 2 replicas with a PDB; if both
+are down, app pods can't be (re)created until one is back, while the platform keeps working.
+sigstore policy-controller isn't used because it can't verify key-signed sigstore bundles (only keyless ones), which is
+what Chains writes.
+
+To see a rejection: `kubectl -n <project> get events --field-selector reason=PolicyViolation`, or the Flux
+Kustomization `app-<project>`'s status (`admission webhook ... denied the request`).
+
+Not done yet (Konflux has them): policy checks on the provenance's content (e.g. "built by build-image from a main
+commit").
 
 ## Flux sync (deploy task)
 
@@ -128,7 +145,8 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
    Role's `resourceNames`, and a `<name>,<dockerfile>,<context>` entry in the Trigger's space-separated `images` binding
    (`dockerfile` relative to `context`, `context` relative to the repo root).
 2. In `apps/<project>/kustomization.yaml`, use a kustomize `images:` entry per image with a `digest:` marker
-   `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's).
+   `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's). Kyverno then only admits
+   Chains-signed digests of it (nothing to configure).
 3. On Tangled: repo **Settings → Hooks** → payload URL `https://ci.casasulgorgo.net/`, event `push`,
    secret = `tangled-webhook` value (`just edit-secret infrastructure/configs/tekton/secrets.yaml`).
 

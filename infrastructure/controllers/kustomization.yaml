@@ -11,3 +11,4 @@ resources:
   - tekton
   - zot
   - tofu-controller
+  - kyverno

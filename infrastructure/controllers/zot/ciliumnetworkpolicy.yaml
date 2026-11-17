@@ -14,7 +14,8 @@ spec:
             - port: "5000"
               protocol: TCP
     # In-cluster clients of registry.local.casasulgorgo.net keep their own identity through the Gateway's Envoy:
-    # containerd on the nodes, Tekton pushes, Chains attaches signatures, Flux scans tags, Gatus probes
+    # containerd on the nodes, Tekton pushes, Chains attaches signatures, Flux scans tags, Gatus probes,
+    # Kyverno verifies signatures at admission
     - fromEntities:
         - host
         - remote-node
@@ -31,6 +32,8 @@ spec:
             io.kubernetes.pod.namespace: flux-system
         - matchLabels:
             io.kubernetes.pod.namespace: gatus
+        - matchLabels:
+            io.kubernetes.pod.namespace: kyverno
       toPorts:
         - ports:
             - port: "5000"

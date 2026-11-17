@@ -8,6 +8,7 @@ resources:
   - limitrange.yaml
   - rbac.yaml
   - secrets.yaml
+  - image-policy.yaml
   - dashboard-httproute.yaml
   - dashboard-oauth2-proxy.yaml
   - dashboard-oauth2-proxy-secret.yaml
@@ -22,3 +23,15 @@ configMapGenerator:
       - cosign.pub=chains.pub
     options:
       disableNameSuffixHash: true
+replacements:
+  # Kyverno verifies deployed images against the same key (image-policy.yaml)
+  - source:
+      kind: ConfigMap
+      name: chains-public-key
+      fieldPath: data.[cosign.pub]
+    targets:
+      - select:
+          kind: ImageValidatingPolicy
+          name: chains-signed-images
+        fieldPaths:
+          - spec.attestors.[name=chains].cosign.key.data

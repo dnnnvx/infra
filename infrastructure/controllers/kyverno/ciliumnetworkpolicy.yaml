@@ -1,0 +1,47 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default
+  namespace: kyverno
+spec:
+  endpointSelector: {}
+  ingress:
+    # Admission webhook called by kube-apiserver (hostNetwork, so also host/remote-node)
+    - fromEntities:
+        - kube-apiserver
+        - host
+        - remote-node
+      toPorts:
+        - ports:
+            - port: "9443"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Watches policies, manages its webhook configurations; Helm hook jobs (kubectl)
+    - toEntities:
+        - kube-apiserver
+    # Signatures and provenance from zot via the LAN Gateway
+    - toEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # In-cluster clients keep their identity through the gw, which checks
+    # this egress policy against the backend too
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: zot
+      toPorts:
+        - ports:
+            - port: "5000"
+              protocol: TCP
