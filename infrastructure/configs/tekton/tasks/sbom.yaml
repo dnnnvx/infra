@@ -42,7 +42,7 @@ spec:
         mountPath: /sboms
   steps:
     - name: generate
-      image: anchore/syft:v1.57.1-debug
+      image: anchore/syft:v1.57.2-debug
       script: |
         #!/busybox/sh
         set -eu
@@ -54,7 +54,7 @@ spec:
           printf '%s=%s@sha256:%s ' "$name" "$repo" "$(sha256sum "/sboms/$name.spdx.json" | cut -d' ' -f1)" >> "$(results.sboms.path)"
         done
     - name: attach
-      image: ghcr.io/oras-project/oras:v1.3.6
+      image: ghcr.io/oras-project/oras:v1.4.0
       volumeMounts:
         - name: registry-auth
           mountPath: /docker-config
