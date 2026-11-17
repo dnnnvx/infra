@@ -1,5 +1,6 @@
 # Read-only. !ci and the CI alerts need the PipelineRuns, !tofu needs the one Terraform
-# and its stored plan. Approving a plan stays with a person running kubectl.
+# and its stored plan, the Kyverno alerts need the PolicyReports of every namespace.
+# Approving a plan stays with a person running kubectl.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -64,3 +65,26 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: tekton-matrix-bot-tofu
+---
+# Kyverno alerts: FAIL results from both Kyverno policies (written by Kyverno's reports controller)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tekton-matrix-bot-policyreports
+rules:
+  - apiGroups: ["wgpolicyk8s.io"]
+    resources: ["policyreports", "clusterpolicyreports"]
+    verbs: ["list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-matrix-bot-policyreports
+subjects:
+  - kind: ServiceAccount
+    name: tekton-matrix-bot
+    namespace: tekton-matrix-bot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-matrix-bot-policyreports
