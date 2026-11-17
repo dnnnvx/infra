@@ -120,8 +120,16 @@ what Chains writes.
 To see a rejection: `kubectl -n <project> get events --field-selector reason=PolicyViolation`, or the Flux
 Kustomization `app-<project>`'s status (`admission webhook ... denied the request`).
 
-Not done yet (Konflux has them): policy checks on the provenance's content (e.g. "built by build-image from a main
-commit").
+The same policy also checks what the provenance says, since Chains signs any PipelineRun in `tekton-ci`, hand-started
+ones included:
+
+- `pipelineRef` is `build-image`;
+- the `repo-url` param is one of our Tangled sources (allowlist of `<knot>/<owner DID>` in the policy: add a new knot
+  or identity there before its first build gets deployed);
+- the subject name is the repository the image is pulled from, so a signed image copied into another app's repository
+  is rejected (Kyverno already matches the subject digest).
+
+The branch isn't recorded in the provenance: only the Trigger's CEL filter (`refs/heads/main`) restricts builds to main.
 
 ## Flux sync (deploy task)
 
@@ -146,7 +154,8 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
    (`dockerfile` relative to `context`, `context` relative to the repo root).
 2. In `apps/<project>/kustomization.yaml`, use a kustomize `images:` entry per image with a `digest:` marker
    `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's). Kyverno then only admits
-   Chains-signed digests of it (nothing to configure).
+   Chains-signed digests of it. If the repo lives on a new knot or under another Tangled identity, add it to the
+   `repo-url` allowlist in `infrastructure/configs/tekton/image-policy.yaml` first.
 3. On Tangled: repo **Settings → Hooks** → payload URL `https://ci.casasulgorgo.net/`, event `push`,
    secret = `tangled-webhook` value (`just edit-secret infrastructure/configs/tekton/secrets.yaml`).
 

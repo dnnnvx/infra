@@ -68,3 +68,23 @@ spec:
       message: image is not signed by Tekton Chains
     - expression: variables.ours.all(i, verifyAttestationSignatures(i, attestations.slsa, [attestors.chains]) > 0)
       message: image has no SLSA provenance signed by Tekton Chains
+    # What the (now verified) provenance says. Chains signs any PipelineRun in tekton-ci, including
+    # ones started by hand, so pin how and from where the image was built. The branch isn't in the
+    # provenance: only the Tangled Trigger's CEL filter (refs/heads/main) enforces that.
+    - expression: >-
+        variables.ours.all(i, extractPayload(i, attestations.slsa)
+        .predicate.buildDefinition.externalParameters.runSpec.pipelineRef.name == "build-image")
+      message: provenance says the image wasn't built by the build-image pipeline
+    # Allowed sources (the Trigger's repo-url = Tangled clone_url): <knot host>/<owner DID>[/<repo>].
+    # Add a new knot or identity here before its first build is deployed.
+    - expression: >-
+        variables.ours.all(i, extractPayload(i, attestations.slsa)
+        .predicate.buildDefinition.externalParameters.runSpec.params
+        .exists(p, p.name == "repo-url" && p.value.matches(r"^https://(knot1\.tangled\.sh/did:plc:qzac7ebdharodtvwlxb7wsof|tangled\.org/did:plc:fz72ds7ns4fx6npepwtfnzag)(/|$)")))
+      message: provenance says the image wasn't built from one of our Tangled repositories
+    # Kyverno already matches the subject digest; also require the subject name to be the repository the
+    # image is pulled from, so a signed image copied into another app's repository is rejected.
+    - expression: >-
+        variables.ours.all(i, extractPayload(i, attestations.slsa)
+        .subject.exists(s, i.startsWith(s.name + ":") || i.startsWith(s.name + "@")))
+      message: provenance was issued for a different image repository
