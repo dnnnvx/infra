@@ -9,8 +9,8 @@
 | `uptime.local.casasulgorgo.net`  | Gatus          |
 | `hubble.local.casasulgorgo.net`  | Hubble UI      |
 | `flux.local.casasulgorgo.net`    | Flux Operator  |
-| `nvr.local.casasulgorgo.net`     | LightNVR       |
-| `tekton.local.casasulgorgo.net`  | Tekton Dashboard (read-only) |
+| `tekton.local.casasulgorgo.net`  | Tekton Dashboard (pocket-id login) |
+| `registry.local.casasulgorgo.net` | zot (registry API + UI) |
 
 Internal services share the LAN-only Cilium Gateway `homelab-local` at `192.168.0.202` (HTTPS; HTTP redirects).
 The router doesn't forward anything to `.202`, so these routes can't be reached from the internet.
