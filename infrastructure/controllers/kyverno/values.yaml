@@ -8,6 +8,14 @@ admissionController:
   podDisruptionBudget:
     enabled: true
     minAvailable: 1
+# The background scan cosign-verifies every running image (like the admission controller, which
+# sits at ~300Mi): the chart's 128Mi limit OOMKills it within a minute of each start.
+reportsController:
+  resources:
+    requests:
+      memory: 256Mi
+    limits:
+      memory: 512Mi
 backgroundController:
   enabled: false
 cleanupController:
