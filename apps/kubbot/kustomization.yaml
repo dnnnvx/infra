@@ -5,7 +5,10 @@ resources:
   - rbac.yaml
   - ciliumnetworkpolicy.yaml
   - pvc.yaml
-  - deployment.yaml
+  # TODO: re-add once kubbot/bot is built and signed and the old store is copied into
+  # kubbot-data. Kyverno rejects the Deployment (even at 0 replicas) while the digest below
+  # doesn't exist, and that failed the whole apply, CI Trigger included.
+  # - deployment.yaml
   - secrets.yaml
   - ci.yaml
 images:
