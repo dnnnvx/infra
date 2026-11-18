@@ -1,5 +1,6 @@
 # Read-only. !ci and the CI alerts need the PipelineRuns, !tofu needs the one Terraform
-# and its stored plan, the Kyverno alerts need the PolicyReports of every namespace.
+# and its stored plan, the Kyverno alerts need the PolicyReports of every namespace, and it
+# lists and watches the pods of every namespace.
 # Approving a plan stays with a person running kubectl.
 apiVersion: v1
 kind: ServiceAccount
@@ -88,3 +89,26 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: tekton-matrix-bot-policyreports
+---
+# Pods of every namespace (list + watch only; no pods/log or exec outside tekton-ci)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tekton-matrix-bot-pods
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-matrix-bot-pods
+subjects:
+  - kind: ServiceAccount
+    name: tekton-matrix-bot
+    namespace: tekton-matrix-bot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-matrix-bot-pods
