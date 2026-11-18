@@ -1,23 +1,23 @@
 # Build → deploy wiring for this app (Tekton Trigger, Flux image automation, flux-sync RBAC).
-# Copied from apps/casasulgorgo/ci.yaml; its Flux Kustomization is clusters/production/apps/tekton-matrix-bot.yaml.
+# Copied from apps/casasulgorgo/ci.yaml; its Flux Kustomization is clusters/production/apps/kubbot.yaml.
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
-  name: tekton-matrix-bot-bot
+  name: kubbot-bot
   namespace: flux-system
 spec:
-  image: registry.local.casasulgorgo.net/tekton-matrix-bot/bot
+  image: registry.local.casasulgorgo.net/kubbot/bot
   interval: 5m
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
 metadata:
-  name: tekton-matrix-bot-bot
+  name: kubbot-bot
   namespace: flux-system
 spec:
   imageRepositoryRef:
-    name: tekton-matrix-bot-bot
+    name: kubbot-bot
   filterTags:
     pattern: '^production$'
   policy:
@@ -30,12 +30,12 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: flux-sync-tekton-matrix-bot
+  name: flux-sync-kubbot
   namespace: flux-system
 rules:
   - apiGroups: [image.toolkit.fluxcd.io]
     resources: [imagerepositories, imagepolicies]
-    resourceNames: [tekton-matrix-bot-bot]
+    resourceNames: [kubbot-bot]
     verbs: [get, patch]
   - apiGroups: [image.toolkit.fluxcd.io]
     resources: [imageupdateautomations]
@@ -43,7 +43,7 @@ rules:
     verbs: [get, patch]
   - apiGroups: [kustomize.toolkit.fluxcd.io]
     resources: [kustomizations]
-    resourceNames: [app-tekton-matrix-bot]
+    resourceNames: [app-kubbot]
     verbs: [get, patch]
   - apiGroups: [source.toolkit.fluxcd.io]
     resources: [gitrepositories]
@@ -53,7 +53,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: flux-sync-tekton-matrix-bot
+  name: flux-sync-kubbot
   namespace: flux-system
 subjects:
   - kind: ServiceAccount
@@ -62,12 +62,12 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: flux-sync-tekton-matrix-bot
+  name: flux-sync-kubbot
 ---
 apiVersion: triggers.tekton.dev/v1beta1
 kind: Trigger
 metadata:
-  name: tekton-matrix-bot
+  name: kubbot
   namespace: tekton-ci
   labels:
     ci.casasulgorgo.net/eventlistener: tangled
@@ -85,7 +85,7 @@ spec:
         - name: filter
           value: >-
             header.match('X-Tangled-Event', 'push') &&
-            body.repository.name == 'tekton-matrix-bot' &&
+            body.repository.name == 'kubbot' &&
             body.ref == 'refs/heads/main' &&
             body.after.matches('^[0-9a-f]{40}$') &&
             body.after != '0000000000000000000000000000000000000000'
@@ -95,12 +95,12 @@ spec:
               expression: "body.after + ' latest production'"
   bindings:
     - name: project
-      value: tekton-matrix-bot
+      value: kubbot
     # space-separated <name>,<dockerfile>,<context> per image (dockerfile relative to context)
     - name: images
       value: bot,Dockerfile,.
     - name: flux-kustomization
-      value: app-tekton-matrix-bot
+      value: app-kubbot
     - name: repo-url
       value: $(body.repository.clone_url)
     - name: revision

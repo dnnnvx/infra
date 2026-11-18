@@ -1,12 +1,12 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: tekton-matrix-bot
-  namespace: tekton-matrix-bot
+  name: kubbot
+  namespace: kubbot
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/name: tekton-matrix-bot
+      app.kubernetes.io/name: kubbot
   # no ingress: nothing calls the bot (it only syncs outwards), the clusterwide default-deny covers it
   egress:
     - toEndpoints:

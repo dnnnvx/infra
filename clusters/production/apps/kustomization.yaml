@@ -15,6 +15,6 @@ resources:
   - casasulgorgo.yaml
   - marcods.yaml
   - tuwunel.yaml
-  - tekton-matrix-bot.yaml
+  - kubbot.yaml
   - radicle.yaml
   # - llama-cpp.yaml

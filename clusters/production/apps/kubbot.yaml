@@ -1,7 +1,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: app-tekton-matrix-bot
+  name: app-kubbot
   namespace: flux-system
 spec:
   dependsOn:
@@ -12,9 +12,10 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./apps/tekton-matrix-bot
+  path: ./apps/kubbot
+  # No deletionPolicy: Orphan (unlike the other apps): removing this Kustomization deletes the
+  # bot, including its PVC (the Matrix crypto store, re-created by logging in again).
   prune: true
-  deletionPolicy: Orphan
   wait: true
   decryption:
     provider: sops

@@ -24,8 +24,8 @@ spec:
               protocol: TCP
     - fromEndpoints:
         - matchLabels:
-            io.kubernetes.pod.namespace: tekton-matrix-bot
-            app.kubernetes.io/name: tekton-matrix-bot
+            io.kubernetes.pod.namespace: kubbot
+            app.kubernetes.io/name: kubbot
       toPorts:
         - ports:
             - port: "8008"

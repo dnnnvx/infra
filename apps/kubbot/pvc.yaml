@@ -3,8 +3,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: tekton-matrix-bot-data
-  namespace: tekton-matrix-bot
+  name: kubbot-data
+  namespace: kubbot
 spec:
   accessModes:
     - ReadWriteOnce

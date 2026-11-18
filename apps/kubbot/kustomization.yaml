@@ -10,7 +10,7 @@ resources:
   - ci.yaml
 images:
   # The digest is a placeholder until the first build; Flux rewrites it.
-  - name: tekton-matrix-bot
-    newName: registry.local.casasulgorgo.net/tekton-matrix-bot/bot
+  - name: kubbot
+    newName: registry.local.casasulgorgo.net/kubbot/bot
     newTag: production
-    digest: sha256:449b7c0f4bc325e8b2bc31884c2db1500ed58218252a1b87f15433edcdc0c312 # {"$imagepolicy": "flux-system:tekton-matrix-bot-bot:digest"}
+    digest: sha256:449b7c0f4bc325e8b2bc31884c2db1500ed58218252a1b87f15433edcdc0c312 # {"$imagepolicy": "flux-system:kubbot:digest"}

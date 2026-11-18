@@ -81,7 +81,7 @@ Talos enforces `baseline` cluster-wide. Namespaces then pick a level with labels
 
 | Level | Namespaces |
 |-------|------------|
-| `enforce: restricted` | bookorbit, casasulgorgo, ddns, gatus, marcods, matrix, norish, radicle, silverbullet, tekton-matrix-bot (+ tekton-pipelines, tekton-pipelines-resolvers from upstream) |
+| `enforce: restricted` | bookorbit, casasulgorgo, ddns, gatus, kubbot, marcods, matrix, norish, radicle, silverbullet (+ tekton-pipelines, tekton-pipelines-resolvers from upstream) |
 | `warn` + `audit: restricted` (not compliant yet, or has hook/runner pods we can't vouch for) | adguard-home (root), webauth/pocket-id (root, `su-exec` caps), zot (root), cert-manager, cnpg-system, kyverno, flux-system |
 | `enforce: privileged` | home-assistant (`hostNetwork`, matter-server), piraeus-datastore, tekton-ci (BuildKit; fenced by its ValidatingAdmissionPolicy) |
 
