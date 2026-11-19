@@ -32,7 +32,7 @@ spec:
             capabilities:
               drop: ["ALL"]
               add: ["NET_BIND_SERVICE"]
-          image: adguard/adguardhome:v0.107.80
+          image: adguard/adguardhome:v1.0.0
           args:
             - --config
             - /opt/adguardhome/conf/AdGuardHome.yaml
