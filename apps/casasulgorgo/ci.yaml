@@ -2,7 +2,7 @@
 # Its Flux Kustomization is clusters/production/apps/casasulgorgo.yaml. For a new CI-built app, copy both and replace:
 #   casasulgorgo → project · web (Trigger filter) → Tangled repository name · web (image) → image name.
 # Per extra image: another ImageRepository/ImagePolicy pair, its name in the Role's resourceNames,
-# a `<name>,<dockerfile>,<context>` entry (space-separated) in the Trigger's `images` binding
+# a `<name>,<attr>,<flakedir>` entry (space-separated) in the Trigger's `images` binding
 # and an `images:` entry with a `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` marker in kustomization.yaml.
 ---
 # Lives in flux-system: ImageUpdateAutomation only sees policies in its own namespace.
@@ -107,9 +107,12 @@ spec:
   bindings:
     - name: project
       value: casasulgorgo
-    # space-separated <name>,<dockerfile>,<context> per image (dockerfile relative to context)
+    # Flake + nix2container (tasks/nix-build.yaml): space-separated <name>,<attr>,<flakedir> per image.
+    # For a Dockerfile repo drop `builder` and use <name>,<dockerfile>,<context> (dockerfile relative to context).
+    - name: builder
+      value: nix-build
     - name: images
-      value: web,Dockerfile,.
+      value: web,image,.
     - name: flux-kustomization
       value: app-casasulgorgo
     - name: repo-url

@@ -29,7 +29,7 @@ spec:
               protocol: TCP
             - port: "8080"
               protocol: TCP
-    # BuildKit, syft, grype, oras, cosign, crane → zot via the LAN Gateway (registry.local.casasulgorgo.net)
+    # BuildKit, skopeo (nix-build), syft, grype, oras, cosign, crane → zot via the LAN Gateway (registry.local.casasulgorgo.net)
     - toEntities:
         - ingress
       toPorts:
@@ -46,8 +46,9 @@ spec:
             - port: "5000"
               protocol: TCP
     # git clone over HTTPS, base images + Dockerfile frontend from public
-    # registries. Public internet only: builds run arbitrary Dockerfile RUN
-    # steps, so the LAN (router, nodes, other devices) stays off-limits.
+    # registries, Nix (cache.nixos.org, flake inputs from GitHub, npm/crates
+    # fetchers). Public internet only: builds run arbitrary Dockerfile RUN
+    # steps and derivations, so the LAN (router, nodes, other devices) stays off-limits.
     - toCIDRSet:
         - cidr: 0.0.0.0/0
           except:

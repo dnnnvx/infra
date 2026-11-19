@@ -89,8 +89,8 @@ release run with the build's `registry`, `project`, `tags`, `flux-kustomization`
 
 The event isn't authenticated. That's fine: release-image only promotes digests signed by Chains, i.e. images that
 a successful build-image run produced. The worst a forged event can do is re-release such an image, and even that
-can't roll back: buildkit stamps every image with the label `ci.casasulgorgo.net/commit-timestamp` (committer date
-from git-clone), and release-image leaves a tag alone when its current image has a later timestamp. Images without
+can't roll back: every image carries the label `ci.casasulgorgo.net/commit-timestamp` (committer date: buildkit
+stamps it from git-clone, a flake sets it itself from `self.lastModified`), and release-image leaves a tag alone when its current image has a later timestamp. Images without
 the label (built before it existed) are never released. Tekton does replay `successful` events for old, finished
 runs (seen on 2026-10-27: yesterday's casasulgorgo build re-released, `production` went back a version).
 
@@ -137,7 +137,7 @@ After the release, the optional `deploy` task (`flux-sync`, ServiceAccount `flux
 it reconciles the ImageRepository, waits until the ImagePolicy resolves the pushed digest, runs
 `ImageUpdateAutomation/apps` (the bot commit), then reconciles `app-<app>` with its source and waits for
 the rollout. A failed rollout fails the release PipelineRun. Names follow a convention: ImageRepository/ImagePolicy `<project>-<image>` and Kustomization `app-<project>`.
-An app may have several images: the `buildkit` task builds them one after the other and returns a
+An app may have several images: the build task builds them one after the other and returns a
 `name=digest` list, and `flux-sync` waits for every policy before the single bot commit.
 A build started without `flux-kustomization` is released without the task.
 
@@ -208,10 +208,28 @@ registry (UI included) is LAN-only: it isn't exposed on the public Gateway at al
 the `tekton` user. Laptops on the LAN pull from `registry.local.casasulgorgo.net` directly; for
 anything else, log in with an API key created in the UI.
 
+## Builders
+
+`build-image` resolves its build Task by name from the `builder` param (cluster resolver), so the pipeline
+name that Kyverno and `trigger-release` pin stays the same. Both Tasks take the same params and return the
+same `digests`/`IMAGES` results; the Trigger picks one:
+
+| `builder` | `images` entry | How |
+|---|---|---|
+| `buildkit` (default) | `name,dockerfile,context` | rootless BuildKit, registry cache under `cache/<project>/<image>:buildcache` |
+| `nix-build` | `name,attr,flakedir` | `nix flake check`, then `nix run <flake>#<attr>.copyTo` (nix2container → skopeo) |
+
+`nix-build` runs `nixos/nix` single-user and non-root: a first step copies the image's `/nix` into an
+emptyDir owned by uid 1000, the build step mounts it as `/nix`. `sandbox = false` (the pod is the sandbox), so
+no user namespaces, RuntimeDefault seccomp, no capabilities. The flake must expose
+`packages.x86_64-linux.<attr>` as a nix2container image with the `commit-timestamp` label (see casasulgorgo's
+`flake.nix`). There's no cache for the repo's own derivations yet (nixpkgs comes from cache.nixos.org), so every
+build recompiles the app. Scans of Nix images see no package database: syft/grype output is close to empty.
+
 ## Build isolation (`tekton-ci`)
 
 Rootless BuildKit needs Unconfined seccomp/AppArmor, so the namespace runs at PodSecurity
-`privileged`. What fences it in again:
+`privileged` until every repo builds with `nix-build`. What fences it in again:
 
 - **`ValidatingAdmissionPolicy` `tekton-ci-pod-restrictions`**: no hostPath, host namespaces,
   hostPorts, privileged containers or added capabilities for anyone. Unconfined profiles

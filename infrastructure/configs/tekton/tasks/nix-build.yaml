@@ -1,0 +1,134 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: nix-build
+  namespace: tekton-ci
+spec:
+  description: >-
+    Builds each requested image from the repository's flake (nix2container) and pushes it with
+    skopeo. Unlike buildkit it needs no user namespaces: Nix runs single-user, unsandboxed
+    (the pod is the sandbox), non-root and under RuntimeDefault seccomp. Same params and
+    results as buildkit, so build-image can pick either.
+  params:
+    - name: registry
+      type: string
+      description: Registry host[:port] to push to, e.g. registry.local.casasulgorgo.net.
+    - name: project
+      type: string
+      description: Registry namespace; images are <registry>/<project>/<name>.
+    - name: images
+      type: string
+      description: >-
+        Space-separated "name,attr,flakedir" entries: attr is a nix2container image under
+        packages.<system> (e.g. image), flakedir the flake's directory relative to the repository
+        root (usually ".").
+    - name: tags
+      type: string
+      description: Space-separated tags to push (e.g. "<sha> latest production").
+    - name: commit-timestamp
+      type: string
+      default: ""
+      description: >-
+        Unused, kept for parity with buildkit. The flake sets the label
+        ci.casasulgorgo.net/commit-timestamp itself from self.lastModified (the commit date);
+        release-image refuses to move tags to an image without it.
+    - name: subdirectory
+      type: string
+      default: source
+      description: Where git-clone put the repository inside the source workspace.
+  workspaces:
+    - name: source
+      readOnly: true
+  results:
+    - name: digests
+      description: Space-separated "name=sha256:..." for every pushed image.
+    - name: IMAGES
+      description: >-
+        Comma-separated <image>@<digest> of every pushed image. Type hint for Tekton Chains,
+        which signs these images and makes them the subjects of the run's SLSA provenance.
+  volumes:
+    # A writable copy of the image's /nix, owned by the step user: single-user Nix needs to own
+    # its store, and nixos/nix ships it root-owned. Swap for a PVC/Attic to cache builds.
+    - name: nix
+      emptyDir: {}
+    - name: registry-auth
+      secret:
+        secretName: registry-push
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+  stepTemplate:
+    image: nixos/nix:2.35.6
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
+      seccompProfile:
+        type: RuntimeDefault
+  steps:
+    - name: seed-store
+      volumeMounts:
+        - name: nix
+          mountPath: /nix-rw
+      script: |
+        #!/bin/sh
+        set -eu
+        cp -a /nix/. /nix-rw/
+    - name: build-and-push
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)
+      env:
+        - name: HOME
+          value: /tmp
+        - name: TMPDIR
+          value: /tmp
+        - name: NIX_CONFIG
+          value: |
+            experimental-features = nix-command flakes
+            sandbox = false
+            build-users-group =
+            max-jobs = 2
+            cores = 2
+            accept-flake-config = false
+        - name: REGISTRY_AUTH_FILE
+          value: /docker-config/config.json
+      # Same budget as buildkit: CPU stays at 2 of the NUCs' 4 cores
+      computeResources:
+        requests:
+          cpu: "1"
+          memory: 3Gi
+        limits:
+          cpu: "2"
+          memory: 3Gi
+      volumeMounts:
+        - name: nix
+          mountPath: /nix
+        - name: registry-auth
+          mountPath: /docker-config
+          readOnly: true
+      script: |
+        #!/bin/sh
+        set -eu
+        # Avoid dollar-brace syntax here: Flux post-build substitution would eat it
+        root="$(pwd)"
+        : > "$(results.digests.path)"
+        : > "$(results.IMAGES.path)"
+        for entry in $(params.images); do
+          name="$(echo "$entry" | cut -d, -f1)"
+          attr="$(echo "$entry" | cut -d, -f2)"
+          dir="$(echo "$entry" | cut -d, -f3)"
+          image="$(params.registry)/$(params.project)/$name"
+          # git+file (not path:) so self.lastModified is the commit date; git-clone is shallow
+          flake="git+file://$root?shallow=1"
+          [ "$dir" != "." ] && flake="$flake&dir=$dir"
+          nix flake check --print-build-logs "$flake"
+          digest=""
+          for tag in $(params.tags); do
+            nix run --print-build-logs "$flake#$attr.copyTo" -- \
+              --digestfile /tmp/digest "docker://$image:$tag"
+            digest="$(cat /tmp/digest)"
+          done
+          printf '%s=%s ' "$name" "$digest" >> "$(results.digests.path)"
+          [ -s "$(results.IMAGES.path)" ] && printf ',' >> "$(results.IMAGES.path)"
+          printf '%s@%s' "$image" "$digest" >> "$(results.IMAGES.path)"
+          echo "Pushed $image ($(params.tags)) @ $digest"
+        done

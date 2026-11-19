@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - git-clone.yaml
   - buildkit.yaml
+  - nix-build.yaml
   - flux-sync.yaml
   - sbom.yaml
   - scan-image.yaml

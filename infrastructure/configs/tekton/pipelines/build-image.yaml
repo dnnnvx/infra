@@ -19,7 +19,15 @@ spec:
       type: string
     - name: images
       type: string
-      description: Space-separated "name,dockerfile,context" entries (see the buildkit task).
+      description: >-
+        Space-separated entries in the builder's format: "name,dockerfile,context" for buildkit,
+        "name,attr,flakedir" for nix-build.
+    - name: builder
+      type: string
+      default: buildkit
+      description: >-
+        Build Task in tekton-ci, resolved by name: buildkit (Dockerfile) or nix-build (flake +
+        nix2container). Both take the same params and return the same results.
     # The next two are only read by the release trigger (from this run's spec)
     - name: tags
       type: string
@@ -57,8 +65,17 @@ spec:
     - name: build
       runAfter:
         - clone
+      # Cluster resolver so the Task name can be a param; the pipeline (and so the name Kyverno
+      # and trigger-release pin) stays build-image whichever builder runs
       taskRef:
-        name: buildkit
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: $(params.builder)
+          - name: namespace
+            value: tekton-ci
       params:
         - name: registry
           value: $(params.registry)

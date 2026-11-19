@@ -18,6 +18,8 @@ spec:
     - name: tags
     - name: flux-kustomization
       default: ""
+    - name: builder
+      default: buildkit
   resourcetemplates:
     - apiVersion: tekton.dev/v1
       kind: PipelineRun
@@ -43,6 +45,8 @@ spec:
             value: $(tt.params.tags)
           - name: flux-kustomization
             value: $(tt.params.flux-kustomization)
+          - name: builder
+            value: $(tt.params.builder)
         taskRunTemplate:
           serviceAccountName: pipeline-runner
           podTemplate:
