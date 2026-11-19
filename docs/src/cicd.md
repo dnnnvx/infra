@@ -10,9 +10,8 @@ Pushes to this repository run a separate, read-only validation pipeline
 ```
 git push main (Tangled) ──signed webhook──▶ ci.casasulgorgo.net ─▶ EventListener "tangled" (tekton-ci)
     interceptors: tangled (HMAC check) ─▶ cel (filter + tags)
-    └▶ PipelineRun build-image: clone ─▶ build (buildkit | nix-build) ─┬▶ sbom (syft + oras attach)
-                                          │ push :<sha>                ├▶ scan (grype on the image)
-                                          │                            └▶ scan-source (grype on lockfiles + Nix closure)
+    └▶ PipelineRun build-image: clone ─▶ build (buildkit | nix-build) ─┬▶ scan (grype on the image)
+                                          │ push :<sha>                └▶ scan-source (grype on lockfiles) ─▶ sbom (oras attach)
                                           ▼
                   zot (registry.local.casasulgorgo.net, LAN Gateway, public TLS)
                                           ▲ image signature + SLSA v1 provenance (OCI referrers)
@@ -62,12 +61,15 @@ so they don't clutter the real repositories.
 ## Build, sign, release
 
 **build-image** (started by the app's Trigger) clones, builds and pushes each image under its commit tag only,
-then runs two tasks in parallel:
+then:
 
-- **sbom**: syft writes an SPDX SBOM per image and oras attaches it to the image as an OCI referrer
-  (`application/spdx+json`). Its blob digest is the `sboms` result.
 - **scan**: grype scans the image and fails the run on vulnerabilities of severity `high` or worse that have a
   fix (`fail-on` param, `--only-fixed`). Unfixable CVEs don't block a release.
+- **scan-source** (in parallel with scan): the same check on the repository's lockfiles, see
+  [Vulnerability scans](#vulnerability-scans).
+- **sbom** (after scan-source): oras attaches SBOMs to each image as OCI referrers: the image's own
+  (`application/spdx+json` from syft, or for nix-build the closure's `application/vnd.cyclonedx+json` from
+  sbomnix) and `source-lockfiles.cdx.json` from scan-source. The image SBOM's blob digest is the `sboms` result.
 
 The pipeline has no signing key and never moves `latest`/`production`.
 
@@ -233,10 +235,15 @@ build recompiles the app.
 dependencies adapter-node bundles into `build/`, statically linked Rust/Go binaries, and everything in a Nix
 image. `scan-source` (after `build`, both builders) closes the gap: syft catalogs the repository's lockfiles
 (npm devDependencies included, since adapter-node bundles them) and grype fails the run on a fixable
-vulnerability of `fail-on` severity (default high) or worse. For nix-build it also prints grype's report on
-the image's runtime closure (node, glibc, …): sbomnix writes it to `sboms/<name>.cdx.json` in the workspace.
-That part is report-only: nixpkgs packages match by CPE, where NVD has no fix version, and nixpkgs' backported
-patches show up as false positives.
+vulnerability of `fail-on` severity (default high) or worse.
+
+nix-build checks each image's runtime closure (node, glibc, …) with vulnix rather than grype: vulnix skips CVEs
+that a nixpkgs patch names (`CVE-<id>.patch`), where grype's CPE matching would report nixpkgs' backports as
+false positives and has no fix versions to go by. Without a `vulnix.toml` in the flake directory the result is
+only printed in the log. With one, any CVE not in it fails the run, so a repo opts in once its first reports are
+triaged: `vulnix -C -W vulnix.toml <image out path>` writes the current matches as a starting whitelist; give each
+entry a `comment` and an `until` date so exceptions expire. vulnix downloads the NVD feeds on every run (there's
+no cache volume yet), which adds a few minutes to the build.
 
 ## Build isolation (`tekton-ci`)
 

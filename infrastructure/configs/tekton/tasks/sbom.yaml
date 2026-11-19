@@ -5,8 +5,10 @@ metadata:
   namespace: tekton-ci
 spec:
   description: >-
-    Generates an SPDX SBOM for each built image (syft) and attaches it to the image in the
-    registry as an OCI 1.1 referrer (oras), like Konflux's build tasks do.
+    Attaches SBOMs to each built image in the registry as OCI 1.1 referrers (oras), like Konflux's
+    build tasks do: one for the image (CycloneDX of the Nix closure from nix-build when there is
+    one, since syft finds no package database in a Nix image; else SPDX from syft), plus the
+    source lockfiles' CycloneDX SBOM from scan-source.
   params:
     - name: registry
       type: string
@@ -16,10 +18,13 @@ spec:
       description: Registry namespace; images are <registry>/<project>/<name>.
     - name: digests
       type: string
-      description: Space-separated "name=sha256:..." as returned by the buildkit task.
+      description: Space-separated "name=sha256:..." as returned by the build task.
+  workspaces:
+    - name: source
+      readOnly: true
   results:
     - name: sboms
-      description: Space-separated "name=<image repo>@sha256:..." pointing at each SBOM blob.
+      description: Space-separated "name=<image repo>@sha256:..." pointing at each image SBOM blob.
   volumes:
     - name: sboms
       emptyDir: {}
@@ -46,12 +51,20 @@ spec:
       script: |
         #!/busybox/sh
         set -eu
+        ws="$(workspaces.source.path)/sboms"
         : > "$(results.sboms.path)"
+        [ -f "$ws/lockfiles.cdx.json" ] && cp "$ws/lockfiles.cdx.json" /sboms/source-lockfiles.cdx.json
         for entry in $(params.digests); do
           name="$(echo "$entry" | cut -d= -f1)"
           repo="$(params.registry)/$(params.project)/$name"
-          /syft scan "registry:$repo@$(echo "$entry" | cut -d= -f2)" --output "spdx-json=/sboms/$name.spdx.json"
-          printf '%s=%s@sha256:%s ' "$name" "$repo" "$(sha256sum "/sboms/$name.spdx.json" | cut -d' ' -f1)" >> "$(results.sboms.path)"
+          if [ -f "$ws/images/$name.cdx.json" ]; then
+            cp "$ws/images/$name.cdx.json" "/sboms/$name.cdx.json"
+            file="$name.cdx.json"
+          else
+            /syft scan "registry:$repo@$(echo "$entry" | cut -d= -f2)" --output "spdx-json=/sboms/$name.spdx.json"
+            file="$name.spdx.json"
+          fi
+          printf '%s=%s@sha256:%s ' "$name" "$repo" "$(sha256sum "/sboms/$file" | cut -d' ' -f1)" >> "$(results.sboms.path)"
         done
     - name: attach
       image: ghcr.io/oras-project/oras:v1.4.0
@@ -66,7 +79,17 @@ spec:
         for entry in $(params.digests); do
           name="$(echo "$entry" | cut -d= -f1)"
           ref="$(params.registry)/$(params.project)/$name@$(echo "$entry" | cut -d= -f2)"
+          if [ -f "$name.cdx.json" ]; then
+            file="$name.cdx.json" type=application/vnd.cyclonedx+json
+          else
+            file="$name.spdx.json" type=application/spdx+json
+          fi
           oras attach --registry-config /docker-config/config.json \
-            --artifact-type application/spdx+json "$ref" "$name.spdx.json:application/spdx+json"
-          echo "Attached SBOM to $ref"
+            --artifact-type "$type" "$ref" "$file:$type"
+          if [ -f source-lockfiles.cdx.json ]; then
+            oras attach --registry-config /docker-config/config.json \
+              --artifact-type application/vnd.cyclonedx+json "$ref" \
+              "source-lockfiles.cdx.json:application/vnd.cyclonedx+json"
+          fi
+          echo "Attached SBOMs to $ref"
         done

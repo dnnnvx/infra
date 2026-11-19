@@ -8,8 +8,11 @@ spec:
     Builds each requested image from the repository's flake (nix2container) and pushes it with
     skopeo. Unlike buildkit it needs no user namespaces: Nix runs single-user, unsandboxed
     (the pod is the sandbox), non-root and under RuntimeDefault seccomp. Same params and
-    results as buildkit, so build-image can pick either. Also leaves a CycloneDX SBOM of each
-    image's runtime closure (sbomnix) at sboms/<name>.cdx.json in the workspace for scan-source.
+    results as buildkit, so build-image can pick either. Then, per image, it writes a CycloneDX
+    SBOM of the runtime closure (sbomnix) to sboms/images/<name>.cdx.json in the workspace, which
+    the sbom task attaches, and checks that closure for CVEs with vulnix (patch-aware). The vulnix
+    check fails the run only if the flake directory has a vulnix.toml (its whitelist); without one
+    it only reports.
   params:
     - name: registry
       type: string
@@ -91,6 +94,9 @@ spec:
             accept-flake-config = false
         - name: REGISTRY_AUTH_FILE
           value: /docker-config/config.json
+        # vulnix (Python/click) refuses to start without a UTF-8 locale
+        - name: LANG
+          value: C.UTF-8
       # Same budget as buildkit: CPU stays at 2 of the NUCs' 4 cores
       computeResources:
         requests:
@@ -127,14 +133,39 @@ spec:
               --digestfile /tmp/digest "docker://$image:$tag"
             digest="$(cat /tmp/digest)"
           done
-          # Runtime closure (node, glibc, …): what dpkg used to tell grype on distroless images.
-          # sbomnix from the flake's own nixpkgs, so no extra nixpkgs download
-          # (cd /tmp: it also writes sbom.spdx.json and sbom.csv to the working directory)
-          mkdir -p "$(workspaces.source.path)/sboms"
-          (cd /tmp && nix run --inputs-from "$flake" nixpkgs#sbomnix -- \
-            --cdx "$(workspaces.source.path)/sboms/$name.cdx.json" "$flake#$attr")
           printf '%s=%s ' "$name" "$digest" >> "$(results.digests.path)"
           [ -s "$(results.IMAGES.path)" ] && printf ',' >> "$(results.IMAGES.path)"
           printf '%s@%s' "$image" "$digest" >> "$(results.IMAGES.path)"
           echo "Pushed $image ($(params.tags)) @ $digest"
+
+          # Runtime closure (node, glibc, …), what dpkg used to tell syft/grype on distroless images.
+          # Tools come from the flake's own nixpkgs (--inputs-from): no second nixpkgs download.
+          # sbomnix also writes sbom.spdx.json and sbom.csv to its working directory, hence cd /tmp.
+          mkdir -p "$(workspaces.source.path)/sboms/images"
+          (cd /tmp && nix run --inputs-from "$flake" nixpkgs#sbomnix -- \
+            --cdx "$(workspaces.source.path)/sboms/images/$name.cdx.json" "$flake#$attr")
+
+          # vulnix skips CVEs that a nixpkgs patch names (CVE-xxxx-yyyy.patch), unlike CPE matching.
+          # Exit 2 means findings or an error; only findings print a JSON report on stdout.
+          out="$(nix build --no-link --print-out-paths "$flake#$attr")"
+          whitelist="$root/$dir/vulnix.toml"
+          if [ -f "$whitelist" ]; then set -- --whitelist "$whitelist"; else set --; fi
+          rc=0
+          nix run --inputs-from "$flake" nixpkgs#vulnix -- --closure --json \
+            --cache-dir /tmp/vulnix "$@" "$out" > "/tmp/vulnix-$name.json" || rc=$?
+          case "$rc" in
+            0) echo "vulnix: no known CVEs in the $name closure" ;;
+            2)
+              [ -s "/tmp/vulnix-$name.json" ] || { echo "vulnix failed" >&2; exit 1; }
+              echo "vulnix: CVEs in the $name closure (https://nvd.nist.gov/vuln/detail/<id>):"
+              nix run --inputs-from "$flake" nixpkgs#jq -- -r \
+                '.[] | "  \(.name): \(.affected_by | join(" "))"' "/tmp/vulnix-$name.json"
+              if [ -f "$whitelist" ]; then
+                echo "Fix them (nixpkgs bump) or add them to vulnix.toml with an until date" >&2
+                exit 1
+              fi
+              echo "Report only: add a vulnix.toml to the flake directory to fail on these"
+              ;;
+            *) echo "vulnix failed (exit $rc)" >&2; exit 1 ;;
+          esac
         done

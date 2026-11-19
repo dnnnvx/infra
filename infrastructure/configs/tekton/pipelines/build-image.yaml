@@ -91,12 +91,16 @@ spec:
       workspaces:
         - name: source
           workspace: source
+    # After scan-source: attaches the lockfile SBOM it writes (and nix-build's closure SBOMs)
     - name: sbom
       retries: 2
       runAfter:
-        - build
+        - scan-source
       taskRef:
         name: sbom
+      workspaces:
+        - name: source
+          workspace: source
       params:
         - name: registry
           value: $(params.registry)
@@ -118,8 +122,7 @@ spec:
           value: $(params.project)
         - name: digests
           value: $(tasks.build.results.digests)
-    # Lockfiles + nix-build's closure SBOMs: what scan-image can't see in bundled, static or Nix images.
-    # After build: it reads the sboms/ that nix-build writes into the workspace
+    # Lockfiles: what scan-image can't see in bundled, static or Nix images
     - name: scan-source
       retries: 2
       runAfter:
