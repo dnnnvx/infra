@@ -10,8 +10,9 @@ Pushes to this repository run a separate, read-only validation pipeline
 ```
 git push main (Tangled) ──signed webhook──▶ ci.casasulgorgo.net ─▶ EventListener "tangled" (tekton-ci)
     interceptors: tangled (HMAC check) ─▶ cel (filter + tags)
-    └▶ PipelineRun build-image: clone ─▶ build (buildkit) ─┬▶ sbom (syft + oras attach)
-                                          │ push :<sha>    └▶ scan (grype, fails on fixable high/critical)
+    └▶ PipelineRun build-image: clone ─▶ build (buildkit | nix-build) ─┬▶ sbom (syft + oras attach)
+                                          │ push :<sha>                ├▶ scan (grype on the image)
+                                          │                            └▶ scan-source (grype on lockfiles + Nix closure)
                                           ▼
                   zot (registry.local.casasulgorgo.net, LAN Gateway, public TLS)
                                           ▲ image signature + SLSA v1 provenance (OCI referrers)
@@ -49,7 +50,7 @@ so they don't clutter the real repositories.
 | `infrastructure/controllers/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
 | `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, RBAC, push credentials, Chains public key (`chains.pub` → ConfigMap `chains-public-key` and the Kyverno policy `image-policy.yaml`), webhook HMAC secret, dashboard HTTPRoute |
 | `infrastructure/controllers/kyverno/` | Kyverno (admission controller only), enforcing `image-policy.yaml` |
-| `infrastructure/configs/tekton/tasks/` | one file per Task (`git-clone`, `buildkit`, `sbom`, `scan-image`, `release-image`, `flux-sync`, `validate-manifests`, `lint-tofu`, `checkov`, `trufflehog`) |
+| `infrastructure/configs/tekton/tasks/` | one file per Task (`git-clone`, `buildkit`, `nix-build`, `sbom`, `scan-image`, `scan-source`, `release-image`, `flux-sync`, `validate-manifests`, `lint-tofu`, `checkov`, `trufflehog`) |
 | `infrastructure/configs/tekton/pipelines/` | one file per Pipeline (`build-image`, `release-image`, `validate-infra`) |
 | `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`tangled`: public webhooks; `tekton-events`: internal CloudEvents), the `tangled` ClusterInterceptor, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
 | `.checkov.yaml`, `tofu/.tflint.hcl` | scanner config for `validate-infra` |
@@ -224,7 +225,18 @@ emptyDir owned by uid 1000, the build step mounts it as `/nix`. `sandbox = false
 no user namespaces, RuntimeDefault seccomp, no capabilities. The flake must expose
 `packages.x86_64-linux.<attr>` as a nix2container image with the `commit-timestamp` label (see casasulgorgo's
 `flake.nix`). There's no cache for the repo's own derivations yet (nixpkgs comes from cache.nixos.org), so every
-build recompiles the app. Scans of Nix images see no package database: syft/grype output is close to empty.
+build recompiles the app.
+
+## Vulnerability scans
+
+`scan-image` runs grype on the pushed image, which only sees OS package databases (dpkg/apk). That misses
+dependencies adapter-node bundles into `build/`, statically linked Rust/Go binaries, and everything in a Nix
+image. `scan-source` (after `build`, both builders) closes the gap: syft catalogs the repository's lockfiles
+(npm devDependencies included, since adapter-node bundles them) and grype fails the run on a fixable
+vulnerability of `fail-on` severity (default high) or worse. For nix-build it also prints grype's report on
+the image's runtime closure (node, glibc, …): sbomnix writes it to `sboms/<name>.cdx.json` in the workspace.
+That part is report-only: nixpkgs packages match by CPE, where NVD has no fix version, and nixpkgs' backported
+patches show up as false positives.
 
 ## Build isolation (`tekton-ci`)
 

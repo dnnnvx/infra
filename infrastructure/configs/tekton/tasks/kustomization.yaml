@@ -7,6 +7,7 @@ resources:
   - flux-sync.yaml
   - sbom.yaml
   - scan-image.yaml
+  - scan-source.yaml
   - release-image.yaml
   - validate-manifests.yaml
   - lint-tofu.yaml

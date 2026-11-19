@@ -118,3 +118,14 @@ spec:
           value: $(params.project)
         - name: digests
           value: $(tasks.build.results.digests)
+    # Lockfiles + nix-build's closure SBOMs: what scan-image can't see in bundled, static or Nix images.
+    # After build: it reads the sboms/ that nix-build writes into the workspace
+    - name: scan-source
+      retries: 2
+      runAfter:
+        - build
+      taskRef:
+        name: scan-source
+      workspaces:
+        - name: source
+          workspace: source

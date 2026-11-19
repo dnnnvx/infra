@@ -1,0 +1,67 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: scan-source
+  namespace: tekton-ci
+spec:
+  description: >-
+    Scans the source's lockfiles (package-lock.json, Cargo.lock, go.sum, …) for known
+    vulnerabilities and fails on any of the given severity or worse that has a fix. Covers what
+    scan-image can't see: dependencies bundled by adapter-node, statically linked Rust/Go, and Nix
+    images, which have no package database. Also prints a report for each Nix closure SBOM that
+    nix-build left in the workspace (sboms/<name>.cdx.json).
+  params:
+    - name: subdirectory
+      type: string
+      default: source
+      description: Where git-clone put the repository inside the source workspace.
+    - name: fail-on
+      type: string
+      default: high
+      description: Lowest grype severity that fails the run (only vulnerabilities that have a fix count).
+  workspaces:
+    - name: source
+      readOnly: true
+  volumes:
+    - name: scan
+      emptyDir: {}
+  stepTemplate:
+    env:
+      - name: HOME
+        value: /tmp
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+    volumeMounts:
+      - name: scan
+        mountPath: /scan
+  steps:
+    - name: syft
+      image: anchore/syft:v1.57.2-debug
+      env:
+        # adapter-node bundles devDependencies into build/: they ship, so they count
+        - name: SYFT_JAVASCRIPT_INCLUDE_DEV_DEPENDENCIES
+          value: "true"
+      script: |
+        #!/busybox/sh
+        set -eu
+        /syft scan "dir:$(workspaces.source.path)/$(params.subdirectory)" \
+          --exclude './.git/**' --output cyclonedx-json=/scan/source.cdx.json
+    - name: grype
+      image: anchore/grype:v0.122.1-debug
+      env:
+        - name: GRYPE_DB_CACHE_DIR
+          value: /scan/grype-db
+      script: |
+        #!/busybox/sh
+        set -eu
+        # Report only: nixpkgs packages match by CPE, so NVD has no fix version for them (--only-fixed
+        # would hide everything) and nixpkgs' backported patches show up as false positives
+        for sbom in "$(workspaces.source.path)"/sboms/*.cdx.json; do
+          [ -e "$sbom" ] || continue
+          echo "Nix closure $(basename "$sbom" .cdx.json) (report only):"
+          /grype "sbom:$sbom" || true
+        done
+        echo "Source lockfiles:"
+        /grype sbom:/scan/source.cdx.json --only-fixed --fail-on "$(params.fail-on)"

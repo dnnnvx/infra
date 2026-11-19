@@ -8,7 +8,8 @@ spec:
     Builds each requested image from the repository's flake (nix2container) and pushes it with
     skopeo. Unlike buildkit it needs no user namespaces: Nix runs single-user, unsandboxed
     (the pod is the sandbox), non-root and under RuntimeDefault seccomp. Same params and
-    results as buildkit, so build-image can pick either.
+    results as buildkit, so build-image can pick either. Also leaves a CycloneDX SBOM of each
+    image's runtime closure (sbomnix) at sboms/<name>.cdx.json in the workspace for scan-source.
   params:
     - name: registry
       type: string
@@ -38,7 +39,6 @@ spec:
       description: Where git-clone put the repository inside the source workspace.
   workspaces:
     - name: source
-      readOnly: true
   results:
     - name: digests
       description: Space-separated "name=sha256:..." for every pushed image.
@@ -127,6 +127,12 @@ spec:
               --digestfile /tmp/digest "docker://$image:$tag"
             digest="$(cat /tmp/digest)"
           done
+          # Runtime closure (node, glibc, …): what dpkg used to tell grype on distroless images.
+          # sbomnix from the flake's own nixpkgs, so no extra nixpkgs download
+          # (cd /tmp: it also writes sbom.spdx.json and sbom.csv to the working directory)
+          mkdir -p "$(workspaces.source.path)/sboms"
+          (cd /tmp && nix run --inputs-from "$flake" nixpkgs#sbomnix -- \
+            --cdx "$(workspaces.source.path)/sboms/$name.cdx.json" "$flake#$attr")
           printf '%s=%s ' "$name" "$digest" >> "$(results.digests.path)"
           [ -s "$(results.IMAGES.path)" ] && printf ',' >> "$(results.IMAGES.path)"
           printf '%s@%s' "$image" "$digest" >> "$(results.IMAGES.path)"
