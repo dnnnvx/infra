@@ -14,8 +14,6 @@ spec:
     name: flux-system
   path: ./apps/radicle
   prune: true
-  # commenting the app out of kustomization.yaml (deleting this object) keeps its resources
-  deletionPolicy: Orphan
   wait: true
   decryption:
     provider: sops

@@ -5,6 +5,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: space
   namespace: silverbullet
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/part-of: silverbullet
 spec:
@@ -21,6 +23,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: data
   namespace: silverbullet
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/part-of: silverbullet
 spec:

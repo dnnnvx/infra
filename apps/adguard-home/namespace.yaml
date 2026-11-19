@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: adguard-home
+  annotations:
+    # kept when the app is removed (its StatefulSet volumes live here): delete by hand
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     pod-security.kubernetes.io/warn: restricted
     pod-security.kubernetes.io/audit: restricted

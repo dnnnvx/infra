@@ -3,6 +3,8 @@ kind: Cluster
 metadata:
   name: norish-postgres
   namespace: norish
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/part-of: norish
 spec:

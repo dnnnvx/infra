@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: bookorbit
+  annotations:
+    # kept when the app is removed (deleting it would delete the data): delete by hand
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/part-of: bookorbit
     pod-security.kubernetes.io/enforce: restricted

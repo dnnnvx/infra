@@ -15,8 +15,6 @@ spec:
     name: flux-system
   path: ./apps/marcods
   prune: true
-  # commenting the app out of kustomization.yaml (deleting this object) keeps its resources
-  deletionPolicy: Orphan
   wait: true
   decryption:
     provider: sops

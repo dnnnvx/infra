@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: llama-models
   namespace: llama-cpp
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/part-of: llama-cpp
 spec:

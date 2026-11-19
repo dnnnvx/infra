@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: norish-uploads
   namespace: norish
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/part-of: norish
 spec:

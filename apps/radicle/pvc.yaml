@@ -4,6 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: radicle-data
   namespace: radicle
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
   labels:
     app.kubernetes.io/part-of: radicle
 spec:

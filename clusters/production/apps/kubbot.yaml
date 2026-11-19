@@ -13,8 +13,9 @@ spec:
     kind: GitRepository
     name: flux-system
   path: ./apps/kubbot
-  # No deletionPolicy: Orphan (unlike the other apps): removing this Kustomization deletes the
-  # bot, including its PVC (the Matrix crypto store, re-created by logging in again).
+  # No prune: disabled on its Namespace/PVC (unlike the stateful apps): removing this
+  # Kustomization deletes the bot, including its PVC (the Matrix crypto store, re-created by
+  # logging in again).
   prune: true
   wait: true
   decryption:

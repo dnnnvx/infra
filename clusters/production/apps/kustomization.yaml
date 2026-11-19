@@ -1,8 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 # One Flux Kustomization per app (app-<name> → ./apps/<name>), so an unhealthy app
-# doesn't fail the others. prune: true removes what you delete from an app dir; commenting an
-# app out here only stops reconciling it (deletionPolicy: Orphan), cleanup is by hand.
+# doesn't fail the others. prune: true removes what you delete from an app dir, and commenting
+# an app out here deletes all its resources except those annotated
+# kustomize.toolkit.fluxcd.io/prune: disabled (the Namespace, PVCs and CNPG Cluster of stateful
+# apps), which are cleaned up by hand.
 resources:
   - home-assistant.yaml
   - ddns.yaml
