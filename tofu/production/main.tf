@@ -60,10 +60,8 @@ locals {
 
   # Pinned rather than ssh-keyscan'd on every plan (tofu-controller runs this in-cluster).
   # Re-check after a host key rotation: https://api.github.com/meta (ssh_keys).
-  # tangled.org stays only while Flux moves its sources to GitHub: drop it afterwards.
   git_known_hosts = <<-EOT
     github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
-    tangled.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII2UShEm/FFPmYZUizaPnIqOJuynoCQpcLhl5PPHd02n
   EOT
 
   client_certificate     = base64decode(module.talos.kubernetes_client_configuration.client_certificate)

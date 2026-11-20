@@ -76,12 +76,10 @@ spec:
         .predicate.buildDefinition.externalParameters.runSpec.pipelineRef.name == "build-image")
       message: provenance says the image wasn't built by the build-image pipeline
     # Allowed sources (the Trigger's pinned repo-url): https://github.com/dnnnvx/<repo>.
-    # The Tangled alternatives cover images built before the move to GitHub: drop them once every
-    # app has been rebuilt from GitHub.
     - expression: >-
         variables.ours.all(i, extractPayload(i, attestations.slsa)
         .predicate.buildDefinition.externalParameters.runSpec.params
-        .exists(p, p.name == "repo-url" && p.value.matches(r"^https://(github\.com/dnnnvx/[A-Za-z0-9_.-]+$|knot1\.tangled\.sh/did:plc:qzac7ebdharodtvwlxb7wsof(/|$)|tangled\.org/did:plc:fz72ds7ns4fx6npepwtfnzag(/|$))")))
+        .exists(p, p.name == "repo-url" && p.value.matches(r"^https://github\.com/dnnnvx/[A-Za-z0-9_.-]+$")))
       message: provenance says the image wasn't built from one of our GitHub repositories
     # Kyverno already matches the subject digest; also require the subject name to be the repository the
     # image is pulled from, so a signed image copied into another app's repository is rejected.
