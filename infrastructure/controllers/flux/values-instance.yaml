@@ -10,8 +10,8 @@ instance:
   sync:
     interval: 30m
     kind: GitRepository
-    # Repo DID rather than handle: the handle path 404s after an account handle change
-    url: "ssh://git@tangled.org/did:plc:mhpujlntihfhlixaayuearmr"
+    # Deploy key with write access (ImageUpdateAutomation pushes digest bumps to main)
+    url: "ssh://git@github.com/dnnnvx/infra.git"
     ref: "refs/heads/main"
     path: ./clusters/production
     pullSecret: flux-system

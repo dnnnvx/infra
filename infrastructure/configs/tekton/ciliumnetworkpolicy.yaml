@@ -19,15 +19,13 @@ spec:
     # EventListener creates PipelineRuns
     - toEntities:
         - kube-apiserver
-    # EventListener → interceptors (core: CEL; custom: tangled signature check)
+    # EventListener → core interceptors (github signature check, CEL)
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: tekton-pipelines
       toPorts:
         - ports:
             - port: "8443"
-              protocol: TCP
-            - port: "8080"
               protocol: TCP
     # BuildKit, skopeo (nix-build), syft, grype, oras, cosign, crane → zot via the LAN Gateway (registry.local.casasulgorgo.net)
     - toEntities:
@@ -62,7 +60,7 @@ spec:
             - port: "443"
               protocol: TCP
 ---
-# Only the EventListener receives traffic (Tangled webhooks via the Gateway)
+# Only the EventListener receives traffic (GitHub webhooks via the Gateway)
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -71,7 +69,7 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      eventlistener: tangled
+      eventlistener: github
   ingress:
     - fromEntities:
         - ingress

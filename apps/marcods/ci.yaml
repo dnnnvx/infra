@@ -64,21 +64,26 @@ roleRef:
   kind: Role
   name: flux-sync-marcods
 ---
-# The clone URL is pinned to the repo DID: the payload's clone_url isn't served by the knot
-# (see infrastructure/configs/tekton/triggers/trigger-infra.yaml).
 apiVersion: triggers.tekton.dev/v1beta1
 kind: Trigger
 metadata:
   name: marcods
   namespace: tekton-ci
   labels:
-    ci.casasulgorgo.net/eventlistener: tangled
+    ci.casasulgorgo.net/eventlistener: github
 spec:
   interceptors:
     - name: verify-signature
       ref:
-        name: tangled
+        name: github
         kind: ClusterInterceptor
+      params:
+        - name: secretRef
+          value:
+            secretName: github-webhook
+            secretKey: secret
+        - name: eventTypes
+          value: ["push"]
     - name: filter
       ref:
         name: cel
@@ -86,8 +91,7 @@ spec:
       params:
         - name: filter
           value: >-
-            header.match('X-Tangled-Event', 'push') &&
-            body.repository.name == 'marcods' &&
+            body.repository.full_name == 'dnnnvx/marcods' &&
             body.ref == 'refs/heads/main' &&
             body.after.matches('^[0-9a-f]{40}$') &&
             body.after != '0000000000000000000000000000000000000000'
@@ -104,7 +108,7 @@ spec:
     - name: flux-kustomization
       value: app-marcods
     - name: repo-url
-      value: https://tangled.org/did:plc:fz72ds7ns4fx6npepwtfnzag
+      value: https://github.com/dnnnvx/marcods
     - name: revision
       value: $(body.after)
     - name: tags

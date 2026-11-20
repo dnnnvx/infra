@@ -2,10 +2,10 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: EventListener
 metadata:
-  name: tangled
+  name: github
   namespace: tekton-ci
 spec:
   serviceAccountName: tekton-triggers
   labelSelector:
     matchLabels:
-      ci.casasulgorgo.net/eventlistener: tangled
+      ci.casasulgorgo.net/eventlistener: github

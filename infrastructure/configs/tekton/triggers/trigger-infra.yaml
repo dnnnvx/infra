@@ -1,21 +1,26 @@
 # Validates every branch push of this repository (Flux's image automation commits on main included).
-# The revision comes from the payload, which is trusted once the tangled interceptor has
-# verified its HMAC signature. The clone URL is pinned: the payload's clone_url
-# (knot/<owner-did>/<rkey>) isn't served by the knot, which addresses repos by repo DID now;
-# tangled.org/<handle>/<name> redirects there.
+# The revision comes from the payload, which is trusted once the github interceptor has verified its
+# HMAC signature (X-Hub-Signature-256). The clone URL is pinned rather than taken from the payload.
 apiVersion: triggers.tekton.dev/v1beta1
 kind: Trigger
 metadata:
   name: infra
   namespace: tekton-ci
   labels:
-    ci.casasulgorgo.net/eventlistener: tangled
+    ci.casasulgorgo.net/eventlistener: github
 spec:
   interceptors:
     - name: verify-signature
       ref:
-        name: tangled
+        name: github
         kind: ClusterInterceptor
+      params:
+        - name: secretRef
+          value:
+            secretName: github-webhook
+            secretKey: secret
+        - name: eventTypes
+          value: ["push"]
     - name: filter
       ref:
         name: cel
@@ -23,14 +28,13 @@ spec:
       params:
         - name: filter
           value: >-
-            header.match('X-Tangled-Event', 'push') &&
-            body.repository.name == 'infra' &&
+            body.repository.full_name == 'dnnnvx/infra' &&
             body.ref.startsWith('refs/heads/') &&
             body.after.matches('^[0-9a-f]{40}$') &&
             body.after != '0000000000000000000000000000000000000000'
   bindings:
     - name: repo-url
-      value: https://tangled.org/did:plc:mhpujlntihfhlixaayuearmr
+      value: https://github.com/dnnnvx/infra
     - name: revision
       value: $(body.after)
   template:

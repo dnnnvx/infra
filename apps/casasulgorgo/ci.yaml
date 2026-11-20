@@ -1,6 +1,6 @@
 # Build → deploy wiring for this app (Tekton Trigger, Flux image automation, flux-sync RBAC).
 # Its Flux Kustomization is clusters/production/apps/casasulgorgo.yaml. For a new CI-built app, copy both and replace:
-#   casasulgorgo → project · web (Trigger filter) → Tangled repository name · web (image) → image name.
+#   casasulgorgo → project and GitHub repository (Trigger filter, repo-url) · web (image) → image name.
 # Per extra image: another ImageRepository/ImagePolicy pair, its name in the Role's resourceNames,
 # a `<name>,<attr>,<flakedir>` entry (space-separated) in the Trigger's `images` binding
 # and an `images:` entry with a `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` marker in kustomization.yaml.
@@ -73,21 +73,28 @@ roleRef:
   kind: Role
   name: flux-sync-casasulgorgo
 ---
-# Everything except the repo name and images comes from the payload, which is
-# trusted once the tangled interceptor has verified its HMAC signature.
+# The revision comes from the payload, trusted once the github interceptor has verified its HMAC
+# signature (X-Hub-Signature-256). The clone URL is pinned (the Kyverno provenance check allowlists it).
 apiVersion: triggers.tekton.dev/v1beta1
 kind: Trigger
 metadata:
   name: casasulgorgo
   namespace: tekton-ci
   labels:
-    ci.casasulgorgo.net/eventlistener: tangled
+    ci.casasulgorgo.net/eventlistener: github
 spec:
   interceptors:
     - name: verify-signature
       ref:
-        name: tangled
+        name: github
         kind: ClusterInterceptor
+      params:
+        - name: secretRef
+          value:
+            secretName: github-webhook
+            secretKey: secret
+        - name: eventTypes
+          value: ["push"]
     - name: filter
       ref:
         name: cel
@@ -95,8 +102,7 @@ spec:
       params:
         - name: filter
           value: >-
-            header.match('X-Tangled-Event', 'push') &&
-            body.repository.name == 'web' &&
+            body.repository.full_name == 'dnnnvx/casasulgorgo' &&
             body.ref == 'refs/heads/main' &&
             body.after.matches('^[0-9a-f]{40}$') &&
             body.after != '0000000000000000000000000000000000000000'
@@ -116,7 +122,7 @@ spec:
     - name: flux-kustomization
       value: app-casasulgorgo
     - name: repo-url
-      value: $(body.repository.clone_url)
+      value: https://github.com/dnnnvx/casasulgorgo
     - name: revision
       value: $(body.after)
     - name: tags

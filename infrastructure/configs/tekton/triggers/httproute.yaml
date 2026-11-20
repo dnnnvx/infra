@@ -1,8 +1,8 @@
-# Tangled push webhooks → EventListener
+# GitHub push webhooks → EventListener
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: eventlistener-tangled
+  name: eventlistener-github
   namespace: tekton-ci
   annotations:
     gateway.casasulgorgo.net/public: "true"
@@ -20,5 +20,5 @@ spec:
             type: Exact
             value: /
       backendRefs:
-        - name: el-tangled
+        - name: el-github
           port: 8080

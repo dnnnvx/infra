@@ -40,7 +40,7 @@ It runs in kube-apiserver, so it doesn't depend on Kyverno.
 | `ha.casasulgorgo.net`   | Home Assistant |
 | `auth.casasulgorgo.net` | Pocket-ID      |
 | `casasulgorgo.net`      | Landing page   |
-| `ci.casasulgorgo.net`   | Tekton EventListener (Tangled webhooks) |
+| `ci.casasulgorgo.net`   | Tekton EventListener (GitHub webhooks)  |
 | `marcods.dev`           | Portfolio      |
 
 The registry (UI and API) is LAN-only: `registry.local.casasulgorgo.net` on the `homelab-local` Gateway (public wildcard cert, so no client needs insecure flags). Nodes and pods resolve it through a Talos `StaticHostConfig` (see [CI/CD](./cicd.md)).

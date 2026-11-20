@@ -17,16 +17,13 @@ spec:
         - ports:
             - port: "8443"
               protocol: TCP
-    # EventListeners call the core interceptors (8443) and the custom
-    # tangled-interceptor (8080, infrastructure/configs/tekton/triggers/interceptor-tangled.yaml)
+    # EventListeners call the core interceptors
     - fromEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: tekton-ci
       toPorts:
         - ports:
             - port: "8443"
-              protocol: TCP
-            - port: "8080"
               protocol: TCP
   egress:
     - toEndpoints:

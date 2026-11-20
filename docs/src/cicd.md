@@ -8,8 +8,8 @@ Pushes to this repository run a separate, read-only validation pipeline
 ([Infra validation](#infra-validation-validate-infra)).
 
 ```
-git push main (Tangled) ──signed webhook──▶ ci.casasulgorgo.net ─▶ EventListener "tangled" (tekton-ci)
-    interceptors: tangled (HMAC check) ─▶ cel (filter + tags)
+git push main (GitHub) ──signed webhook──▶ ci.casasulgorgo.net ─▶ EventListener "github" (tekton-ci)
+    interceptors: github (HMAC check) ─▶ cel (filter + tags)
     └▶ PipelineRun build-image: clone ─▶ build (buildkit | nix-build) ─┬▶ scan (grype on the image)
                                           │ push :<sha>                └▶ scan-source (grype on lockfiles) ─▶ sbom (oras attach)
                                           ▼
@@ -27,7 +27,7 @@ Flux ImageUpdateAutomation ─▶ commits the new digest to apps/** on main ─�
 
 ## Images and tags
 
-Images are `<project>/<image>`, where project is set in the app's Trigger (the Tangled repo itself may be called anything, e.g. `web`):
+Images are `<project>/<image>`, where project is set in the app's Trigger (normally the GitHub repo name, e.g. `dnnnvx/casasulgorgo`):
 `registry.local.casasulgorgo.net/casasulgorgo/web`.
 
 | Tag | Meaning |
@@ -51,7 +51,7 @@ so they don't clutter the real repositories.
 | `infrastructure/controllers/kyverno/` | Kyverno (admission controller only), enforcing `image-policy.yaml` |
 | `infrastructure/configs/tekton/tasks/` | one file per Task (`git-clone`, `buildkit`, `nix-build`, `sbom`, `scan-image`, `scan-source`, `release-image`, `flux-sync`, `validate-manifests`, `lint-tofu`, `checkov`, `trufflehog`) |
 | `infrastructure/configs/tekton/pipelines/` | one file per Pipeline (`build-image`, `release-image`, `validate-infra`) |
-| `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`tangled`: public webhooks; `tekton-events`: internal CloudEvents), the `tangled` ClusterInterceptor, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
+| `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`github`: public webhooks; `tekton-events`: internal CloudEvents), the `github-webhook` HMAC Secret, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
 | `.checkov.yaml`, `tofu/.tflint.hcl` | scanner config for `validate-infra` |
 | `clusters/production/apps/<project>.yaml` | the app's Flux Kustomization `app-<project>` |
 | `apps/<project>/ci.yaml` | the app's Trigger, ImageRepository/ImagePolicy per image and name-scoped `flux-sync` Role/RoleBinding |
@@ -127,8 +127,8 @@ The same policy also checks what the provenance says, since Chains signs any Pip
 ones included:
 
 - `pipelineRef` is `build-image`;
-- the `repo-url` param is one of our Tangled sources (allowlist of `<knot>/<owner DID>` in the policy: add a new knot
-  or identity there before its first build gets deployed);
+- the `repo-url` param is one of our GitHub repositories (`https://github.com/dnnnvx/<repo>`, pinned in each Trigger;
+  repos under another owner need an allowlist entry in the policy before their first build gets deployed);
 - the subject name is the repository the image is pulled from, so a signed image copied into another app's repository
   is rejected (Kyverno already matches the subject digest).
 
@@ -151,16 +151,17 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
 
 1. Copy `apps/casasulgorgo/ci.yaml` into `apps/<project>/` (list it in its `kustomization.yaml`) and
    `clusters/production/apps/casasulgorgo.yaml` to `<project>.yaml` (list it in `clusters/production/apps/kustomization.yaml`).
-   Replace the project name, the Tangled repository name in the Trigger's CEL filter and the image name
+   Replace the project name, the GitHub repository in the Trigger's CEL filter and `repo-url` binding, and the image name
    (the header comment of `ci.yaml` lists every spot). For more images, add an ImageRepository/ImagePolicy pair per image, its name in the
    Role's `resourceNames`, and a `<name>,<dockerfile>,<context>` entry in the Trigger's space-separated `images` binding
    (`dockerfile` relative to `context`, `context` relative to the repo root).
 2. In `apps/<project>/kustomization.yaml`, use a kustomize `images:` entry per image with a `digest:` marker
    `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's). Kyverno then only admits
-   Chains-signed digests of it. If the repo lives on a new knot or under another Tangled identity, add it to the
+   Chains-signed digests of it. If the repo lives outside `github.com/dnnnvx`, add it to the
    `repo-url` allowlist in `infrastructure/configs/tekton/image-policy.yaml` first.
-3. On Tangled: repo **Settings → Hooks** → payload URL `https://ci.casasulgorgo.net/`, event `push`,
-   secret = `tangled-webhook` value (`just edit-secret infrastructure/configs/tekton/secrets.yaml`).
+3. On GitHub: repo **Settings → Webhooks** → payload URL `https://ci.casasulgorgo.net/`, content type
+   `application/json`, event "Just the push event", secret = `github-webhook` value
+   (`just edit-secret infrastructure/configs/tekton/triggers/github-webhook-secret.yaml`).
 
 ## Infra validation (validate-infra)
 
@@ -185,17 +186,16 @@ Notes:
   nixpkgs build is broken).
 - The clone is shallow, so trufflehog only scans the pushed commit's tree, not older history.
 - Results only show up in Tekton (dashboard, `tkn pr list -n tekton-ci -l ci.casasulgorgo.net/project=infra`):
-  nothing reports back to Tangled.
+  nothing reports back to GitHub.
 
 ## Webhook verification
 
-Tangled signs the body as `X-Tangled-Signature-256: sha256=<hmac>`. That's the same
-scheme as GitHub, but under a header name the built-in `github` interceptor doesn't read.
-`infrastructure/configs/tekton/triggers/interceptor-tangled.yaml` runs a small custom ClusterInterceptor
-([`ghcr.io/dnnnvx/tangled-interceptor`](https://github.com/dnnnvx/tangled-interceptor), a static
-Rust binary) that checks it. The `cel` interceptor then filters the
-event and computes the tags. Because the payload is authenticated, the Trigger takes the
-clone URL, repo name and commit from it.
+GitHub signs the body as `X-Hub-Signature-256: sha256=<hmac>`. The core `github` ClusterInterceptor
+checks it against the `tekton-ci/github-webhook` Secret (it must be in the Trigger's namespace) and only
+lets `push` events through; without `secretRef` it would accept anything, so every Trigger sets it.
+The `cel` interceptor then filters on `repository.full_name` and the branch and computes the tags. The
+commit comes from the authenticated payload; the clone URL is pinned in each Trigger, since Kyverno
+allowlists it in the provenance. `just ci-build <repo> <sha>` replays a signed push.
 
 ## Registry access
 
@@ -255,7 +255,7 @@ Rootless BuildKit needs Unconfined seccomp/AppArmor, so the namespace runs at Po
   are allowed only for pods created by the Tekton controller (TaskRuns).
 - **Cilium**: builds reach DNS, zot and the public internet on 443. RFC1918/CGNAT/link-local
   ranges are excluded, so a Dockerfile `RUN` can't reach the LAN or the nodes. Only the
-  EventListeners accept ingress: `tangled` from the Gateway, `tekton-events` from tekton-events-controller.
+  EventListeners accept ingress: `github` from the Gateway, `tekton-events` from tekton-events-controller.
 - **Signing key outside**: the Chains key lives in `tekton-chains`, which no pipeline can read.
 - **LimitRange**: default 2 CPU / 2Gi per step container, max 3 CPU / 4Gi.
 - The Tekton Pruner keeps 5 successful and 5 failed runs (max 7 days). Workspace PVCs go with them.
@@ -263,7 +263,8 @@ Rootless BuildKit needs Unconfined seccomp/AppArmor, so the namespace runs at Po
 ## Debugging
 
 - `tkn pr list -n tekton-ci`, `tkn pr logs -f -n tekton-ci <run>`
-- `kubectl -n tekton-ci logs -l eventlistener=tangled` (rejected webhooks show up here)
+- `kubectl -n tekton-ci logs -l eventlistener=github` (accepted events; rejections only at debug level,
+  so check GitHub's webhook "Recent Deliveries" response body first)
 - `kubectl -n tekton-ci logs -l eventlistener=tekton-events` (CloudEvents → release runs)
 - `kubectl -n tekton-chains logs deploy/tekton-chains-controller`; a signed run carries the annotation
   `chains.tekton.dev/signed: "true"`

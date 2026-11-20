@@ -70,13 +70,20 @@ metadata:
   name: kubbot
   namespace: tekton-ci
   labels:
-    ci.casasulgorgo.net/eventlistener: tangled
+    ci.casasulgorgo.net/eventlistener: github
 spec:
   interceptors:
     - name: verify-signature
       ref:
-        name: tangled
+        name: github
         kind: ClusterInterceptor
+      params:
+        - name: secretRef
+          value:
+            secretName: github-webhook
+            secretKey: secret
+        - name: eventTypes
+          value: ["push"]
     - name: filter
       ref:
         name: cel
@@ -84,8 +91,7 @@ spec:
       params:
         - name: filter
           value: >-
-            header.match('X-Tangled-Event', 'push') &&
-            body.repository.name == 'kubbot' &&
+            body.repository.full_name == 'dnnnvx/kubbot' &&
             body.ref == 'refs/heads/main' &&
             body.after.matches('^[0-9a-f]{40}$') &&
             body.after != '0000000000000000000000000000000000000000'
@@ -102,7 +108,7 @@ spec:
     - name: flux-kustomization
       value: app-kubbot
     - name: repo-url
-      value: $(body.repository.clone_url)
+      value: https://github.com/dnnnvx/kubbot
     - name: revision
       value: $(body.after)
     - name: tags

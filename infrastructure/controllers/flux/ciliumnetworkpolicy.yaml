@@ -24,7 +24,7 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-            # SSH git sync to tangled.org
+            # SSH git sync (and image automation pushes) to github.com
             - port: "22"
               protocol: TCP
     # image-reflector-controller scans zot over its in-cluster Service
@@ -54,7 +54,7 @@ spec:
             - port: "9080"
               protocol: TCP
 ---
-# Webhook receiver (Tangled push events)
+# Webhook receiver (GitHub push events)
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
