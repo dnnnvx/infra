@@ -328,19 +328,6 @@ module "github" {
   }
 }
 
-# Repositories and the Flux deploy key created by hand before tofu managed GitHub. The key was read-only:
-# deploy keys are immutable, so the first apply replaces it with a read-write one.
-import {
-  for_each = toset(["infra", "casasulgorgo", "kubbot", "marcods", "nix", "radicle-images", "dnnnvx", "tangled-interceptor", "dotfiles", "solzk"])
-  to       = module.github.github_repository.repos[each.key]
-  id       = each.key
-}
-
-import {
-  to = module.github.github_repository_deploy_key.flux
-  id = "infra:145162879"
-}
-
 module "k8s" {
   source = "../modules/k8s"
 
