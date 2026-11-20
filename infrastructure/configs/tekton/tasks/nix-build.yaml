@@ -76,7 +76,15 @@ spec:
       script: |
         #!/bin/sh
         set -eu
-        cp -a /nix/. /nix-rw/
+        # Copy the children, not "/nix/.": a non-root user can't set times on the mount point.
+        # Skip the db lock files (root-only 0600 since nix 2.36); Nix recreates them.
+        for e in /nix/*; do [ "$e" = /nix/var ] || cp -a "$e" /nix-rw/; done
+        mkdir -p /nix-rw/var/nix/db
+        for e in /nix/var/*; do [ "$e" = /nix/var/nix ] || cp -a "$e" /nix-rw/var/; done
+        for e in /nix/var/nix/*; do [ "$e" = /nix/var/nix/db ] || cp -a "$e" /nix-rw/var/nix/; done
+        for e in /nix/var/nix/db/*; do
+          case "$e" in */big-lock|*/reserved) ;; *) cp -a "$e" /nix-rw/var/nix/db/ ;; esac
+        done
     - name: build-and-push
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
