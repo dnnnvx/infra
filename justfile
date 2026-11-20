@@ -192,5 +192,4 @@ validate:
 
 push:
     git push origin main
-    git push --force github main
     git push rad main
