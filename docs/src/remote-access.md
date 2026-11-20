@@ -29,7 +29,7 @@ Turn the tunnel off at home: the same `/32`s would otherwise hairpin through the
 `tofu/modules/wireguard` generates the server and client keys (`ojford/wireguard` provider), and outputs the
 Talos `WireguardConfig` patch (applied to nuc-101 via its `extra_patches`) and the client configs. Private keys
 live only in the encrypted state and in those configs. Devices are listed in the module's `peers`
-(`tofu/production/main.tf`, name → `10.10.0.x`).
+(`tofu/production/talos.tf`, name → `10.10.0.x`).
 
 `wireguard_hostname` (tfvars in `infrastructure/tofu/secret.yaml`, see [OpenTofu](opentofu.md)) is the DNS-only record DDNS points at the home IP, used as the
 clients' `Endpoint`. It's kept out of git because a DNS-only record exposes the home IP. Tofu writes it into the
