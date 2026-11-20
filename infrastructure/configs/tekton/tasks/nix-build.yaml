@@ -61,7 +61,7 @@ spec:
           - key: .dockerconfigjson
             path: config.json
   stepTemplate:
-    image: nixos/nix:2.35.6
+    image: nixos/nix:2.36.0
     securityContext:
       allowPrivilegeEscalation: false
       capabilities:
