@@ -53,6 +53,10 @@ module "k8s" {
       data = merge(var.flux_substitutions, {
         github_webhook_secret = random_password.github_webhook.result
         flux_receiver_token   = random_password.flux_receiver.result
+        }, {
+        # base64 so the multi-line key substitutes into a Secret's data on one line
+        for repo, key in tls_private_key.ci_clone :
+        "git_ssh_key_${replace(repo, "-", "_")}" => base64encode(key.private_key_openssh)
       })
     },
     {

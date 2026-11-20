@@ -167,6 +167,10 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
 3. Add the repo with `ci_webhook = true` to `repositories` in `module "github"` (`tofu/production/github.tf`; an existing repo also needs an
    `import` entry) and run `just tofu apply`: tofu manages the repo settings and creates its push webhook to
    `https://ci.casasulgorgo.net/` with the HMAC secret.
+4. Private repo: also add it to `tls_private_key.ci_clone` (`tofu/production/github.tf`) and a
+   `<repo>: ${git_ssh_key_<repo>}` line (dashes as underscores) to `infrastructure/configs/tekton/git-ssh-secret.yaml`.
+   Tofu registers a read-only deploy key and passes the private half via `flux-substitutions`; `git-clone` then fetches
+   over SSH on `ssh.github.com:443` (no extra egress), while `repo-url` stays the HTTPS URL that Kyverno pins.
 
 ## Infra validation (validate-infra)
 

@@ -38,6 +38,9 @@ spec:
       description: The app's Flux Kustomization release-image reconciles and waits for. Empty skips the Flux sync.
   workspaces:
     - name: source
+    - name: git-ssh
+      optional: true
+      description: Secret git-ssh, deploy keys for private repos (clone task only).
   results:
     - name: commit
       value: $(tasks.clone.results.commit)
@@ -62,6 +65,8 @@ spec:
       workspaces:
         - name: source
           workspace: source
+        - name: git-ssh
+          workspace: git-ssh
     - name: build
       runAfter:
         - clone

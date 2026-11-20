@@ -8,6 +8,7 @@ resources:
   - limitrange.yaml
   - rbac.yaml
   - secrets.yaml
+  - git-ssh-secret.yaml
   - image-policy.yaml
   - dashboard-httproute.yaml
   - dashboard-oauth2-proxy.yaml

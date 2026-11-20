@@ -68,3 +68,7 @@ spec:
                 resources:
                   requests:
                     storage: 2Gi
+          # Only the clone task mounts it; it holds a key only for private repos
+          - name: git-ssh
+            secret:
+              secretName: git-ssh

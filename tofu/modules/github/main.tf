@@ -91,3 +91,13 @@ resource "github_repository_webhook" "flux_receiver" {
 resource "github_user_gpg_key" "flux" {
   armored_public_key = var.flux.signing_key_pub
 }
+
+# Read-only keys Tekton's git-clone uses for private CI repos (private halves: Secret tekton-ci/git-ssh)
+resource "github_repository_deploy_key" "ci" {
+  for_each = var.ci_deploy_keys
+
+  repository = github_repository.repos[each.key].name
+  title      = "tekton-ci"
+  key        = each.value
+  read_only  = true
+}

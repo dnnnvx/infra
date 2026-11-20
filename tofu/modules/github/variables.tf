@@ -31,3 +31,9 @@ variable "flux" {
   })
   sensitive = true
 }
+
+variable "ci_deploy_keys" {
+  description = "Read-only deploy keys (OpenSSH public keys) for Tekton to clone private CI repos, keyed by repository name"
+  type        = map(string)
+  default     = {}
+}

@@ -23,8 +23,17 @@ resource "random_password" "flux_receiver" {
   special = false
 }
 
+# Clone keys for private CI repos: GitHub gets the public half (read-only deploy key), the cluster the
+# private one through flux-substitutions (infrastructure/configs/tekton/git-ssh-secret.yaml)
+resource "tls_private_key" "ci_clone" {
+  for_each  = toset(["marcods"])
+  algorithm = "ED25519"
+}
+
 module "github" {
   source = "../modules/github"
+
+  ci_deploy_keys = { for repo, key in tls_private_key.ci_clone : repo => key.public_key_openssh }
 
   repositories = {
     # CI-built (ci_webhook: Trigger in apps/<project>/ci.yaml or infrastructure/configs/tekton/triggers/)

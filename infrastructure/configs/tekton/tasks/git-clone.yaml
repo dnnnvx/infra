@@ -17,6 +17,13 @@ spec:
       description: Clone target inside the workspace (the volume root has lost+found).
   workspaces:
     - name: source
+    - name: git-ssh
+      optional: true
+      readOnly: true
+      description: >-
+        Secret git-ssh: a private key per repository name plus known_hosts. If it holds a key for
+        this repo, github.com is fetched over SSH on 443 (private repos); the url stays HTTPS, as
+        Kyverno's provenance check pins it.
   results:
     - name: commit
     - name: short-commit
@@ -43,6 +50,14 @@ spec:
         rm -rf "$dir"
         mkdir -p "$dir"
         cd "$dir"
+        key="$(workspaces.git-ssh.path)/$(basename "$(params.url)" .git)"
+        if [ "$(workspaces.git-ssh.bound)" = true ] && [ -s "$key" ]; then
+          # ssh refuses the group-readable secret mount, hence the copy
+          install -m 600 "$key" /tmp/id_git
+          export GIT_SSH_COMMAND="ssh -i /tmp/id_git -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$(workspaces.git-ssh.path)/known_hosts"
+          git config --global url."ssh://git@ssh.github.com:443/".insteadOf https://github.com/
+          echo "Fetching over SSH with the git-ssh deploy key"
+        fi
         git init -q
         git remote add origin "$(params.url)"
         git fetch -q --depth 1 origin "$(params.revision)"
