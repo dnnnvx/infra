@@ -159,9 +159,9 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
    `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's). Kyverno then only admits
    Chains-signed digests of it. If the repo lives outside `github.com/dnnnvx`, add it to the
    `repo-url` allowlist in `infrastructure/configs/tekton/image-policy.yaml` first.
-3. On GitHub: repo **Settings → Webhooks** → payload URL `https://ci.casasulgorgo.net/`, content type
-   `application/json`, event "Just the push event", secret = `github-webhook` value
-   (`just edit-secret infrastructure/configs/tekton/triggers/github-webhook-secret.yaml`).
+3. Add the repo to `repositories` in `module "github"` (`tofu/production/main.tf`; an existing repo also needs an
+   `import` entry) and run `just tofu apply`: tofu manages the repo settings and creates its push webhook to
+   `https://ci.casasulgorgo.net/` with the HMAC secret.
 
 ## Infra validation (validate-infra)
 
@@ -196,6 +196,12 @@ lets `push` events through; without `secretRef` it would accept anything, so eve
 The `cel` interceptor then filters on `repository.full_name` and the branch and computes the tags. The
 commit comes from the authenticated payload; the clone URL is pinned in each Trigger, since Kyverno
 allowlists it in the provenance. `just ci-build <repo> <sha>` replays a signed push.
+
+tofu owns both webhook secrets (`random_password.github_webhook` for CI, `random_password.flux_receiver` for the
+Flux Receiver on `infra`): it sets them on the GitHub webhooks (`tofu/modules/github`) and passes them to the cluster
+as `github_webhook_secret` / `flux_receiver_token` in `flux-substitutions`, which fill
+`triggers/github-webhook-secret.yaml` and `infrastructure/configs/flux/receiver-token.yaml`. Neither value is in git;
+to rotate one, `just tofu apply -replace=random_password.<name>`.
 
 ## Registry access
 

@@ -19,6 +19,14 @@ variable "cloudflare_api_token" {
   sensitive   = true
 }
 
+# GitHub
+
+variable "github_token" {
+  description = "Fine-grained token for the dnnnvx repositories: Administration (read/write, settings + deploy keys), Webhooks (read/write), Metadata (read)"
+  type        = string
+  sensitive   = true
+}
+
 # WireGuard (remote access, see docs/src/remote-access.md)
 
 variable "wireguard_hostname" {

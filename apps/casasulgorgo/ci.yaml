@@ -1,6 +1,7 @@
 # Build → deploy wiring for this app (Tekton Trigger, Flux image automation, flux-sync RBAC).
 # Its Flux Kustomization is clusters/production/apps/casasulgorgo.yaml. For a new CI-built app, copy both and replace:
-#   casasulgorgo → project and GitHub repository (Trigger filter, repo-url) · web (image) → image name.
+#   casasulgorgo → project and GitHub repository (Trigger filter, repo-url; add it to module "github" in tofu/production/main.tf for
+#   the webhook) · web (image) → image name.
 # Per extra image: another ImageRepository/ImagePolicy pair, its name in the Role's resourceNames,
 # a `<name>,<attr>,<flakedir>` entry (space-separated) in the Trigger's `images` binding
 # and an `images:` entry with a `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` marker in kustomization.yaml.

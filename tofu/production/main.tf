@@ -44,6 +44,14 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 5"
     }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.13"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.7"
+    }
   }
 }
 
@@ -81,6 +89,11 @@ provider "helm" {
 
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
+}
+
+provider "github" {
+  owner = "dnnnvx"
+  token = var.github_token
 }
 
 module "talos" {
@@ -230,6 +243,69 @@ module "cloudflare" {
   }
 }
 
+# Webhook HMAC secrets: GitHub gets them here, the cluster through flux-substitutions
+# (infrastructure/configs/tekton/triggers/github-webhook-secret.yaml, infrastructure/configs/flux/receiver-token.yaml)
+resource "random_password" "github_webhook" {
+  length  = 48
+  special = false
+}
+
+resource "random_password" "flux_receiver" {
+  length  = 48
+  special = false
+}
+
+module "github" {
+  source = "../modules/github"
+
+  repositories = {
+    infra = {
+      description = "Homelab cluster as code"
+      topics      = ["fluxcd", "gitops", "homelab", "iac", "kubernetes", "talos", "tofu"]
+    }
+    casasulgorgo = {
+      description  = "Local nature, season by season"
+      homepage_url = "https://casasulgorgo.net"
+      has_wiki     = true
+    }
+    kubbot = {
+      description = "A Matrix bot for the homelab (flux, kyverno, tekton, k8s)"
+      has_wiki    = true
+      topics      = ["alerting", "alerts", "bot", "chat", "ci", "cicd", "fluxcd", "kyverno", "matrix", "tekton"]
+    }
+    marcods = {
+      description = "Portfolio / website"
+      visibility  = "private"
+    }
+  }
+
+  ci_webhook = {
+    url    = "https://ci.casasulgorgo.net/"
+    secret = random_password.github_webhook.result
+  }
+
+  flux = {
+    repository     = "infra"
+    deploy_key_pub = var.flux_deploy_key_pub
+    # Flux's path is /hook/sha256(token + name + namespace) of the Receiver (infrastructure/configs/flux/receiver.yaml)
+    receiver_url    = "https://flux.casasulgorgo.net/hook/${sha256("${random_password.flux_receiver.result}github-pushflux-system")}"
+    receiver_secret = random_password.flux_receiver.result
+  }
+}
+
+# Repositories and the Flux deploy key created by hand before tofu managed GitHub. The key was read-only:
+# deploy keys are immutable, so the first apply replaces it with a read-write one.
+import {
+  for_each = toset(["infra", "casasulgorgo", "kubbot", "marcods"])
+  to       = module.github.github_repository.repos[each.key]
+  id       = each.key
+}
+
+import {
+  to = module.github.github_repository_deploy_key.flux
+  id = "infra:145162879"
+}
+
 module "k8s" {
   source = "../modules/k8s"
 
@@ -260,7 +336,10 @@ module "k8s" {
     {
       name      = "flux-substitutions"
       namespace = "flux-system"
-      data      = var.flux_substitutions
+      data = merge(var.flux_substitutions, {
+        github_webhook_secret = random_password.github_webhook.result
+        flux_receiver_token   = random_password.flux_receiver.result
+      })
     },
     {
       name      = "cloudflare-api-token"
