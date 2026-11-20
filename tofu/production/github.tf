@@ -29,17 +29,20 @@ module "github" {
   repositories = {
     # CI-built (ci_webhook: Trigger in apps/<project>/ci.yaml or infrastructure/configs/tekton/triggers/)
     infra = {
+      visibility  = "public"
       description = "Homelab cluster as code"
       topics      = ["fluxcd", "gitops", "homelab", "iac", "kubernetes", "talos", "tofu"]
       ci_webhook  = true
     }
     casasulgorgo = {
+      visibility   = "public"
       description  = "Local nature, season by season"
       homepage_url = "https://casasulgorgo.net"
       has_wiki     = true
       ci_webhook   = true
     }
     kubbot = {
+      visibility  = "public"
       description = "A Matrix bot for the homelab (flux, kyverno, tekton, k8s)"
       has_wiki    = true
       topics      = ["alerting", "alerts", "bot", "chat", "ci", "cicd", "fluxcd", "kyverno", "matrix", "tekton"]
@@ -52,31 +55,37 @@ module "github" {
     }
     # settings only
     nix = {
+      visibility  = "public"
       description = "Macbook and Raspberry Pis setup"
       has_wiki    = true
       topics      = ["dotfiles", "home-manager", "nix"]
     }
     radicle-images = {
+      visibility   = "public"
       description  = "Radicle container images"
       homepage_url = "https://github.com/dnnnvx?tab=packages&repo_name=radicle-images"
       has_wiki     = true
       topics       = ["container", "containerization", "containers", "docker", "docker-compose", "docker-image", "dockerfile", "kubernetes", "radicle"]
     }
     dnnnvx = {
+      visibility  = "public"
       description = "dnnnvx meets dnnnvx"
       has_wiki    = true
     }
     tangled-interceptor = {
+      visibility  = "public"
       description = "Tekton interceptor that verifies Tangled webhook signatures."
       has_wiki    = true
       topics      = ["cicd", "interceptor", "tangled", "tekton", "webhook"]
     }
     dotfiles = {
+      visibility  = "public"
       description = "dot dot :lizard:"
       has_wiki    = true
       topics      = ["configuration", "dotfiles"]
     }
     solzk = {
+      visibility  = "public"
       description = "Solidity / ZK circuits / Test & Exercises"
       has_wiki    = true
     }
@@ -93,5 +102,7 @@ module "github" {
     # Flux's path is /hook/sha256(token + name + namespace) of the Receiver (infrastructure/configs/flux/receiver.yaml)
     receiver_url    = "https://flux.casasulgorgo.net/hook/${sha256("${random_password.flux_receiver.result}github-pushflux-system")}"
     receiver_secret = random_password.flux_receiver.result
+    # Public half of infrastructure/configs/flux/signing-key.yaml (SOPS)
+    signing_key_pub = file("${path.module}/flux-signing-key.asc")
   }
 }

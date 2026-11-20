@@ -22,7 +22,7 @@ variable "cloudflare_api_token" {
 # GitHub
 
 variable "github_token" {
-  description = "Fine-grained token for the dnnnvx repositories: Administration (read/write, settings + deploy keys), Webhooks (read/write), Metadata (read)"
+  description = "Fine-grained token for all dnnnvx repositories: Administration, Webhooks, Dependabot alerts (read/write), Metadata (read); account permission GPG keys (read/write)"
   type        = string
   sensitive   = true
 }

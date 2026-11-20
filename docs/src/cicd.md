@@ -144,6 +144,11 @@ An app may have several images: the build task builds them one after the other a
 `name=digest` list, and `flux-sync` waits for every policy before the single bot commit.
 A build started without `flux-kustomization` is released without the task.
 
+The bot commits are GPG-signed (`signingKey` in `infrastructure/configs/flux/image-update-automation.yaml`,
+private key in the SOPS Secret `signing-key.yaml`) as `fluxcdbot <17187206+dnnnvx@users.noreply.github.com>`. tofu
+registers the public half (`tofu/production/flux-signing-key.asc`) on the GitHub account, so they show as Verified.
+To rotate: generate a new key with the same identity, replace both files and run `just tofu apply`.
+
 Every app has its own Kustomization (`clusters/production/apps/<project>.yaml`), so the deploy task waits
 for this app only: an unhealthy unrelated app doesn't fail the release.
 

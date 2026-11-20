@@ -1,6 +1,7 @@
 resource "github_repository" "repos" {
   # checkov:skip=CKV_GIT_1:Public on purpose (open-source homelab, dotfiles, portfolio); visibility is set per repo
   # checkov:skip=CKV2_GIT_1:Public repos get github_branch_protection.main below; private ones can't on GitHub Free
+  # checkov:skip=CKV_GIT_3:Vulnerability alerts are enabled by github_repository_vulnerability_alerts.repos (the attribute is deprecated)
   for_each = var.repositories
 
   name         = each.key
@@ -13,9 +14,6 @@ resource "github_repository" "repos" {
   has_issues   = true
   has_projects = true
 
-  # Dependabot alerts
-  vulnerability_alerts = true
-
   # a `tofu destroy` (or dropping a repo from the map) archives instead of deleting
   archive_on_destroy = true
 
@@ -24,12 +22,27 @@ resource "github_repository" "repos" {
   }
 }
 
+# Dependabot alerts, then automatic PRs for vulnerable dependencies (security updates need alerts on)
+resource "github_repository_vulnerability_alerts" "repos" {
+  for_each = var.repositories
+
+  repository = github_repository.repos[each.key].name
+  enabled    = true
+}
+
+resource "github_repository_dependabot_security_updates" "repos" {
+  for_each = var.repositories
+
+  repository = github_repository_vulnerability_alerts.repos[each.key].repository
+  enabled    = true
+}
+
 # Guards history, not workflow: no force-pushes or deletion of main, while direct pushes (and Flux's
 # image automation commits on infra) keep working. Public repos only: GitHub Free doesn't offer branch
 # protection on private ones.
 resource "github_branch_protection" "main" {
   # checkov:skip=CKV_GIT_5:Solo repos: required approvals would block direct pushes and Flux image automation
-  # checkov:skip=CKV_GIT_6:Flux image automation commits unsigned; required signatures would block it
+  # checkov:skip=CKV_GIT_6:Not required yet: Flux now signs (github_user_gpg_key.flux), but other machines may push unsigned
   for_each = { for name, repo in var.repositories : name => repo if repo.visibility == "public" }
 
   repository_id       = github_repository.repos[each.key].node_id
@@ -72,4 +85,9 @@ resource "github_repository_webhook" "flux_receiver" {
     secret       = var.flux.receiver_secret
     insecure_ssl = false
   }
+}
+
+# Lets GitHub verify image automation's signed commits (the key's identity is the account's noreply address)
+resource "github_user_gpg_key" "flux" {
+  armored_public_key = var.flux.signing_key_pub
 }
