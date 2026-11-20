@@ -20,7 +20,7 @@ resource "github_repository" "repos" {
 }
 
 resource "github_repository_webhook" "ci" {
-  for_each = var.repositories
+  for_each = { for name, repo in var.repositories : name => repo if repo.ci_webhook }
 
   repository = github_repository.repos[each.key].name
   events     = ["push"]

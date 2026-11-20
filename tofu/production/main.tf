@@ -259,23 +259,58 @@ module "github" {
   source = "../modules/github"
 
   repositories = {
+    # CI-built (ci_webhook: Trigger in apps/<project>/ci.yaml or infrastructure/configs/tekton/triggers/)
     infra = {
       description = "Homelab cluster as code"
       topics      = ["fluxcd", "gitops", "homelab", "iac", "kubernetes", "talos", "tofu"]
+      ci_webhook  = true
     }
     casasulgorgo = {
       description  = "Local nature, season by season"
       homepage_url = "https://casasulgorgo.net"
       has_wiki     = true
+      ci_webhook   = true
     }
     kubbot = {
       description = "A Matrix bot for the homelab (flux, kyverno, tekton, k8s)"
       has_wiki    = true
       topics      = ["alerting", "alerts", "bot", "chat", "ci", "cicd", "fluxcd", "kyverno", "matrix", "tekton"]
+      ci_webhook  = true
     }
     marcods = {
       description = "Portfolio / website"
       visibility  = "private"
+      ci_webhook  = true
+    }
+    # settings only
+    nix = {
+      description = "Macbook and Raspberry Pis setup"
+      has_wiki    = true
+      topics      = ["dotfiles", "home-manager", "nix"]
+    }
+    radicle-images = {
+      description  = "Radicle container images"
+      homepage_url = "https://github.com/dnnnvx?tab=packages&repo_name=radicle-images"
+      has_wiki     = true
+      topics       = ["container", "containerization", "containers", "docker", "docker-compose", "docker-image", "dockerfile", "kubernetes", "radicle"]
+    }
+    dnnnvx = {
+      description = "dnnnvx meets dnnnvx"
+      has_wiki    = true
+    }
+    tangled-interceptor = {
+      description = "Tekton interceptor that verifies Tangled webhook signatures."
+      has_wiki    = true
+      topics      = ["cicd", "interceptor", "tangled", "tekton", "webhook"]
+    }
+    dotfiles = {
+      description = "dot dot :lizard:"
+      has_wiki    = true
+      topics      = ["configuration", "dotfiles"]
+    }
+    solzk = {
+      description = "Solidity / ZK circuits / Test & Exercises"
+      has_wiki    = true
     }
   }
 
@@ -296,7 +331,7 @@ module "github" {
 # Repositories and the Flux deploy key created by hand before tofu managed GitHub. The key was read-only:
 # deploy keys are immutable, so the first apply replaces it with a read-write one.
 import {
-  for_each = toset(["infra", "casasulgorgo", "kubbot", "marcods"])
+  for_each = toset(["infra", "casasulgorgo", "kubbot", "marcods", "nix", "radicle-images", "dnnnvx", "tangled-interceptor", "dotfiles", "solzk"])
   to       = module.github.github_repository.repos[each.key]
   id       = each.key
 }

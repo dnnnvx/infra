@@ -1,11 +1,12 @@
 variable "repositories" {
-  description = "Repositories under the provider's owner, keyed by name. Each gets the CI push webhook."
+  description = "Repositories under the provider's owner, keyed by name. ci_webhook: push webhook to the Tekton EventListener (the repo needs a Trigger)."
   type = map(object({
     description  = string
     visibility   = optional(string, "public")
     homepage_url = optional(string)
     has_wiki     = optional(bool, false)
     topics       = optional(list(string), [])
+    ci_webhook   = optional(bool, false)
   }))
 }
 

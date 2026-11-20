@@ -159,7 +159,7 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
    `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's). Kyverno then only admits
    Chains-signed digests of it. If the repo lives outside `github.com/dnnnvx`, add it to the
    `repo-url` allowlist in `infrastructure/configs/tekton/image-policy.yaml` first.
-3. Add the repo to `repositories` in `module "github"` (`tofu/production/main.tf`; an existing repo also needs an
+3. Add the repo with `ci_webhook = true` to `repositories` in `module "github"` (`tofu/production/main.tf`; an existing repo also needs an
    `import` entry) and run `just tofu apply`: tofu manages the repo settings and creates its push webhook to
    `https://ci.casasulgorgo.net/` with the HMAC secret.
 
