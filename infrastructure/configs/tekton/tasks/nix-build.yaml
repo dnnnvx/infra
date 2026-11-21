@@ -88,8 +88,10 @@ spec:
     - name: build-and-push
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
+        # Nix ignores a $HOME owned by someone else (/tmp is root's) and falls back to passwd,
+        # which has no entry for uid 1000. A not-yet-existing path is accepted (created on use).
         - name: HOME
-          value: /tmp
+          value: /tmp/home
         - name: TMPDIR
           value: /tmp
         - name: NIX_CONFIG
