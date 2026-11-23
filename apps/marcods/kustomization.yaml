@@ -13,4 +13,4 @@ images:
   - name: marcods
     newName: registry.local.casasulgorgo.net/marcods/web
     newTag: production
-    digest: sha256:73006ba34388cceb11add5fbfd95774478fd4dd5ebf2bc61aa97ef8385f7c827 # {"$imagepolicy": "flux-system:marcods-web:digest"}
+    digest: sha256:ee5f40e0bc295537bc72bc32498c55a01d68d36685dbdc3e603a0be71248a476 # {"$imagepolicy": "flux-system:marcods-web:digest"}
