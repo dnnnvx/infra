@@ -85,6 +85,9 @@ spec:
         for e in /nix/var/nix/db/*; do
           case "$e" in */big-lock|*/reserved) ;; *) cp -a "$e" /nix-rw/var/nix/db/ ;; esac
         done
+        # The emptyDir root is setgid (fsGroup) and new dirs inherit it. Nix's syscall filter refuses
+        # setgid modes, so a build under /nix/var/nix/builds fails in unpackPhase (cp: setting permissions).
+        find /nix-rw -mindepth 1 -type d -perm -2000 -exec chmod g-s {} +
     - name: build-and-push
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
