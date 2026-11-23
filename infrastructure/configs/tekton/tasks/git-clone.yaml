@@ -29,13 +29,47 @@ spec:
     - name: short-commit
     - name: commit-timestamp
       description: Committer date as unix seconds, used to build sortable image tags.
+  volumes:
+    - name: mirror
+      emptyDir: {}
   steps:
-    - name: clone
+    # OpenSSH exits ("No user exists for uid 1000") when getpwuid() fails, and the image's
+    # /etc/passwd has no uid 1000. So the network fetch runs as nobody into a scratch mirror,
+    # and the checkout below runs as the pod user, so the workspace stays owned by uid 1000.
+    - name: fetch
       image: alpine/git:v2.54.1
+      securityContext:
+        runAsUser: 65534
+      volumeMounts:
+        - name: mirror
+          mountPath: /mirror
       env:
         - name: HOME
           value: /tmp
-        # The volume root is owned by root (fsGroup only grants group access)
+      script: |
+        #!/bin/sh
+        set -eu
+        git init -q --bare /mirror
+        cd /mirror
+        key="$(workspaces.git-ssh.path)/$(basename "$(params.url)" .git)"
+        if [ "$(workspaces.git-ssh.bound)" = true ] && [ -s "$key" ]; then
+          # ssh refuses the group-readable secret mount, hence the copy
+          install -m 600 "$key" /tmp/id_git
+          export GIT_SSH_COMMAND="ssh -i /tmp/id_git -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$(workspaces.git-ssh.path)/known_hosts"
+          git config --global url."ssh://git@ssh.github.com:443/".insteadOf https://github.com/
+          echo "Fetching over SSH with the git-ssh deploy key"
+        fi
+        git fetch -q --depth 1 "$(params.url)" "+$(params.revision):refs/heads/ci"
+    - name: clone
+      image: alpine/git:v2.54.1
+      volumeMounts:
+        - name: mirror
+          mountPath: /mirror
+          readOnly: true
+      env:
+        - name: HOME
+          value: /tmp
+        # The volume root is owned by root (fsGroup only grants group access), the mirror by nobody
         - name: GIT_CONFIG_COUNT
           value: "1"
         - name: GIT_CONFIG_KEY_0
@@ -50,17 +84,9 @@ spec:
         rm -rf "$dir"
         mkdir -p "$dir"
         cd "$dir"
-        key="$(workspaces.git-ssh.path)/$(basename "$(params.url)" .git)"
-        if [ "$(workspaces.git-ssh.bound)" = true ] && [ -s "$key" ]; then
-          # ssh refuses the group-readable secret mount, hence the copy
-          install -m 600 "$key" /tmp/id_git
-          export GIT_SSH_COMMAND="ssh -i /tmp/id_git -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$(workspaces.git-ssh.path)/known_hosts"
-          git config --global url."ssh://git@ssh.github.com:443/".insteadOf https://github.com/
-          echo "Fetching over SSH with the git-ssh deploy key"
-        fi
         git init -q
         git remote add origin "$(params.url)"
-        git fetch -q --depth 1 origin "$(params.revision)"
+        git fetch -q --depth 1 file:///mirror refs/heads/ci
         git -c advice.detachedHead=false checkout -q FETCH_HEAD
         printf %s "$(git rev-parse HEAD)" > "$(results.commit.path)"
         printf %s "$(git rev-parse --short=7 HEAD)" > "$(results.short-commit.path)"
