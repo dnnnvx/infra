@@ -13,4 +13,4 @@ images:
   - name: kubbot
     newName: registry.local.casasulgorgo.net/kubbot/bot
     newTag: production
-    digest: sha256:5be4f4135df78269bc7c8cbfdaedb72f00379bc0011698b19db24b9e9d31e218 # {"$imagepolicy": "flux-system:kubbot-bot:digest"}
+    digest: sha256:6b4542e28a5ae18d9c502ad1a4a2f49efa6840b9c1958be94ed11fcddd029086 # {"$imagepolicy": "flux-system:kubbot-bot:digest"}
