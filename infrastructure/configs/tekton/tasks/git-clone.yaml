@@ -60,8 +60,8 @@ spec:
         cd /mirror
         key="$(workspaces.git-ssh.path)/$(basename "$(params.url)" .git)"
         if [ "$(workspaces.git-ssh.bound)" = true ] && [ -s "$key" ]; then
-          # ssh refuses the group-readable secret mount, hence the copy
-          install -m 600 "$key" /tmp/id_git
+          # Stored base64-encoded (see git-ssh-secret.yaml); ssh also refuses the group-readable mount
+          (umask 077 && base64 -d "$key" > /tmp/id_git)
           export GIT_SSH_COMMAND="ssh -i /tmp/id_git -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$(workspaces.git-ssh.path)/known_hosts"
           git config --global url."ssh://git@ssh.github.com:443/".insteadOf https://github.com/
           echo "Fetching over SSH with the git-ssh deploy key"
