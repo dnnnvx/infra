@@ -7,3 +7,9 @@ resources:
   - service.yaml
   - ciliumnetworkpolicy.yaml
   - httproute.yaml
+configMapGenerator:
+  - name: git-sync
+    namespace: silverbullet
+    files:
+      - git-sync/publish.sh
+      - git-sync/sparse-checkout

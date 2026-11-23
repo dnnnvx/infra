@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/part-of: silverbullet
   annotations:
     checkov.io/skip1: CKV_K8S_22=the entrypoint's PUID/PGID user setup isn't verified with a read-only root yet
+    checkov.io/skip2: CKV_K8S_9=git-sync sidecar has no readiness probe on purpose, a GitHub outage must not take the notes out of the Service
 spec:
   replicas: 1
   strategy:
@@ -65,7 +66,64 @@ spec:
               port: http
             initialDelaySeconds: 5
             timeoutSeconds: 3
+        # Public docs space (docs.marcods.dev): mirrors each repo's docs/src into
+        # /data/spaces/docs/<repo>. Git is the source of truth, nothing to back up.
+        # Another repo = a copy of this container with its own REPO_NAME, --repo and /git volume.
+        - name: git-sync-infra
+          image: registry.k8s.io/git-sync/git-sync:v4.8.0
+          args:
+            - --repo=https://github.com/dnnnvx/infra
+            - --ref=main
+            - --root=/git
+            - --link=current
+            - --period=5m
+            - --sparse-checkout-file=/config/sparse-checkout
+            - --exechook-command=/config/publish.sh
+            - --http-bind=:2020
+          env:
+            - name: REPO_NAME
+              value: infra
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: 2020
+              name: git-sync
+          resources:
+            requests:
+              cpu: 5m
+              memory: 32Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: git-sync-config
+              mountPath: /config
+            - name: git-infra
+              mountPath: /git
+            - name: tmp
+              mountPath: /tmp
+            # only the docs space, not the private notes. The space must exist
+            # first (created in the dashboard), or kubelet creates it root-owned.
+            - name: data
+              mountPath: /space
+              subPath: spaces/docs
+          livenessProbe:
+            httpGet:
+              path: /
+              port: git-sync
+            initialDelaySeconds: 30
+            timeoutSeconds: 3
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: data
+        - name: git-sync-config
+          configMap:
+            name: git-sync
+            defaultMode: 0555
+        - name: git-infra
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
