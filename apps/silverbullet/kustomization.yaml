@@ -13,3 +13,4 @@ configMapGenerator:
     files:
       - docs-sync/sync.sh
       - docs-sync/repos
+      - docs-sync/index.md
