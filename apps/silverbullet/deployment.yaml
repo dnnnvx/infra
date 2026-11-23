@@ -7,7 +7,8 @@ metadata:
     app.kubernetes.io/part-of: silverbullet
   annotations:
     checkov.io/skip1: CKV_K8S_22=the entrypoint's PUID/PGID user setup isn't verified with a read-only root yet
-    checkov.io/skip2: CKV_K8S_9=git-sync sidecar has no readiness probe on purpose, a GitHub outage must not take the notes out of the Service
+    checkov.io/skip2: CKV_K8S_9=docs-sync sidecar has no readiness probe on purpose, a GitHub outage must not take the notes out of the Service
+    checkov.io/skip3: CKV_K8S_8=docs-sync is a sleep loop with no endpoint to probe; failures are logged per repo and retried next period
 spec:
   replicas: 1
   strategy:
@@ -66,31 +67,21 @@ spec:
               port: http
             initialDelaySeconds: 5
             timeoutSeconds: 3
-        # Public docs space (docs.marcods.dev): mirrors each repo's docs/src into
-        # /data/spaces/docs/<repo>. Git is the source of truth, nothing to back up.
-        # Another repo = a copy of this container with its own REPO_NAME, --repo and /git volume.
-        - name: git-sync-infra
+        # Public docs space (docs.marcods.dev): mirrors the repos listed in
+        # docs-sync/repos into /data/spaces/docs/<folder>. Git is the source of
+        # truth, nothing to back up. The git-sync image only provides bash + git;
+        # docs-sync/sync.sh does the work, so one container serves every repo.
+        - name: docs-sync
           image: registry.k8s.io/git-sync/git-sync:v4.8.0
-          args:
-            - --repo=https://github.com/dnnnvx/infra
-            - --ref=main
-            - --root=/git/infra
-            - --link=current
-            - --period=5m
-            - --sparse-checkout-file=/config/sparse-checkout
-            - --exechook-command=/config/publish.sh
-            - --http-bind=:2020
+          command: ["/bin/bash", "/config/sync.sh"]
           env:
-            - name: REPO_NAME
-              value: infra
+            - name: PERIOD
+              value: "300"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-          ports:
-            - containerPort: 2020
-              name: git-sync
           resources:
             requests:
               cpu: 5m
@@ -98,9 +89,11 @@ spec:
             limits:
               memory: 256Mi
           volumeMounts:
-            - name: git-sync-config
+            - name: docs-sync-config
               mountPath: /config
-            - name: git-infra
+            # clones go in /git/<folder>, created by git as uid 1000: the
+            # root-owned mount point itself would be "dubious ownership"
+            - name: git
               mountPath: /git
             - name: tmp
               mountPath: /tmp
@@ -109,21 +102,14 @@ spec:
             - name: data
               mountPath: /space
               subPath: spaces/docs
-          livenessProbe:
-            httpGet:
-              path: /
-              port: git-sync
-            initialDelaySeconds: 30
-            timeoutSeconds: 3
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: data
-        - name: git-sync-config
+        - name: docs-sync-config
           configMap:
-            name: git-sync
-            defaultMode: 0555
-        - name: git-infra
+            name: docs-sync
+        - name: git
           emptyDir: {}
         - name: tmp
           emptyDir: {}

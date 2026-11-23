@@ -1,0 +1,3 @@
+# Public repos mirrored into the docs space (docs.marcods.dev), one folder per repo.
+# <folder> <https url> <branch> <docs path in the repo>
+infra https://github.com/dnnnvx/infra main docs/src
