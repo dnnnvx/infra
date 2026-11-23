@@ -127,6 +127,9 @@ spec:
           value: $(params.project)
         - name: digests
           value: $(tasks.build.results.digests)
+      workspaces:
+        - name: source
+          workspace: source
     # Lockfiles: what scan-image can't see in bundled, static or Nix images
     - name: scan-source
       retries: 2

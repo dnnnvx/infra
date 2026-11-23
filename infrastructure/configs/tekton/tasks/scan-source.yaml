@@ -9,7 +9,7 @@ spec:
     on any known vulnerability of the given severity or worse that has a fix (grype). Covers what
     scan-image can't see: dependencies bundled by adapter-node, statically linked Rust/Go, and Nix
     images, which have no package database. Leaves the SBOM at sboms/lockfiles.cdx.json in the
-    workspace, which the sbom task attaches to every image.
+    workspace, which the sbom task attaches to every image. Time-boxed exceptions: .grype-ignore.
   params:
     - name: subdirectory
       type: string
@@ -50,5 +50,19 @@ spec:
       script: |
         #!/busybox/sh
         set -eu
-        /grype "sbom:$(workspaces.source.path)/sboms/lockfiles.cdx.json" \
+        # .grype-ignore at the repo root: "<CVE/GHSA id> <until YYYY-MM-DD> <reason>" per line. Only
+        # these ids are ignored (no other grype options), and a malformed or expired line fails the run.
+        ignore="$(workspaces.source.path)/$(params.subdirectory)/.grype-ignore"
+        printf 'ignore:\n' > /tmp/grype.yaml
+        if [ -f "$ignore" ]; then
+          awk -v today="$(date -u +%F)" '
+            /^[[:space:]]*(#|$)/ { next }
+            $1 !~ /^(CVE-[0-9]{4}-[0-9]+|GHSA(-[0-9a-z]{4}){3})$/ || $2 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ || NF < 3 {
+              printf ".grype-ignore:%d: want <CVE/GHSA id> <until YYYY-MM-DD> <reason>\n", NR > "/dev/stderr"; bad = 1; next
+            }
+            $2 < today { printf ".grype-ignore:%d: %s expired on %s\n", NR, $1, $2 > "/dev/stderr"; bad = 1; next }
+            { printf "  - vulnerability: %s\n", $1; printf "Ignoring %s until %s\n", $1, $2 > "/dev/stderr" }
+            END { exit bad }' "$ignore" >> /tmp/grype.yaml
+        fi
+        /grype "sbom:$(workspaces.source.path)/sboms/lockfiles.cdx.json" --config /tmp/grype.yaml \
           --only-fixed --fail-on "$(params.fail-on)"

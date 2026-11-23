@@ -66,7 +66,7 @@ then:
 - **scan**: grype scans the image and fails the run on vulnerabilities of severity `high` or worse that have a
   fix (`fail-on` param, `--only-fixed`). Unfixable CVEs don't block a release.
 - **scan-source** (in parallel with scan): the same check on the repository's lockfiles, see
-  [Vulnerability scans](#vulnerability-scans).
+  [Vulnerability scans](#vulnerability-scans). Both honour the repo's time-boxed `.grype-ignore`.
 - **sbom** (after scan-source): oras attaches SBOMs to each image as OCI referrers: the image's own
   (`application/spdx+json` from syft, or for nix-build the closure's `application/vnd.cyclonedx+json` from
   sbomnix) and `source-lockfiles.cdx.json` from scan-source. The image SBOM's blob digest is the `sboms` result.
@@ -246,9 +246,9 @@ build recompiles the app.
 
 ## Vulnerability scans
 
-`scan-image` runs grype on the pushed image, which only sees OS package databases (dpkg/apk). That misses
-dependencies adapter-node bundles into `build/`, statically linked Rust/Go binaries, and everything in a Nix
-image. `scan-source` (after `build`, both builders) closes the gap: syft catalogs the repository's lockfiles
+`scan-image` runs grype on the pushed image, which sees OS package databases (dpkg/apk) and Nix store paths
+(by name and version, blind to nixpkgs' CVE patches). That misses dependencies adapter-node bundles into
+`build/` and statically linked Rust/Go binaries. `scan-source` (after `build`, both builders) closes the gap: syft catalogs the repository's lockfiles
 (npm devDependencies included, since adapter-node bundles them) and grype fails the run on a fixable
 vulnerability of `fail-on` severity (default high) or worse.
 
@@ -259,6 +259,16 @@ only printed in the log. With one, any CVE not in it fails the run, so a repo op
 triaged: `vulnix -C -W vulnix.toml <image out path>` writes the current matches as a starting whitelist; give each
 entry a `comment` and an `until` date so exceptions expire. vulnix downloads the NVD feeds on every run (there's
 no cache volume yet), which adds a few minutes to the build.
+
+Exceptions to both grype scans go in `.grype-ignore` at the repository root, one per line:
+
+```
+# <CVE/GHSA id> <until YYYY-MM-DD> <reason>
+CVE-2026-124709 2026-12-23 openssl 3.5.10 not in nixpkgs yet
+```
+
+The scan tasks turn it into a grype config holding only those `ignore` ids, so a repo can't loosen any other
+option or ignore a whole package. A malformed line, or one past its `until` date, fails the run.
 
 ## Build isolation (`tekton-ci`)
 
