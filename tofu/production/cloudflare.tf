@@ -25,7 +25,7 @@ module "cloudflare" {
       }
     }
     "marcods.dev" = {
-      cname_subdomains = ["rad", "git", "notes"]
+      cname_subdomains = ["rad", "git", "notes", "docs"]
       atproto_did      = local.atproto_did
     }
   }

@@ -16,6 +16,7 @@ spec:
       sectionName: https-marcods-sub
   hostnames:
     - notes.marcods.dev
+    - docs.marcods.dev
   rules:
     - backendRefs:
         - name: silverbullet
