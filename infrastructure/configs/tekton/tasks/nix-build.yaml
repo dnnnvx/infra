@@ -10,7 +10,11 @@ spec:
     is the sandbox), non-root and under RuntimeDefault seccomp, so tekton-ci stays PodSecurity
     restricted. The flake sets the label ci.casasulgorgo.net/commit-timestamp itself from
     self.lastModified (the commit date); release-image refuses to move tags to an image without
-    it. Then, per image, it writes a CycloneDX
+    it. Builds substitute from the Nix cache on RustFS (bucket nix-cache, tofu/modules/rustfs), and
+    push-cache then uploads every path this run built or fetched itself, signed; the signing key
+    and write credentials live only in that step's container, never where builds run. A cache
+    outage only costs speed: fallback builds locally and push-cache may fail without failing the
+    run. Then scan-closure, per image, writes a CycloneDX
     SBOM of the runtime closure (sbomnix) to sboms/images/<name>.cdx.json in the workspace, which
     the sbom task attaches, and checks that closure for CVEs with vulnix (patch-aware). The vulnix
     check fails the run only if the flake directory has a vulnix.toml (its whitelist); without one
@@ -46,9 +50,12 @@ spec:
         which signs these images and makes them the subjects of the run's SLSA provenance.
   volumes:
     # A writable copy of the image's /nix, owned by the step user: single-user Nix needs to own
-    # its store, and nixos/nix ships it root-owned. Swap for a PVC/Attic to cache builds.
+    # its store, and nixos/nix ships it root-owned. Cross-run caching is the S3 cache, not this.
     - name: nix
       emptyDir: {}
+    - name: nix-cache-signing-key
+      secret:
+        secretName: nix-cache-signing-key
     - name: registry-auth
       secret:
         secretName: registry-push
@@ -63,6 +70,43 @@ spec:
         drop: [ALL]
       seccompProfile:
         type: RuntimeDefault
+    env:
+      # Nix ignores a $HOME owned by someone else (/tmp is root's) and falls back to passwd,
+      # which has no entry for uid 1000. A not-yet-existing path is accepted (created on use).
+      - name: HOME
+        value: /tmp/home
+      - name: TMPDIR
+        value: /tmp
+      # The cache is a plain S3 binary cache, in-cluster (no TLS, never leaves the node network).
+      # fallback: build locally when a narinfo outlives its expired NAR (bucket lifecycle).
+      - name: NIX_CONFIG
+        value: |
+          experimental-features = nix-command flakes
+          sandbox = false
+          build-users-group =
+          max-jobs = 2
+          cores = 2
+          accept-flake-config = false
+          extra-substituters = s3://nix-cache?endpoint=http://rustfs.rustfs.svc.cluster.local:9000&region=us-east-1
+          extra-trusted-public-keys = nix-cache.casasulgorgo.net-1:HlVXAzlw48Zg2l70GCgBIVL+uKsZzpHmSbswgU6LHDg=
+          fallback = true
+      # Read-only cache credentials (tofu: module "rustfs"); push-cache swaps in the write ones.
+      # Optional: without them the cache answers 403 and Nix just skips it.
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: nix-cache-read
+            key: AWS_ACCESS_KEY_ID
+            optional: true
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: nix-cache-read
+            key: AWS_SECRET_ACCESS_KEY
+            optional: true
+      # vulnix (Python/click) refuses to start without a UTF-8 locale
+      - name: LANG
+        value: C.UTF-8
   steps:
     - name: seed-store
       volumeMounts:
@@ -86,25 +130,8 @@ spec:
     - name: build-and-push
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
-        # Nix ignores a $HOME owned by someone else (/tmp is root's) and falls back to passwd,
-        # which has no entry for uid 1000. A not-yet-existing path is accepted (created on use).
-        - name: HOME
-          value: /tmp/home
-        - name: TMPDIR
-          value: /tmp
-        - name: NIX_CONFIG
-          value: |
-            experimental-features = nix-command flakes
-            sandbox = false
-            build-users-group =
-            max-jobs = 2
-            cores = 2
-            accept-flake-config = false
         - name: REGISTRY_AUTH_FILE
           value: /docker-config/config.json
-        # vulnix (Python/click) refuses to start without a UTF-8 locale
-        - name: LANG
-          value: C.UTF-8
       # CPU stays at 2 of the NUCs' 4 cores
       computeResources:
         requests:
@@ -145,6 +172,65 @@ spec:
           [ -s "$(results.IMAGES.path)" ] && printf ',' >> "$(results.IMAGES.path)"
           printf '%s@%s' "$image" "$digest" >> "$(results.IMAGES.path)"
           echo "Pushed $image ($(params.tags)) @ $digest"
+        done
+    - name: push-cache
+      # Best effort: a cache outage must not fail a run whose images are already pushed
+      onError: continue
+      env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: nix-cache-write
+              key: AWS_ACCESS_KEY_ID
+              optional: true
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nix-cache-write
+              key: AWS_SECRET_ACCESS_KEY
+              optional: true
+      computeResources:
+        limits:
+          memory: 1Gi
+      volumeMounts:
+        - name: nix
+          mountPath: /nix
+        - name: nix-cache-signing-key
+          mountPath: /nix-cache-key
+          readOnly: true
+      script: |
+        #!/bin/sh
+        set -eu
+        # Only what this run built or fetched itself (crane's deps, npm/crate tarballs, the image
+        # layers): cache.nixos.org paths are fetched from there, our own cache's are already there.
+        # .drv files are skipped too: substituters never need them.
+        nix path-info --all --sigs \
+          | awk '!/cache\.nixos\.org-1:|nix-cache\.casasulgorgo\.net-1:/ && $1 !~ /\.drv$/ { print $1 }' \
+          > /tmp/paths
+        echo "Pushing $(wc -l < /tmp/paths) store paths to the Nix cache"
+        # secret-key signs every narinfo on upload; nix copy skips paths the cache already has
+        nix copy --stdin \
+          --to "s3://nix-cache?endpoint=http://rustfs.rustfs.svc.cluster.local:9000&region=us-east-1&compression=zstd&secret-key=/nix-cache-key/key" \
+          < /tmp/paths
+    - name: scan-closure
+      workingDir: $(workspaces.source.path)/$(params.subdirectory)
+      computeResources:
+        limits:
+          memory: 2Gi
+      volumeMounts:
+        - name: nix
+          mountPath: /nix
+      script: |
+        #!/bin/sh
+        set -eu
+        # Avoid dollar-brace syntax here: Flux post-build substitution would eat it
+        root="$(pwd)"
+        for entry in $(params.images); do
+          name="$(echo "$entry" | cut -d, -f1)"
+          attr="$(echo "$entry" | cut -d, -f2)"
+          dir="$(echo "$entry" | cut -d, -f3)"
+          flake="git+file://$root?shallow=1"
+          [ "$dir" != "." ] && flake="$flake&dir=$dir"
 
           # Runtime closure (node, glibc, …), what dpkg used to tell syft/grype on distroless images.
           # Tools come from the flake's own nixpkgs (--inputs-from): no second nixpkgs download.

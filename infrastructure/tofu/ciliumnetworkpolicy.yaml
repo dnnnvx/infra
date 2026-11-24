@@ -1,0 +1,20 @@
+# Adds to flux-system's default policy (infrastructure/controllers/flux): the tofu runner
+# talks to the RustFS S3/admin API for the rustfs provider (tofu/modules/rustfs)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: tf-runner-rustfs
+  namespace: flux-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: tf-runner
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: rustfs
+            app.kubernetes.io/name: rustfs
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP

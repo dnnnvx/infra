@@ -62,3 +62,11 @@ variable "flux_substitutions" {
   sensitive   = true
   default     = {}
 }
+
+# RustFS (apps/rustfs, tofu/modules/rustfs)
+
+variable "rustfs_endpoint" {
+  description = "RustFS S3/admin endpoint for the rustfs provider: the LAN hostname from a workstation, the in-cluster Service from tofu-controller (infrastructure/tofu/terraform.yaml)"
+  type        = string
+  default     = "https://s3.local.casasulgorgo.net"
+}

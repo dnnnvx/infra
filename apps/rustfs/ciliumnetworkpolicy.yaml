@@ -27,7 +27,18 @@ spec:
         - ports:
             - port: "9000"
               protocol: TCP
-    # S3 clients in the cluster: add their namespace here (e.g. tekton-ci for the Nix cache)
+    # S3 clients in the cluster, on the Service (add new ones here):
+    # nix-build's Nix cache, and tofu-controller managing buckets/users (tofu/modules/rustfs)
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: tekton-ci
+        - matchLabels:
+            io.kubernetes.pod.namespace: flux-system
+            app.kubernetes.io/name: tf-runner
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
   egress:
     - toEndpoints:
         - matchLabels:

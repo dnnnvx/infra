@@ -8,6 +8,7 @@ resources:
   - rbac.yaml
   - secrets.yaml
   - git-ssh-secret.yaml
+  - nix-cache-signing-key.yaml
   - image-policy.yaml
   - dashboard-httproute.yaml
   - dashboard-oauth2-proxy.yaml

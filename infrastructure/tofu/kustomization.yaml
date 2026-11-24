@@ -7,3 +7,4 @@ resources:
   - gitrepository.yaml
   - secret.yaml
   - terraform.yaml
+  - ciliumnetworkpolicy.yaml

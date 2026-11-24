@@ -79,6 +79,12 @@ or change the code to match.
 | `k8s`       | Bootstrap: Cilium Helm, Flux, namespaces, secrets |
 | `cloudflare`| DNS records (apex A + CNAME subdomains), R2       |
 | `github`    | Deploy key + SSH known_hosts                      |
+| `rustfs`    | RustFS buckets, policies and client users         |
+
+`rustfs` talks to the running RustFS (`apps/rustfs`): `https://s3.local.casasulgorgo.net` from the laptop, the
+in-cluster Service from tofu-controller (`rustfs_endpoint` in `infrastructure/tofu/terraform.yaml`, plus
+`infrastructure/tofu/ciliumnetworkpolicy.yaml`). It doesn't exist yet on a fresh bootstrap, so apply without it
+first (`just tofu apply -exclude=module.rustfs`), then again once Flux has deployed RustFS.
 
 ## Applying node changes
 

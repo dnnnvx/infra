@@ -56,5 +56,9 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.4"
     }
+    rustfs = {
+      source  = "caberdo/rustfs"
+      version = "0.10.0"
+    }
   }
 }

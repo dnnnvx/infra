@@ -236,8 +236,34 @@ builder: rootless BuildKit needed Unconfined seccomp/AppArmor, user namespaces o
 emptyDir owned by uid 1000, the build step mounts it as `/nix`. `sandbox = false` (the pod is the sandbox), so
 no user namespaces, RuntimeDefault seccomp, no capabilities. The flake must expose
 `packages.x86_64-linux.<attr>` as a nix2container image with the `commit-timestamp` label (see casasulgorgo's
-`flake.nix` for Node, kubbot's for Rust with crane). There's no cache for the repo's own derivations yet (nixpkgs comes from cache.nixos.org), so every
-build recompiles the app.
+`flake.nix` for Node, kubbot's for Rust with crane).
+
+Steps: `seed-store` → `build-and-push` → `push-cache` → `scan-closure` (sbomnix + vulnix, below). The
+scans come after `push-cache`, so a run that fails on a CVE has already cached its build.
+
+### Nix cache
+
+nixpkgs comes from cache.nixos.org; everything the repos build or fetch themselves (crane's dependency
+derivation, npm/crate tarballs, the app, the image layers) goes to the bucket `nix-cache` on
+[RustFS](storage.md), a plain S3 binary cache reached over the in-cluster Service.
+
+- Every step substitutes from it with the read-only keys (Secret `nix-cache-read`). Only `push-cache` gets
+  the write keys (`nix-cache-write`) and the signing key (`nix-cache-signing-key`, SOPS, in
+  `infrastructure/configs/tekton/`). Those mounts are in that step's container only, never where builds run.
+  The public key is in the Task's `trusted-public-keys`.
+- `push-cache` uploads every store path without a cache.nixos.org or our own signature, skipping `.drv`
+  files, signed with `secret-key` on the upload.
+- Best effort: `push-cache` has `onError: continue`, the credentials are optional, and `fallback = true`
+  builds locally when a NAR is missing. A RustFS outage only makes the build slower.
+- Objects expire after 30 days (bucket lifecycle). Whatever is still needed gets rebuilt and pushed again.
+- Bucket, policies, users and both credential Secrets come from tofu (`tofu/modules/rustfs`, wired in
+  `tofu/production/k8s.tf`).
+- To rotate the signing key: generate it with `nix key generate-secret --key-name nix-cache.casasulgorgo.net-<n+1>`
+  into the SOPS Secret (written and encrypted in one command), and swap the public key in `nix-build.yaml`.
+  Paths signed with the old key stop being trusted and get rebuilt.
+
+The trust model: whatever a build produced gets signed, so a malicious flake in a watched repo could poison
+the cache for later builds. It's the same trust the pipeline already gives that repo's image.
 
 ### Why Nix rather than Dockerfiles
 
@@ -256,8 +282,9 @@ What it gives:
 
 What it costs:
 
-- **Cold builds:** no store cache yet, so every run rebuilds the app and its dependencies (~13 minutes for
-  casasulgorgo); a Dockerfile builder would have had a warm layer cache.
+- **Cold builds without the cache:** the first build of a change to the dependencies compiles them all
+  (~13 minutes for casasulgorgo, ~35 for kubbot's matrix-sdk). After that they come from the
+  [Nix cache](#nix-cache).
 - **grype false positives:** grype matches versions and can't see nixpkgs backports, hence `.grype-ignore`.
 - **Fixes wait on nixpkgs:** a fix lands only once nixpkgs ships it (e.g. openssl).
 - **Learning curve:** the Nix language, plus build wrappers such as `buildNpmPackage` for toolchains that
@@ -306,10 +333,11 @@ option or ignore a whole package. A malformed line, or one past its `until` date
 - **PodSecurity `restricted`**: every step runs non-root with RuntimeDefault seccomp, no
   capabilities and no privilege escalation (Tekton's `set-security-context` flag covers its own
   init containers). No host access, so no extra admission policy is needed.
-- **Cilium**: builds reach DNS, zot and the public internet on 443. RFC1918/CGNAT/link-local
+- **Cilium**: builds reach DNS, zot, RustFS (Nix cache, port 9000) and the public internet on 443. RFC1918/CGNAT/link-local
   ranges are excluded, so a build can't reach the LAN or the nodes. Only the
   EventListeners accept ingress: `github` from the Gateway, `tekton-events` from tekton-events-controller.
-- **Signing key outside**: the Chains key lives in `tekton-chains`, which no pipeline can read.
+- **Signing key outside**: the Chains key lives in `tekton-chains`, which no pipeline can read. The Nix
+  cache's signing key is in `tekton-ci`, but only the `push-cache` step mounts it.
 - **LimitRange**: default 2 CPU / 2Gi per step container, max 3 CPU / 4Gi.
 - The Tekton Pruner keeps 5 successful and 5 failed runs (max 7 days). Workspace PVCs go with them.
 

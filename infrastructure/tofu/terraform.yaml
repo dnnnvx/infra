@@ -13,6 +13,11 @@ spec:
   # commit, so approving with a commit invalidates the plan; approve in-cluster instead
   # (docs/opentofu.md). Drift detection runs on every interval once a plan is applied.
   storeReadablePlan: human
+  # The runner can't resolve s3.local.casasulgorgo.net (LAN DNS): reach RustFS via its Service
+  # (ciliumnetworkpolicy.yaml here, ingress in apps/rustfs)
+  vars:
+    - name: rustfs_endpoint
+      value: http://rustfs.rustfs.svc.cluster.local:9000
   # Keep the R2 backend from main.tf (written as backend_override.tf; must match it).
   # Without this the controller would switch state to a Kubernetes Secret.
   backendConfig:

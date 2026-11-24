@@ -31,6 +31,7 @@ module "k8s" {
     "cert-manager",
     "ddns",
     "rustfs",
+    "tekton-ci",
   ]
 
   secrets = [
@@ -70,6 +71,17 @@ module "k8s" {
       }
     },
     {
+      # Nix binary cache on RustFS: the build steps read, only the push-cache step writes
+      name      = "nix-cache-read"
+      namespace = "tekton-ci"
+      data      = module.rustfs.credentials["nix-cache-read"]
+    },
+    {
+      name      = "nix-cache-write"
+      namespace = "tekton-ci"
+      data      = module.rustfs.credentials["nix-cache-write"]
+    },
+    {
       name      = "cloudflare-api-token"
       namespace = "cert-manager"
       data      = { api-token = module.cloudflare.cluster_api_token }
@@ -86,8 +98,13 @@ module "k8s" {
   ]
 }
 
-# Created by Flux before tofu owned the rustfs-root Secret; Flux keeps managing its labels
+# Created by Flux before tofu owned Secrets in them; Flux keeps managing their labels
 import {
   to = module.k8s.kubernetes_namespace_v1.namespaces["rustfs"]
   id = "rustfs"
+}
+
+import {
+  to = module.k8s.kubernetes_namespace_v1.namespaces["tekton-ci"]
+  id = "tekton-ci"
 }

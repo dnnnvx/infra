@@ -43,6 +43,15 @@ spec:
         - ports:
             - port: "5000"
               protocol: TCP
+    # nix-build: Nix binary cache on RustFS, over its in-cluster Service
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: rustfs
+            app.kubernetes.io/name: rustfs
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
     # git clone over HTTPS, Nix (cache.nixos.org, flake inputs from GitHub, npm/crates
     # fetchers), grype's DB. Public internet only: builds run arbitrary derivations
     # (sandbox = false), so the LAN (router, nodes, other devices) stays off-limits.
