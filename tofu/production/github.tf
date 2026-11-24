@@ -97,6 +97,7 @@ module "github" {
       visibility  = "public"
       description = "Solidity / ZK circuits / Test & Exercises"
       has_wiki    = true
+      archived    = true
     }
   }
 

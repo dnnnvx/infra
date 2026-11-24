@@ -1,5 +1,5 @@
 variable "repositories" {
-  description = "Repositories under the provider's owner, keyed by name. ci_webhook: push webhook to the Tekton EventListener (the repo needs a Trigger)."
+  description = "Repositories under the provider's owner, keyed by name. ci_webhook: push webhook to the Tekton EventListener (the repo needs a Trigger). archived: read-only."
   type = map(object({
     description  = string
     visibility   = string
@@ -7,6 +7,7 @@ variable "repositories" {
     has_wiki     = optional(bool, false)
     topics       = optional(list(string), [])
     ci_webhook   = optional(bool, false)
+    archived     = optional(bool, false)
   }))
 }
 

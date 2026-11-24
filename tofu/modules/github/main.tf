@@ -14,6 +14,8 @@ resource "github_repository" "repos" {
   has_issues   = true
   has_projects = true
 
+  archived = each.value.archived
+
   # a `tofu destroy` (or dropping a repo from the map) archives instead of deleting
   archive_on_destroy = true
 
@@ -22,16 +24,17 @@ resource "github_repository" "repos" {
   }
 }
 
-# Dependabot alerts, then automatic PRs for vulnerable dependencies (security updates need alerts on)
+# Dependabot alerts, then automatic PRs for vulnerable dependencies (security updates need alerts on).
+# Not on archived repos: they're read-only and Dependabot skips them.
 resource "github_repository_vulnerability_alerts" "repos" {
-  for_each = var.repositories
+  for_each = { for name, repo in var.repositories : name => repo if !repo.archived }
 
   repository = github_repository.repos[each.key].name
   enabled    = true
 }
 
 resource "github_repository_dependabot_security_updates" "repos" {
-  for_each = var.repositories
+  for_each = github_repository_vulnerability_alerts.repos
 
   repository = github_repository_vulnerability_alerts.repos[each.key].repository
   enabled    = true
