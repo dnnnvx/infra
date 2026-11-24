@@ -68,12 +68,15 @@ resource "rustfs_user" "clients" {
   access_key = each.key
   secret_key = random_password.clients[each.key].result
   status     = "enabled"
+
+  policy = rustfs_policy.clients[each.key].name
 }
 
-# Separate from rustfs_user.policy, which replaces the user on every change
-resource "rustfs_user_policy_attachment" "clients" {
-  for_each = local.clients
+# Was a rustfs_user_policy_attachment: forget it without detaching the policy on the server
+removed {
+  from = rustfs_user_policy_attachment.clients
 
-  user   = rustfs_user.clients[each.key].access_key
-  policy = rustfs_policy.clients[each.key].name
+  lifecycle {
+    destroy = false
+  }
 }
