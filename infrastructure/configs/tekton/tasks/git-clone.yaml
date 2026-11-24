@@ -27,11 +27,15 @@ spec:
   results:
     - name: commit
     - name: short-commit
-    - name: commit-timestamp
-      description: Committer date as unix seconds, used to build sortable image tags.
   volumes:
     - name: mirror
       emptyDir: {}
+  # PodSecurity restricted (tekton-ci)
+  stepTemplate:
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
   steps:
     # OpenSSH exits ("No user exists for uid 1000") when getpwuid() fails, and the image's
     # /etc/passwd has no uid 1000. So the network fetch runs as nobody into a scratch mirror,
@@ -97,5 +101,4 @@ spec:
         git -c advice.detachedHead=false checkout -q FETCH_HEAD
         printf %s "$(git rev-parse HEAD)" > "$(results.commit.path)"
         printf %s "$(git rev-parse --short=7 HEAD)" > "$(results.short-commit.path)"
-        printf %s "$(git log -1 --format=%ct)" > "$(results.commit-timestamp.path)"
         echo "Checked out $(git rev-parse HEAD)"

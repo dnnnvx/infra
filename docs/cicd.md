@@ -10,7 +10,7 @@ Pushes to this repository run a separate, read-only validation pipeline
 ```
 git push main (GitHub) ──signed webhook──▶ ci.casasulgorgo.net ─▶ EventListener "github" (tekton-ci)
     interceptors: github (HMAC check) ─▶ cel (filter + tags)
-    └▶ PipelineRun build-image: clone ─▶ build (buildkit | nix-build) ─┬▶ scan (grype on the image)
+    └▶ PipelineRun build-image: clone ─▶ build (nix-build)          ─┬▶ scan (grype on the image)
                                           │ push :<sha>                └▶ scan-source (grype on lockfiles) ─▶ sbom (oras attach)
                                           ▼
                   zot (registry.local.casasulgorgo.net, LAN Gateway, public TLS)
@@ -32,14 +32,13 @@ Images are `<project>/<image>`, where project is set in the app's Trigger (norma
 
 | Tag | Meaning |
 |-----|---------|
-| `<full commit sha>` | Immutable, one per build. Pushed by buildkit, before scans and signing |
+| `<full commit sha>` | Immutable, one per build. Pushed by nix-build, before scans and signing |
 | `latest` | Last released build of the default branch |
 | `production` | What should run in production (`main` → production). Moved by release-image only |
 
 Apps reference `…/web:production@sha256:<digest>`, and Flux rewrites the digest
 (`digestReflectionPolicy: Always`). Every rollout is therefore a commit, and a
-rollback is a `git revert`. Build caches go to `cache/<project>/<image>:buildcache`
-so they don't clutter the real repositories.
+rollback is a `git revert`.
 
 ## Where things live
 
@@ -49,7 +48,7 @@ so they don't clutter the real repositories.
 | `infrastructure/controllers/zot/` | zot HelmRelease, config (`values.yaml`), SOPS secrets (htpasswd, OIDC client, session keys), UI-only HTTPRoute |
 | `infrastructure/configs/tekton/` | `tekton-ci` namespace and its fences, RBAC, push credentials, Chains public key (`chains.pub` → ConfigMap `chains-public-key` and the Kyverno policy `image-policy.yaml`), webhook HMAC secret, dashboard HTTPRoute |
 | `infrastructure/controllers/kyverno/` | Kyverno (admission controller only), enforcing `image-policy.yaml` |
-| `infrastructure/configs/tekton/tasks/` | one file per Task (`git-clone`, `buildkit`, `nix-build`, `sbom`, `scan-image`, `scan-source`, `release-image`, `flux-sync`, `validate-manifests`, `lint-tofu`, `checkov`, `trufflehog`) |
+| `infrastructure/configs/tekton/tasks/` | one file per Task (`git-clone`, `nix-build`, `sbom`, `scan-image`, `scan-source`, `release-image`, `flux-sync`, `validate-manifests`, `lint-tofu`, `checkov`, `trufflehog`) |
 | `infrastructure/configs/tekton/pipelines/` | one file per Pipeline (`build-image`, `release-image`, `validate-infra`) |
 | `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`github`: public webhooks; `tekton-events`: internal CloudEvents), the `github-webhook` HMAC Secret, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
 | `.checkov.yaml`, `tofu/.tflint.hcl` | scanner config for `validate-infra` |
@@ -92,8 +91,8 @@ release run with the build's `registry`, `project`, `tags`, `flux-kustomization`
 
 The event isn't authenticated. That's fine: release-image only promotes digests signed by Chains, i.e. images that
 a successful build-image run produced. The worst a forged event can do is re-release such an image, and even that
-can't roll back: every image carries the label `ci.casasulgorgo.net/commit-timestamp` (committer date: buildkit
-stamps it from git-clone, a flake sets it itself from `self.lastModified`), and release-image leaves a tag alone when its current image has a later timestamp. Images without
+can't roll back: every image carries the label `ci.casasulgorgo.net/commit-timestamp` (commit date: the flake sets it
+from `self.lastModified`), and release-image leaves a tag alone when its current image has a later timestamp. Images without
 the label (built before it existed) are never released. Tekton does replay `successful` events for old, finished
 runs (seen on 2026-10-27: yesterday's casasulgorgo build re-released, `production` went back a version).
 
@@ -158,8 +157,8 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
    `clusters/production/apps/casasulgorgo.yaml` to `<project>.yaml` (list it in `clusters/production/apps/kustomization.yaml`).
    Replace the project name, the GitHub repository in the Trigger's CEL filter and `repo-url` binding, and the image name
    (the header comment of `ci.yaml` lists every spot). For more images, add an ImageRepository/ImagePolicy pair per image, its name in the
-   Role's `resourceNames`, and a `<name>,<dockerfile>,<context>` entry in the Trigger's space-separated `images` binding
-   (`dockerfile` relative to `context`, `context` relative to the repo root).
+   Role's `resourceNames`, and a `<name>,<attr>,<flakedir>` entry in the Trigger's space-separated `images` binding
+   (see [Builder](#builder) for what the flake must expose).
 2. In `apps/<project>/kustomization.yaml`, use a kustomize `images:` entry per image with a `digest:` marker
    `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's). Kyverno then only admits
    Chains-signed digests of it. If the repo lives outside `github.com/dnnnvx`, add it to the
@@ -226,36 +225,30 @@ registry (UI included) is LAN-only: it isn't exposed on the public Gateway at al
 the `tekton` user. Laptops on the LAN pull from `registry.local.casasulgorgo.net` directly; for
 anything else, log in with an API key created in the UI.
 
-## Builders
+## Builder
 
-`build-image` resolves its build Task by name from the `builder` param (cluster resolver), so the pipeline
-name that Kyverno and `trigger-release` pin stays the same. Both Tasks take the same params and return the
-same `digests`/`IMAGES` results; the Trigger picks one:
-
-| `builder` | `images` entry | How |
-|---|---|---|
-| `buildkit` (default) | `name,dockerfile,context` | rootless BuildKit, registry cache under `cache/<project>/<image>:buildcache` |
-| `nix-build` | `name,attr,flakedir` | `nix flake check`, then `nix run <flake>#<attr>.copyTo` (nix2container → skopeo) |
+Every repo builds with the `nix-build` Task: per `name,attr,flakedir` entry of the Trigger's `images` binding,
+`nix flake check`, then `nix run <flake>#<attr>.copyTo` (nix2container → skopeo). There's no Dockerfile
+builder: rootless BuildKit needed Unconfined seccomp/AppArmor, user namespaces on the nodes and a
+`privileged` namespace, all gone with it.
 
 `nix-build` runs `nixos/nix` single-user and non-root: a first step copies the image's `/nix` into an
 emptyDir owned by uid 1000, the build step mounts it as `/nix`. `sandbox = false` (the pod is the sandbox), so
 no user namespaces, RuntimeDefault seccomp, no capabilities. The flake must expose
 `packages.x86_64-linux.<attr>` as a nix2container image with the `commit-timestamp` label (see casasulgorgo's
-`flake.nix`). There's no cache for the repo's own derivations yet (nixpkgs comes from cache.nixos.org), so every
+`flake.nix` for Node, kubbot's for Rust with crane). There's no cache for the repo's own derivations yet (nixpkgs comes from cache.nixos.org), so every
 build recompiles the app.
 
-### Choosing a builder
+### Why Nix rather than Dockerfiles
 
-Prefer `nix-build` for our own apps. Keep `buildkit` where a Dockerfile is simpler or what contributors expect.
-
-What `nix-build` gives:
+What it gives:
 
 - **Reproducible:** every input is pinned (`flake.lock`, lockfile hashes), with fixed timestamps, so the same
   commit gives the same image.
 - **Minimal:** the image holds only the runtime closure (no shell, package manager or base distro).
 - **Granular layers:** nix2container makes one layer per store path, so an app change doesn't re-push node or
   glibc.
-- **Rootless:** no user namespaces or privileged pod. BuildKit is the reason `tekton-ci` is still `privileged`.
+- **Rootless:** no user namespaces or privileges, so `tekton-ci` runs PodSecurity `restricted`.
 - **Exact SBOM and patch-aware CVE checks:** sbomnix reads the real dependency graph, and vulnix knows which
   CVEs nixpkgs has patched.
 - **Same toolchain locally and in CI:** the devShell, `just vulnix` and the CI build all use one pinned
@@ -263,7 +256,8 @@ What `nix-build` gives:
 
 What it costs:
 
-- **Cold builds:** no store cache yet, so roughly 13 minutes against a warm BuildKit cache.
+- **Cold builds:** no store cache yet, so every run rebuilds the app and its dependencies (~13 minutes for
+  casasulgorgo); a Dockerfile builder would have had a warm layer cache.
 - **grype false positives:** grype matches versions and can't see nixpkgs backports, hence `.grype-ignore`.
 - **Fixes wait on nixpkgs:** a fix lands only once nixpkgs ships it (e.g. openssl).
 - **Learning curve:** the Nix language, plus build wrappers such as `buildNpmPackage` for toolchains that
@@ -285,7 +279,7 @@ the network, and the pod's egress policy is the fence. Reproducibility still res
 
 `scan-image` runs grype on the pushed image, which sees OS package databases (dpkg/apk) and Nix store paths
 (by name and version, blind to nixpkgs' CVE patches). That misses dependencies adapter-node bundles into
-`build/` and statically linked Rust/Go binaries. `scan-source` (after `build`, both builders) closes the gap: syft catalogs the repository's lockfiles
+`build/` and statically linked Rust/Go binaries. `scan-source` (after `build`) closes the gap: syft catalogs the repository's lockfiles
 (npm devDependencies included, since adapter-node bundles them) and grype fails the run on a fixable
 vulnerability of `fail-on` severity (default high) or worse.
 
@@ -309,14 +303,11 @@ option or ignore a whole package. A malformed line, or one past its `until` date
 
 ## Build isolation (`tekton-ci`)
 
-Rootless BuildKit needs Unconfined seccomp/AppArmor, so the namespace runs at PodSecurity
-`privileged` until every repo builds with `nix-build`. What fences it in again:
-
-- **`ValidatingAdmissionPolicy` `tekton-ci-pod-restrictions`**: no hostPath, host namespaces,
-  hostPorts, privileged containers or added capabilities for anyone. Unconfined profiles
-  are allowed only for pods created by the Tekton controller (TaskRuns).
+- **PodSecurity `restricted`**: every step runs non-root with RuntimeDefault seccomp, no
+  capabilities and no privilege escalation (Tekton's `set-security-context` flag covers its own
+  init containers). No host access, so no extra admission policy is needed.
 - **Cilium**: builds reach DNS, zot and the public internet on 443. RFC1918/CGNAT/link-local
-  ranges are excluded, so a Dockerfile `RUN` can't reach the LAN or the nodes. Only the
+  ranges are excluded, so a build can't reach the LAN or the nodes. Only the
   EventListeners accept ingress: `github` from the Gateway, `tekton-events` from tekton-events-controller.
 - **Signing key outside**: the Chains key lives in `tekton-chains`, which no pipeline can read.
 - **LimitRange**: default 2 CPU / 2Gi per step container, max 3 CPU / 4Gi.

@@ -102,9 +102,9 @@ spec:
   bindings:
     - name: project
       value: kubbot
-    # space-separated <name>,<dockerfile>,<context> per image (dockerfile relative to context)
+    # Flake + nix2container (tasks/nix-build.yaml): space-separated <name>,<attr>,<flakedir> per image
     - name: images
-      value: bot,Dockerfile,.
+      value: bot,image,.
     - name: flux-kustomization
       value: app-kubbot
     - name: repo-url

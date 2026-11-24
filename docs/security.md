@@ -81,9 +81,9 @@ Talos enforces `baseline` cluster-wide. Namespaces then pick a level with labels
 
 | Level | Namespaces |
 |-------|------------|
-| `enforce: restricted` | bookorbit, casasulgorgo, ddns, gatus, kubbot, marcods, matrix, norish, radicle, silverbullet (+ tekton-pipelines, tekton-pipelines-resolvers from upstream) |
+| `enforce: restricted` | bookorbit, casasulgorgo, ddns, gatus, kubbot, marcods, matrix, norish, radicle, silverbullet, tekton-ci (+ tekton-pipelines, tekton-pipelines-resolvers from upstream) |
 | `warn` + `audit: restricted` (not compliant yet, or has hook/runner pods we can't vouch for) | adguard-home (root), webauth/pocket-id (root, `su-exec` caps), zot (root), cert-manager, cnpg-system, kyverno, flux-system |
-| `enforce: privileged` | home-assistant (`hostNetwork`, matter-server), piraeus-datastore, tekton-ci (BuildKit; fenced by its ValidatingAdmissionPolicy) |
+| `enforce: privileged` | home-assistant (`hostNetwork`, matter-server), piraeus-datastore |
 
 New apps should start at `enforce: restricted`. To check whether a namespace can move up, ask kube-apiserver which
 running pods would violate it (server-side dry run, changes nothing):
@@ -207,7 +207,7 @@ unsigned. Once a project has a clean report for a while, its validation could mo
     only the two discovery paths, plus binding `system:service-account-issuer-discovery` to
     `system:unauthenticated`. That's a control-plane auth change.
   - Enabling `bearer` turns every push challenge into Bearer. zot's `/zot/auth/token` accepts only
-    API keys or trusted JWTs, never htpasswd passwords, so `buildkit`, `sbom`, `release-image` and
+    API keys or trusted JWTs, never htpasswd passwords, so `nix-build`, `sbom`, `release-image` and
     Chains must all switch in the same change. Anonymous pulls (containerd, Flux) are unaffected.
   - Chains only reads static credentials from `pipeline-runner`'s `secrets`. It needs a CronJob that
     refreshes a short-lived TokenRequest (`aud: registry.local.casasulgorgo.net`) into that Secret, or

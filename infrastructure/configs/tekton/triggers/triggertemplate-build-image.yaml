@@ -1,7 +1,5 @@
 # Flux naming convention: ImageRepository/ImagePolicy <project>-<image-name>, Kustomization app-<project>.
 # Images are <registry>/<project>/<image>, e.g. registry.local.casasulgorgo.net/casasulgorgo/web.
-# Build caches live apart under <registry>/cache/<project>/<image> so they
-# don't show up as tags of the real image.
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
@@ -18,8 +16,6 @@ spec:
     - name: tags
     - name: flux-kustomization
       default: ""
-    - name: builder
-      default: buildkit
   resourcetemplates:
     - apiVersion: tekton.dev/v1
       kind: PipelineRun
@@ -45,8 +41,6 @@ spec:
             value: $(tt.params.tags)
           - name: flux-kustomization
             value: $(tt.params.flux-kustomization)
-          - name: builder
-            value: $(tt.params.builder)
         taskRunTemplate:
           serviceAccountName: pipeline-runner
           podTemplate:

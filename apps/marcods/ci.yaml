@@ -102,9 +102,9 @@ spec:
   bindings:
     - name: project
       value: marcods
-    # space-separated <name>,<dockerfile>,<context> per image (dockerfile relative to context)
+    # Flake + nix2container (tasks/nix-build.yaml): space-separated <name>,<attr>,<flakedir> per image
     - name: images
-      value: web,Dockerfile,.
+      value: web,image,.
     - name: flux-kustomization
       value: app-marcods
     - name: repo-url

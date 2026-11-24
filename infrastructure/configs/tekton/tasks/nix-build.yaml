@@ -6,9 +6,11 @@ metadata:
 spec:
   description: >-
     Builds each requested image from the repository's flake (nix2container) and pushes it with
-    skopeo. Unlike buildkit it needs no user namespaces: Nix runs single-user, unsandboxed
-    (the pod is the sandbox), non-root and under RuntimeDefault seccomp. Same params and
-    results as buildkit, so build-image can pick either. Then, per image, it writes a CycloneDX
+    skopeo. Needs no user namespaces or privileges: Nix runs single-user, unsandboxed (the pod
+    is the sandbox), non-root and under RuntimeDefault seccomp, so tekton-ci stays PodSecurity
+    restricted. The flake sets the label ci.casasulgorgo.net/commit-timestamp itself from
+    self.lastModified (the commit date); release-image refuses to move tags to an image without
+    it. Then, per image, it writes a CycloneDX
     SBOM of the runtime closure (sbomnix) to sboms/images/<name>.cdx.json in the workspace, which
     the sbom task attaches, and checks that closure for CVEs with vulnix (patch-aware). The vulnix
     check fails the run only if the flake directory has a vulnix.toml (its whitelist); without one
@@ -29,13 +31,6 @@ spec:
     - name: tags
       type: string
       description: Space-separated tags to push (e.g. "<sha> latest production").
-    - name: commit-timestamp
-      type: string
-      default: ""
-      description: >-
-        Unused, kept for parity with buildkit. The flake sets the label
-        ci.casasulgorgo.net/commit-timestamp itself from self.lastModified (the commit date);
-        release-image refuses to move tags to an image without it.
     - name: subdirectory
       type: string
       default: source
@@ -110,7 +105,7 @@ spec:
         # vulnix (Python/click) refuses to start without a UTF-8 locale
         - name: LANG
           value: C.UTF-8
-      # Same budget as buildkit: CPU stays at 2 of the NUCs' 4 cores
+      # CPU stays at 2 of the NUCs' 4 cores
       computeResources:
         requests:
           cpu: "1"

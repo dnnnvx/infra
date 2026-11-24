@@ -114,10 +114,7 @@ spec:
   bindings:
     - name: project
       value: casasulgorgo
-    # Flake + nix2container (tasks/nix-build.yaml): space-separated <name>,<attr>,<flakedir> per image.
-    # For a Dockerfile repo drop `builder` and use <name>,<dockerfile>,<context> (dockerfile relative to context).
-    - name: builder
-      value: nix-build
+    # Flake + nix2container (tasks/nix-build.yaml): space-separated <name>,<attr>,<flakedir> per image
     - name: images
       value: web,image,.
     - name: flux-kustomization

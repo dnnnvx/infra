@@ -4,7 +4,6 @@ resources:
   # tekton-ci namespace and its fences
   - namespace.yaml
   - ciliumnetworkpolicy.yaml
-  - admission-policy.yaml
   - limitrange.yaml
   - rbac.yaml
   - secrets.yaml

@@ -17,7 +17,7 @@ spec:
       description: Registry namespace; images are <registry>/<project>/<name>.
     - name: digests
       type: string
-      description: Space-separated "name=sha256:..." as returned by the buildkit task.
+      description: Space-separated "name=sha256:..." as returned by the nix-build task.
     - name: fail-on
       type: string
       default: high

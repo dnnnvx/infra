@@ -3,6 +3,6 @@ kind: Namespace
 metadata:
   name: tekton-ci
   labels:
-    # Rootless BuildKit needs Unconfined seccomp + AppArmor, which Talos'
-    # default "baseline" enforcement rejects. Keep this namespace for builds only.
-    pod-security.kubernetes.io/enforce: privileged
+    # Every build is nix-build (non-root, no privileges), so builds run restricted too.
+    # Keep this namespace for CI only.
+    pod-security.kubernetes.io/enforce: restricted
