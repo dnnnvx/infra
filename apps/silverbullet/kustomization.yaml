@@ -14,3 +14,4 @@ configMapGenerator:
       - docs-sync/sync.sh
       - docs-sync/repos
       - docs-sync/index.md
+      - docs-sync/CONFIG.md

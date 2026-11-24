@@ -30,11 +30,13 @@ sync_repo() {
 }
 
 while true; do
-  # the space's front page is managed in git too (replaced only when it differs)
-  if [[ ! -f /space/index.md || "$(</space/index.md)" != "$(</config/index.md)" ]]; then
-    cp /config/index.md /space/.index.md.new && mv /space/.index.md.new /space/index.md &&
-      echo "index.md: published"
-  fi
+  # the space's front page and config are managed in git too (replaced only when they differ)
+  for f in index.md CONFIG.md; do
+    if [[ ! -f /space/$f || "$(</space/$f)" != "$(</config/$f)" ]]; then
+      cp "/config/$f" "/space/.$f.new" && mv "/space/.$f.new" "/space/$f" &&
+        echo "$f: published"
+    fi
+  done
   while read -r name url ref path; do
     [[ -z ${name:-} || $name == \#* ]] && continue
     sync_repo "$name" "$url" "$ref" "$path" || echo "$name: sync failed" >&2
