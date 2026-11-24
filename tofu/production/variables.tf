@@ -27,7 +27,7 @@ variable "github_token" {
   sensitive   = true
 }
 
-# WireGuard (remote access, see docs/src/remote-access.md)
+# WireGuard (remote access, see docs/remote-access.md)
 
 variable "wireguard_hostname" {
   description = "DNS-only record kept pointed at the home IP by DDNS, used as the clients' Endpoint; kept out of git"

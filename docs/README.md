@@ -1,4 +1,4 @@
-# Summary
+# Homelab docs
 
 - [Overview](overview.md)
 - [Architecture](architecture.md)

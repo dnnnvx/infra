@@ -3,7 +3,7 @@
 # exposing something by mistake, e.g. a LAN-only route copied with the wrong parentRef:
 #  - a route on homelab must opt in with the annotation gateway.casasulgorgo.net/public: "true"
 #  - it must name its hostnames (no catch-all), and none may be a LAN-only name
-# LAN-only routes belong on homelab-local (docs/src/networking.md).
+# LAN-only routes belong on homelab-local (docs/networking.md).
 # Native admission (runs in kube-apiserver), so it doesn't depend on any controller being up.
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy

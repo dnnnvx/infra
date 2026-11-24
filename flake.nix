@@ -52,7 +52,6 @@
             yq-go
             sops
             age
-            mdbook
             renovate
             tektoncd-cli
             wireguard-tools

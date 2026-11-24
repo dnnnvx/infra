@@ -124,10 +124,6 @@ encrypt file:
 edit-secret file:
     sops {{ file }}
 
-# build and serve docs
-docs:
-    mdbook serve docs --port 3000
-
 # sync flux with the defined git repo
 sync:
     flux reconcile kustomization flux-system --with-source --context {{ context }}

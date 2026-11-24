@@ -100,7 +100,7 @@ locals {
       }),
     ],
     [
-      # Tetragon (a future improvement, see docs/src/security.md) needs this at 1 to read /proc/kallsyms.
+      # Tetragon (a future improvement, see docs/security.md) needs this at 1 to read /proc/kallsyms.
       # Talos defaults to kptr_restrict=2 (hidden even from root); 1 allows root to read them.
       yamlencode({
         machine = {

@@ -69,7 +69,7 @@ module "talos" {
       ip           = "192.168.0.102"
       # endpoint     = "192.168.0.20"
       gateway      = "192.168.0.1"
-      install_disk = "/dev/sda" # not the NVMe: its PM961 hangs on cold boot (docs/src/hardware.md)
+      install_disk = "/dev/sda" # not the NVMe: its PM961 hangs on cold boot (docs/hardware.md)
       region       = "production"
       zone         = "office"
       node-type    = "nuc"
@@ -106,7 +106,7 @@ module "talos" {
   }
 }
 
-# Remote access (docs/src/remote-access.md): WireGuard on nuc-101, the router forwards 51820/udp to it.
+# Remote access (docs/remote-access.md): WireGuard on nuc-101, the router forwards 51820/udp to it.
 # Clients route the VIP and node IP through the tunnel; both are local addresses of nuc-101, so the
 # node doesn't forward anything and kubeconfig/talosconfig work unchanged.
 module "wireguard" {
