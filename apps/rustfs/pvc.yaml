@@ -1,10 +1,12 @@
-# Every bucket lives here (RUSTFS_VOLUMES=/data, single node, single drive). Two LINSTOR
-# replicas so buckets other than caches survive a node; thin and expandable, so grow it
-# in place when it fills up (file-thin only exists on nuc-103 and nuc-104).
+# Every bucket lives here (RUSTFS_VOLUMES=/data, single node, single drive). One LINSTOR replica
+# (piraeus-scratch): DRBD's synchronous second copy made every write wait on the other node's
+# DRAM-less SSD. Only for data that can be rebuilt (the Nix cache); a bucket that must survive a
+# node needs its own replicated volume. Thin and expandable: grow it in place when it fills up.
+# Replaced PVC "data" (piraeus): storageClassName is immutable, hence the new name.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: data
+  name: data-scratch
   namespace: rustfs
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
@@ -13,7 +15,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: piraeus
+  storageClassName: piraeus-scratch
   resources:
     requests:
       storage: 30Gi

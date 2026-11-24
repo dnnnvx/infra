@@ -101,7 +101,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: data
+            claimName: data-scratch
         - name: tmp
           emptyDir:
             sizeLimit: 256Mi

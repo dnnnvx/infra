@@ -47,7 +47,10 @@ linstor resource list                  # DRBD resources and sync status
 ## Object storage (RustFS)
 
 S3 for whatever wants buckets (Nix binary cache, backups, …): `apps/rustfs`, one RustFS pod on one 30Gi
-`piraeus` PVC (two LINSTOR replicas, thin, expandable in place). It's a plain Deployment, not the upstream
+`piraeus-scratch` PVC (`data-scratch`: one LINSTOR replica, thin, expandable in place). One replica because
+both file-thin nodes have DRAM-less SSDs (Crucial BX500), and DRBD's synchronous second copy capped writes,
+and the first full sync, at well under 1 MB/s. So RustFS only holds data that can be rebuilt: a bucket that
+must survive losing a node needs its own replicated volume (or a second RustFS on `piraeus`). It's a plain Deployment, not the upstream
 chart, which isn't published to a Helm repo and assumes distributed mode.
 
 | Endpoint | For |
