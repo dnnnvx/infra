@@ -8,6 +8,14 @@ admissionController:
   podDisruptionBudget:
     enabled: true
     minAvailable: 1
+  # Cosign verification caches push it to ~350Mi at steady state
+  container:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 384Mi
+      limits:
+        memory: 768Mi
 # The background scan cosign-verifies every running image (like the admission controller, which
 # sits at ~300Mi): the chart's 128Mi limit OOMKills it within a minute of each start.
 reportsController:
