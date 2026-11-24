@@ -98,7 +98,7 @@ namespaces stay at `warn`.
 
 ## Secrets
 
-Secrets are encrypted at rest using [SOPS](https://github.com/getsops/sops) with an age key. See [Secrets](./secrets.md) for details.
+Secrets are encrypted at rest using [SOPS](https://github.com/getsops/sops) with an age key. See [Secrets](secrets.md) for details.
 
 ## API audit log
 

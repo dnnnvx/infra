@@ -244,6 +244,43 @@ no user namespaces, RuntimeDefault seccomp, no capabilities. The flake must expo
 `flake.nix`). There's no cache for the repo's own derivations yet (nixpkgs comes from cache.nixos.org), so every
 build recompiles the app.
 
+### Choosing a builder
+
+Prefer `nix-build` for our own apps. Keep `buildkit` where a Dockerfile is simpler or what contributors expect.
+
+What `nix-build` gives:
+
+- **Reproducible:** every input is pinned (`flake.lock`, lockfile hashes), with fixed timestamps, so the same
+  commit gives the same image.
+- **Minimal:** the image holds only the runtime closure (no shell, package manager or base distro).
+- **Granular layers:** nix2container makes one layer per store path, so an app change doesn't re-push node or
+  glibc.
+- **Rootless:** no user namespaces or privileged pod. BuildKit is the reason `tekton-ci` is still `privileged`.
+- **Exact SBOM and patch-aware CVE checks:** sbomnix reads the real dependency graph, and vulnix knows which
+  CVEs nixpkgs has patched.
+- **Same toolchain locally and in CI:** the devShell, `just vulnix` and the CI build all use one pinned
+  nixpkgs.
+
+What it costs:
+
+- **Cold builds:** no store cache yet, so roughly 13 minutes against a warm BuildKit cache.
+- **grype false positives:** grype matches versions and can't see nixpkgs backports, hence `.grype-ignore`.
+- **Fixes wait on nixpkgs:** a fix lands only once nixpkgs ships it (e.g. openssl).
+- **Learning curve:** the Nix language, plus build wrappers such as `buildNpmPackage` for toolchains that
+  expect network access while building.
+
+**How dependencies are downloaded:** `npm install` doesn't run during the build. `buildNpmPackage` splits it
+in two:
+
+1. **Fetch:** a *fixed-output derivation* downloads the tarballs. Nix allows network access only for
+   derivations whose output hash is known in advance. With `importNpmLock` the hashes are the lockfile's
+   `integrity` fields, so a tampered or changed tarball fails the build.
+2. **Build:** `npm ci` runs offline against that fetched cache, then `npm run build`.
+
+The same holds for Go modules, Cargo crates and anything else fetched with `fetchurl`. With `sandbox = true`,
+Nix blocks network access in the build step. In CI we run `sandbox = false`, so the build step *could* reach
+the network, and the pod's egress policy is the fence. Reproducibility still rests on the pinned hashes.
+
 ## Vulnerability scans
 
 `scan-image` runs grype on the pushed image, which sees OS package databases (dpkg/apk) and Nix store paths

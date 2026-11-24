@@ -43,12 +43,12 @@ It runs in kube-apiserver, so it doesn't depend on Kyverno.
 | `ci.casasulgorgo.net`   | Tekton EventListener (GitHub webhooks)  |
 | `marcods.dev`           | Portfolio      |
 
-The registry (UI and API) is LAN-only: `registry.local.casasulgorgo.net` on the `homelab-local` Gateway (public wildcard cert, so no client needs insecure flags). Nodes and pods resolve it through a Talos `StaticHostConfig` (see [CI/CD](./cicd.md)).
+The registry (UI and API) is LAN-only: `registry.local.casasulgorgo.net` on the `homelab-local` Gateway (public wildcard cert, so no client needs insecure flags). Nodes and pods resolve it through a Talos `StaticHostConfig` (see [CI/CD](cicd.md)).
 
 External access via Cloudflare proxy (orange cloud) → port-forward 443 → Cilium Gateway (HTTPS, port 443).
 TLS terminated at the Gateway using a Let's Encrypt wildcard cert (`*.casasulgorgo.net`) issued via DNS-01.
 DDNS (`favonia/cloudflare-ddns`) keeps the apex A records (`casasulgorgo.net`, `marcods.dev`) updated with the home public IP,
-plus the DNS-only WireGuard endpoint record (see [Remote access](./remote-access.md)).
+plus the DNS-only WireGuard endpoint record (see [Remote access](remote-access.md)).
 
 Domains are entries in the `cloudflare` tofu module's `domains` map. The wildcard cert only covers `*.casasulgorgo.net`,
 so another domain needs its own Certificate and a Gateway listener (`marcods.dev`: listener `https-marcods`).
