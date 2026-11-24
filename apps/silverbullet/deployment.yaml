@@ -76,7 +76,7 @@ spec:
           command: ["/bin/bash", "/config/sync.sh"]
           env:
             - name: PERIOD
-              value: "300"
+              value: "120"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
