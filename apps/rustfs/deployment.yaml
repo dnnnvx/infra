@@ -55,7 +55,7 @@ spec:
               value: info
             - name: RUSTFS_OBS_ENVIRONMENT
               value: production
-          # RUSTFS_ACCESS_KEY / RUSTFS_SECRET_KEY: root credentials (console login, admin API)
+          # RUSTFS_ACCESS_KEY / RUSTFS_SECRET_KEY: root credentials, created by tofu (tofu/production/rustfs.tf)
           envFrom:
             - secretRef:
                 name: rustfs-root

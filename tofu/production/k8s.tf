@@ -30,6 +30,7 @@ module "k8s" {
   namespaces = [
     "cert-manager",
     "ddns",
+    "rustfs",
   ]
 
   secrets = [
@@ -60,6 +61,15 @@ module "k8s" {
       })
     },
     {
+      # Root credentials (console, admin API, the rustfs provider). Clients get their own keys.
+      name      = "rustfs-root"
+      namespace = "rustfs"
+      data = {
+        RUSTFS_ACCESS_KEY = random_password.rustfs_access_key.result
+        RUSTFS_SECRET_KEY = random_password.rustfs_secret_key.result
+      }
+    },
+    {
       name      = "cloudflare-api-token"
       namespace = "cert-manager"
       data      = { api-token = module.cloudflare.cluster_api_token }
@@ -74,4 +84,10 @@ module "k8s" {
       }
     },
   ]
+}
+
+# Created by Flux before tofu owned the rustfs-root Secret; Flux keeps managing its labels
+import {
+  to = module.k8s.kubernetes_namespace_v1.namespaces["rustfs"]
+  id = "rustfs"
 }
