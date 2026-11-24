@@ -1,0 +1,19 @@
+# Every bucket lives here (RUSTFS_VOLUMES=/data, single node, single drive). Two LINSTOR
+# replicas so buckets other than caches survive a node; thin and expandable, so grow it
+# in place when it fills up (file-thin only exists on nuc-103 and nuc-104).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data
+  namespace: rustfs
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+  labels:
+    app.kubernetes.io/part-of: rustfs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: piraeus
+  resources:
+    requests:
+      storage: 30Gi

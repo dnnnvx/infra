@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rustfs
+  annotations:
+    # kept when the app is removed (deleting it would delete the buckets): delete by hand
+    kustomize.toolkit.fluxcd.io/prune: disabled
+  labels:
+    app.kubernetes.io/part-of: rustfs
+    pod-security.kubernetes.io/enforce: restricted

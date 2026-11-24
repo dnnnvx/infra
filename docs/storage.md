@@ -43,3 +43,18 @@ linstor storage-pool list              # Pool status per node
 linstor volume list                    # All volumes and their locations
 linstor resource list                  # DRBD resources and sync status
 ```
+
+## Object storage (RustFS)
+
+S3 for whatever wants buckets (Nix binary cache, backups, …): `apps/rustfs`, one RustFS pod on one 30Gi
+`piraeus` PVC (two LINSTOR replicas, thin, expandable in place). It's a plain Deployment, not the upstream
+chart, which isn't published to a Helm repo and assumes distributed mode.
+
+| Endpoint | For |
+|---|---|
+| `http://rustfs.rustfs.svc.cluster.local:9000` | S3 clients in the cluster. Add the client's namespace to `apps/rustfs/ciliumnetworkpolicy.yaml` |
+| `https://s3.local.casasulgorgo.net` | S3 from the LAN (homelab-local Gateway, wildcard TLS) |
+| `https://rustfs.local.casasulgorgo.net` | Web console, LAN only |
+
+The root credentials in `apps/rustfs/secrets.yaml` (`just edit-secret`) are for the console and admin only.
+Each client gets its own access key, scoped to its bucket with a policy, created in the console.

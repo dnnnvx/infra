@@ -1,0 +1,41 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: rustfs
+  namespace: rustfs
+  labels:
+    app.kubernetes.io/part-of: rustfs
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: rustfs
+  ingress:
+    # s3.local / rustfs.local through the homelab-local Gateway (LAN only)
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+            - port: "9001"
+              protocol: TCP
+    # Gatus probes /health through the Gateway, keeping its own identity in Envoy
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: gatus
+      toPorts:
+        - ports:
+            - port: "9000"
+              protocol: TCP
+    # S3 clients in the cluster: add their namespace here (e.g. tekton-ci for the Nix cache)
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
