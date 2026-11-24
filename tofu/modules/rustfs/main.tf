@@ -71,12 +71,3 @@ resource "rustfs_user" "clients" {
 
   policy = rustfs_policy.clients[each.key].name
 }
-
-# Was a rustfs_user_policy_attachment: forget it without detaching the policy on the server
-removed {
-  from = rustfs_user_policy_attachment.clients
-
-  lifecycle {
-    destroy = false
-  }
-}

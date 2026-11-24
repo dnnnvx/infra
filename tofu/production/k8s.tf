@@ -97,14 +97,3 @@ module "k8s" {
     },
   ]
 }
-
-# Created by Flux before tofu owned Secrets in them; Flux keeps managing their labels
-import {
-  to = module.k8s.kubernetes_namespace_v1.namespaces["rustfs"]
-  id = "rustfs"
-}
-
-import {
-  to = module.k8s.kubernetes_namespace_v1.namespaces["tekton-ci"]
-  id = "tekton-ci"
-}
