@@ -238,8 +238,11 @@ no user namespaces, RuntimeDefault seccomp, no capabilities. The flake must expo
 `packages.x86_64-linux.<attr>` as a nix2container image with the `commit-timestamp` label (see casasulgorgo's
 `flake.nix` for Node, kubbot's for Rust with crane).
 
-Steps: `seed-store` → `build-and-push` → `push-cache` → `scan-closure` (sbomnix + vulnix, below). The
-scans come after `push-cache`, so a run that fails on a CVE has already cached its build.
+Steps: `seed-store` → `build-and-push` → `push-cache` → `scan-closure` (sbomnix + vulnix, below).
+`push-cache` runs even when the build fails (`build-and-push` has `onError: continue`; `scan-closure`
+then exits with its code, so the run still fails), and before the scans. A failed build or CVE check
+keeps whatever finished, e.g. crane's dependencies when the app doesn't compile. A derivation that dies
+halfway (one crate inside the dependencies) has nothing to cache.
 
 ### Nix cache
 

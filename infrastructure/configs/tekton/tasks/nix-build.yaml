@@ -128,6 +128,10 @@ spec:
         # setgid modes, so a build under /nix/var/nix/builds fails in unpackPhase (cp: setting permissions).
         find /nix-rw -mindepth 1 -type d -perm -2000 -exec chmod g-s {} +
     - name: build-and-push
+      # A failure doesn't stop the TaskRun here: push-cache still uploads what got built (e.g.
+      # crane's dependencies when the app itself fails to compile), then scan-closure fails the run
+      # with this step's exit code
+      onError: continue
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
       env:
         - name: REGISTRY_AUTH_FILE
@@ -225,6 +229,12 @@ spec:
       script: |
         #!/bin/sh
         set -eu
+        # build-and-push has onError: continue, so its failure is turned back into the run's here
+        rc="$(cat $(steps.step-build-and-push.exitCode.path))"
+        if [ "$rc" != 0 ]; then
+          echo "build-and-push failed (exit $rc); its finished store paths are cached, see its log" >&2
+          exit "$rc"
+        fi
         # Avoid dollar-brace syntax here: Flux post-build substitution would eat it
         root="$(pwd)"
         for entry in $(params.images); do
