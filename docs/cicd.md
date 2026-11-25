@@ -53,7 +53,7 @@ rollback is a `git revert`.
 | `infrastructure/configs/tekton/triggers/` | TriggerTemplates, EventListeners (`github`: public webhooks; `tekton-events`: internal CloudEvents), the `github-webhook` HMAC Secret, this repo's Trigger (`trigger-infra.yaml`), the release Trigger (`trigger-release.yaml`), webhook HTTPRoute |
 | `.checkov.yaml`, `tofu/.tflint.hcl` | scanner config for `validate-infra` |
 | `clusters/production/apps/<project>.yaml` | the app's Flux Kustomization `app-<project>` |
-| `apps/<project>/ci.yaml` | the app's Trigger, ImageRepository/ImagePolicy per image and name-scoped `flux-sync` Role/RoleBinding |
+| `components/ci-app` (in each CI-built app) | the app's Trigger, ImageRepository/ImagePolicy and name-scoped `flux-sync` Role/RoleBinding, filled in by its Flux Kustomization (`ci_project`, `ci_image`) |
 | `apps/<project>/kustomization.yaml` | `images:` entry with the `digest:` marker Flux rewrites |
 | `tofu/production/talos.tf` | Talos `StaticHostConfig` pinning `registry.local.casasulgorgo.net` to the LAN Gateway, so pulls don't depend on DNS |
 
@@ -153,14 +153,17 @@ for this app only: an unhealthy unrelated app doesn't fail the release.
 
 ## Adding a repo/image
 
-1. Copy `apps/casasulgorgo/ci.yaml` into `apps/<project>/` (list it in its `kustomization.yaml`) and
-   `clusters/production/apps/casasulgorgo.yaml` to `<project>.yaml` (list it in `clusters/production/apps/kustomization.yaml`).
-   Replace the project name, the GitHub repository in the Trigger's CEL filter and `repo-url` binding, and the image name
-   (the header comment of `ci.yaml` lists every spot). For more images, add an ImageRepository/ImagePolicy pair per image, its name in the
-   Role's `resourceNames`, and a `<name>,<attr>,<flakedir>` entry in the Trigger's space-separated `images` binding
-   (see [Builder](#builder) for what the flake must expose).
+1. The CI wiring (Trigger, ImageRepository/ImagePolicy, flux-sync Role/RoleBinding) is the kustomize Component
+   `components/ci-app`. Add `components: [../../components/ci-app]` to `apps/<project>/kustomization.yaml`, copy
+   `clusters/production/apps/casasulgorgo.yaml` to `<project>.yaml` (list it in `clusters/production/apps/kustomization.yaml`)
+   and set its `postBuild.substitute`: `ci_project` (GitHub repository under `dnnnvx` = registry project = app name)
+   and `ci_image` (image name; built from the flake's `packages.<system>.image` at the repository root, see
+   [Builder](#builder)). Flux substitution then runs on the whole app, so it must contain no other `${…}`.
+   The Component handles one image. For more, add an ImageRepository/ImagePolicy pair per extra image in the app itself
+   and extend the Component's Role `resourceNames` and Trigger `images` binding (or give that app its own copy).
 2. In `apps/<project>/kustomization.yaml`, use a kustomize `images:` entry per image with a `digest:` marker
-   `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's). Kyverno then only admits
+   `# {"$imagepolicy": "flux-system:<project>-<image>:digest"}` (copy casasulgorgo's; the marker names the
+   ImagePolicy literally, since Flux's image automation edits the file in git, before any substitution). Kyverno then only admits
    Chains-signed digests of it. If the repo lives outside `github.com/dnnnvx`, add it to the
    `repo-url` allowlist in `infrastructure/configs/tekton/image-policy.yaml` first.
 3. Add the repo with `ci_webhook = true` to `repositories` in `module "github"` (`tofu/production/github.tf`; an existing repo also needs an

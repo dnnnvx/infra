@@ -36,7 +36,7 @@ module "github" {
   ci_deploy_keys = { for repo, key in tls_private_key.ci_clone : repo => key.public_key_openssh }
 
   repositories = {
-    # CI-built (ci_webhook: Trigger in apps/<project>/ci.yaml or infrastructure/configs/tekton/triggers/)
+    # CI-built (ci_webhook: Trigger from components/ci-app or infrastructure/configs/tekton/triggers/)
     infra = {
       visibility  = "public"
       description = "Homelab cluster as code"

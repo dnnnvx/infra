@@ -7,7 +7,9 @@ resources:
   - service.yaml
   - httproute.yaml
   - secrets.yaml
-  - ci.yaml
+components:
+  # Trigger, image automation, flux-sync RBAC; ci_project/ci_image come from clusters/production/apps/marcods.yaml
+  - ../../components/ci-app
 images:
   # The digest is a placeholder until the first build; Flux rewrites it.
   - name: marcods

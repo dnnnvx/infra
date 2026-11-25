@@ -1,23 +1,33 @@
-# Build → deploy wiring for this app (Tekton Trigger, Flux image automation, flux-sync RBAC).
-# Copied from apps/casasulgorgo/ci.yaml; its Flux Kustomization is clusters/production/apps/marcods.yaml.
+# Build → deploy wiring for one CI-built app: Flux image automation, flux-sync RBAC, Tekton Trigger.
+# An app includes it with `components: [../../components/ci-app]` in its kustomization.yaml, and its
+# Flux Kustomization (clusters/production/apps/<app>.yaml) fills in, via postBuild.substitute:
+#   ci_project  GitHub repository under dnnnvx = registry project = app name (app-<name>, apps/<name>)
+#   ci_image    image name: registry.local.casasulgorgo.net/<ci_project>/<ci_image>, built from the
+#               flake's packages.<system>.image at the repository root
+# One image per app. For more, add an ImageRepository/ImagePolicy pair per image in the app itself, its
+# name to this Role's resourceNames, and a <name>,<attr>,<flakedir> entry to the `images` binding.
+# Write no other dollar-brace expressions here: Flux would substitute (or blank) them.
 ---
+# Lives in flux-system: ImageUpdateAutomation only sees policies in its own namespace.
+# Tekton moves the `production` tag on every main build; Flux follows its digest and
+# pins it in kustomization.yaml, so each rollout is a git commit.
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImageRepository
 metadata:
-  name: marcods-web
+  name: ${ci_project}-${ci_image}
   namespace: flux-system
 spec:
-  image: registry.local.casasulgorgo.net/marcods/web
+  image: registry.local.casasulgorgo.net/${ci_project}/${ci_image}
   interval: 5m
 ---
 apiVersion: image.toolkit.fluxcd.io/v1
 kind: ImagePolicy
 metadata:
-  name: marcods-web
+  name: ${ci_project}-${ci_image}
   namespace: flux-system
 spec:
   imageRepositoryRef:
-    name: marcods-web
+    name: ${ci_project}-${ci_image}
   filterTags:
     pattern: '^production$'
   policy:
@@ -27,15 +37,18 @@ spec:
   digestReflectionPolicy: Always
   interval: 5m
 ---
+# What the flux-sync task may touch after a build. Scoped by name: patch on a
+# Kustomization/GitRepository would otherwise let the CI namespace rewrite arbitrary Flux objects.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: flux-sync-marcods
+  name: flux-sync-${ci_project}
   namespace: flux-system
 rules:
   - apiGroups: [image.toolkit.fluxcd.io]
     resources: [imagerepositories, imagepolicies]
-    resourceNames: [marcods-web]
+    resourceNames:
+      - ${ci_project}-${ci_image}
     verbs: [get, patch]
   - apiGroups: [image.toolkit.fluxcd.io]
     resources: [imageupdateautomations]
@@ -43,7 +56,8 @@ rules:
     verbs: [get, patch]
   - apiGroups: [kustomize.toolkit.fluxcd.io]
     resources: [kustomizations]
-    resourceNames: [app-marcods]
+    resourceNames:
+      - app-${ci_project}
     verbs: [get, patch]
   - apiGroups: [source.toolkit.fluxcd.io]
     resources: [gitrepositories]
@@ -53,7 +67,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: flux-sync-marcods
+  name: flux-sync-${ci_project}
   namespace: flux-system
 subjects:
   - kind: ServiceAccount
@@ -62,12 +76,14 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: flux-sync-marcods
+  name: flux-sync-${ci_project}
 ---
+# The revision comes from the payload, trusted once the github interceptor has verified its HMAC
+# signature (X-Hub-Signature-256). The clone URL is pinned (the Kyverno provenance check allowlists it).
 apiVersion: triggers.tekton.dev/v1beta1
 kind: Trigger
 metadata:
-  name: marcods
+  name: ${ci_project}
   namespace: tekton-ci
   labels:
     ci.casasulgorgo.net/eventlistener: github
@@ -91,7 +107,7 @@ spec:
       params:
         - name: filter
           value: >-
-            body.repository.full_name == 'dnnnvx/marcods' &&
+            body.repository.full_name == 'dnnnvx/${ci_project}' &&
             body.ref == 'refs/heads/main' &&
             body.after.matches('^[0-9a-f]{40}$') &&
             body.after != '0000000000000000000000000000000000000000' &&
@@ -102,14 +118,14 @@ spec:
               expression: "body.after + ' latest production'"
   bindings:
     - name: project
-      value: marcods
+      value: ${ci_project}
     # Flake + nix2container (tasks/nix-build.yaml): space-separated <name>,<attr>,<flakedir> per image
     - name: images
-      value: web,image,.
+      value: ${ci_image},image,.
     - name: flux-kustomization
-      value: app-marcods
+      value: app-${ci_project}
     - name: repo-url
-      value: https://github.com/dnnnvx/marcods
+      value: https://github.com/dnnnvx/${ci_project}
     - name: revision
       value: $(body.after)
     - name: tags

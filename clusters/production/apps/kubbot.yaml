@@ -18,6 +18,11 @@ spec:
   # logging in again).
   prune: true
   wait: true
+  # Fills components/ci-app (Trigger, image automation, flux-sync RBAC)
+  postBuild:
+    substitute:
+      ci_project: kubbot
+      ci_image: bot
   decryption:
     provider: sops
     secretRef:
