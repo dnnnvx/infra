@@ -24,8 +24,9 @@ spec:
       signingKey:
         secretRef:
           name: flux-signing-key
+      # [skip ci]: a digest bump needs no validate-infra run (the Tekton Triggers skip such pushes)
       messageTemplate: |
-        chore(images): update {{ range .Changed.Changes }}{{ .OldValue | trunc 15 }} → {{ .NewValue | trunc 15 }} {{ end }}
+        chore(images): update {{ range .Changed.Changes }}{{ .OldValue | trunc 15 }} → {{ .NewValue | trunc 15 }} {{ end }}[skip ci]
     push:
       branch: main
   update:

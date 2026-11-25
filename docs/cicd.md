@@ -215,7 +215,9 @@ commits) would be blocked waiting for a status that only exists after the push.
 GitHub signs the body as `X-Hub-Signature-256: sha256=<hmac>`. The core `github` ClusterInterceptor
 checks it against the `tekton-ci/github-webhook` Secret (it must be in the Trigger's namespace) and only
 lets `push` events through; without `secretRef` it would accept anything, so every Trigger sets it.
-The `cel` interceptor then filters on `repository.full_name` and the branch and computes the tags. The
+The `cel` interceptor then filters on `repository.full_name` and the branch and computes the tags.
+A push whose head commit message contains `[skip ci]` starts nothing (every Trigger checks it). Flux's
+image automation puts it in its digest commits, so a release doesn't run `validate-infra` again. The
 commit comes from the authenticated payload; the clone URL is pinned in each Trigger, since Kyverno
 allowlists it in the provenance. `just ci-build <repo> <sha>` replays a signed push.
 

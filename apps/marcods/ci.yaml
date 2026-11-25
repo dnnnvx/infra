@@ -94,7 +94,8 @@ spec:
             body.repository.full_name == 'dnnnvx/marcods' &&
             body.ref == 'refs/heads/main' &&
             body.after.matches('^[0-9a-f]{40}$') &&
-            body.after != '0000000000000000000000000000000000000000'
+            body.after != '0000000000000000000000000000000000000000' &&
+            !body.head_commit.message.contains('[skip ci]')
         - name: overlays
           value:
             - key: tags
