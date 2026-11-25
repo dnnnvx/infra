@@ -204,8 +204,10 @@ spec:
         # Only what this run built or fetched itself (crane's deps, npm/crate tarballs, the image
         # layers): cache.nixos.org paths are fetched from there, our own cache's are already there.
         # .drv files are skipped too: substituters never need them.
+        # nixos/nix has grep and cut but no awk/sed. Lines are "<path><spaces><tab><sigs>".
         nix path-info --all --sigs \
-          | awk '!/cache\.nixos\.org-1:|nix-cache\.casasulgorgo\.net-1:/ && $1 !~ /\.drv$/ { print $1 }' \
+          | grep -vE 'cache\.nixos\.org-1:|nix-cache\.casasulgorgo\.net-1:' \
+          | cut -d' ' -f1 | cut -f1 | grep -v '\.drv$' \
           > /tmp/paths
         echo "Pushing $(wc -l < /tmp/paths) store paths to the Nix cache"
         # secret-key signs every narinfo on upload; nix copy skips paths the cache already has
