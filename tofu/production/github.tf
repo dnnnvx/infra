@@ -69,6 +69,11 @@ module "github" {
       has_wiki    = true
       topics      = ["dotfiles", "home-manager", "nix"]
     }
+    skills = {
+      description = "bot bot"
+      visibility  = "private"
+      has_wiki    = false
+    }
     radicle-images = {
       visibility   = "public"
       description  = "Radicle container images"
