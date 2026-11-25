@@ -18,6 +18,21 @@ spec:
     - name: commit
       value: $(tasks.clone.results.commit)
   tasks:
+    # GitHub commit status: pending now, the result in finally (github-status Task)
+    - name: status-pending
+      taskRef:
+        name: github-status
+      params:
+        - name: repo-url
+          value: $(params.repo-url)
+        - name: sha
+          value: $(params.revision)
+        - name: state
+          value: pending
+        - name: context
+          value: tekton/validate-infra
+        - name: target-url
+          value: https://tekton.local.casasulgorgo.net/#/namespaces/tekton-ci/pipelineruns/$(context.pipelineRun.name)
     - name: clone
       retries: 2
       taskRef:
@@ -62,3 +77,18 @@ spec:
       workspaces:
         - name: source
           workspace: source
+  finally:
+    - name: status-result
+      taskRef:
+        name: github-status
+      params:
+        - name: repo-url
+          value: $(params.repo-url)
+        - name: sha
+          value: $(params.revision)
+        - name: state
+          value: $(tasks.status)
+        - name: context
+          value: tekton/validate-infra
+        - name: target-url
+          value: https://tekton.local.casasulgorgo.net/#/namespaces/tekton-ci/pipelineruns/$(context.pipelineRun.name)

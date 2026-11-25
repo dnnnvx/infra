@@ -1,0 +1,112 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: github-status
+  namespace: tekton-ci
+spec:
+  description: >-
+    Sets a commit status (the check next to a commit or PR on GitHub). Run it once with
+    state "pending" at the start of a pipeline and once in `finally` with state "$(tasks.status)".
+    Uses the token in Secret github-status (fine-grained PAT, "Commit statuses: write"). Never fails
+    the pipeline: without a token it skips, and an API error only marks its own step.
+  params:
+    - name: repo-url
+      type: string
+      description: https://github.com/<owner>/<repo>, as passed to git-clone.
+    - name: sha
+      type: string
+      description: Full commit SHA.
+    - name: state
+      type: string
+      description: >-
+        pending, success, failure or error; or a Tekton aggregate status ($(tasks.status) in finally):
+        Succeeded/Completed → success, Failed → failure, None → error.
+    - name: context
+      type: string
+      description: Name of the check on GitHub, e.g. tekton/validate-infra. One status per context and commit.
+    - name: description
+      type: string
+      default: ""
+      description: Short text next to the check (max 140 characters). Empty picks one from the state.
+    - name: target-url
+      type: string
+      default: ""
+      description: Where the check's "Details" link points, e.g. the PipelineRun in the Tekton dashboard.
+  steps:
+    - name: report
+      image: curlimages/curl:8.23.0
+      # A status that couldn't be reported must not fail the build it describes
+      onError: continue
+      env:
+        # Passed as env, not inlined in the script: payload-derived values never become shell code
+        - name: REPO_URL
+          value: $(params.repo-url)
+        - name: SHA
+          value: $(params.sha)
+        - name: STATE
+          value: $(params.state)
+        - name: CONTEXT
+          value: $(params.context)
+        - name: DESCRIPTION
+          value: $(params.description)
+        - name: TARGET_URL
+          value: $(params.target-url)
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-status
+              key: token
+              optional: true
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      script: |
+        #!/bin/sh
+        set -eu
+        token="$(printenv GITHUB_TOKEN || true)"
+        if [ -z "$token" ]; then
+          echo "No token in Secret github-status: not reporting" >&2
+          exit 0
+        fi
+
+        repo="$(printf %s "$REPO_URL" | sed -E 's#^(https://|ssh://git@|git@)github\.com[:/]##; s#\.git$##; s#/$##')"
+        printf %s "$repo" | grep -Eq '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$' || { echo "Not a GitHub repository: $REPO_URL" >&2; exit 1; }
+        printf %s "$SHA" | grep -Eq '^[0-9a-f]{40}$' || { echo "Not a full commit SHA: $SHA" >&2; exit 1; }
+
+        case "$STATE" in
+          pending | success | failure | error) state="$STATE" ;;
+          Succeeded | Completed) state=success ;;
+          Failed) state=failure ;;
+          *) state=error ;;
+        esac
+        desc="$DESCRIPTION"
+        if [ -z "$desc" ]; then
+          case "$state" in
+            pending) desc="Running" ;;
+            success) desc="Passed" ;;
+            failure) desc="Failed" ;;
+            *) desc="Errored or cancelled" ;;
+          esac
+        fi
+        # No jq in this image: strip what would break the JSON string
+        desc="$(printf %s "$desc" | tr -d '"\\' | cut -c1-140)"
+        ctx="$(printf %s "$CONTEXT" | tr -d '"\\')"
+        url="$(printf %s "$TARGET_URL" | tr -d '"\\')"
+        body="$(printf '{"state":"%s","context":"%s","description":"%s"' "$state" "$ctx" "$desc")"
+        [ -n "$url" ] && body="$body,\"target_url\":\"$url\""
+        body="$body}"
+
+        out="$(curl -sS --max-time 20 --retry 3 --retry-all-errors -w '\n%{http_code}' \
+          -H "Authorization: Bearer $token" \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          --data "$body" \
+          "https://api.github.com/repos/$repo/statuses/$SHA")"
+        code="$(printf '%s\n' "$out" | tail -n1)"
+        if [ "$code" != "201" ]; then
+          echo "GitHub answered $code:" >&2
+          printf '%s\n' "$out" | sed '$d' >&2
+          exit 1
+        fi
+        echo "$repo@$SHA: $ctx → $state"

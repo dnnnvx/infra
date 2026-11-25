@@ -12,3 +12,4 @@ resources:
   - lint-tofu.yaml
   - checkov.yaml
   - trufflehog.yaml
+  - github-status.yaml

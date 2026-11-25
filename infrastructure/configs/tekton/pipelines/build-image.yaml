@@ -46,6 +46,21 @@ spec:
     - name: sboms
       value: $(tasks.sbom.results.sboms)
   tasks:
+    # GitHub commit status: pending now, the result in finally (github-status Task)
+    - name: status-pending
+      taskRef:
+        name: github-status
+      params:
+        - name: repo-url
+          value: $(params.repo-url)
+        - name: sha
+          value: $(params.revision)
+        - name: state
+          value: pending
+        - name: context
+          value: tekton/build-image
+        - name: target-url
+          value: https://tekton.local.casasulgorgo.net/#/namespaces/tekton-ci/pipelineruns/$(context.pipelineRun.name)
     # retries only on network-bound tasks: a failed build is deterministic, retrying just burns time
     - name: clone
       retries: 2
@@ -123,3 +138,18 @@ spec:
       workspaces:
         - name: source
           workspace: source
+  finally:
+    - name: status-result
+      taskRef:
+        name: github-status
+      params:
+        - name: repo-url
+          value: $(params.repo-url)
+        - name: sha
+          value: $(params.revision)
+        - name: state
+          value: $(tasks.status)
+        - name: context
+          value: tekton/build-image
+        - name: target-url
+          value: https://tekton.local.casasulgorgo.net/#/namespaces/tekton-ci/pipelineruns/$(context.pipelineRun.name)

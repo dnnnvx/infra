@@ -193,8 +193,22 @@ Notes:
 - Run it locally with `checkov --config-file .checkov.yaml -d .` (`nix shell nixpkgs#uv -c uvx checkov` works if the
   nixpkgs build is broken).
 - The clone is shallow, so trufflehog only scans the pushed commit's tree, not older history.
-- Results only show up in Tekton (dashboard, `tkn pr list -n tekton-ci -l ci.casasulgorgo.net/project=infra`):
-  nothing reports back to GitHub.
+- Results show up in Tekton (dashboard, `tkn pr list -n tekton-ci -l ci.casasulgorgo.net/project=infra`) and
+  as a commit status on GitHub (see [Commit status](#commit-status)).
+
+## Commit status
+
+`validate-infra` and `build-image` report to GitHub's commit status API with the reusable `github-status` Task:
+`pending` as their first task, then the result in `finally` (state `$(tasks.status)`), under the contexts
+`tekton/validate-infra` and `tekton/build-image`. The check's "Details" link opens the PipelineRun in the Tekton
+dashboard (LAN only). Another pipeline gets a check by adding the same two tasks with its own `context`.
+
+The token is a fine-grained PAT in `tekton-ci/github-status` (`infrastructure/configs/tekton/github-status-secret.yaml`,
+SOPS), limited to the CI repos with only "Commit statuses: Read and write". tofu can't create PATs, so it's set by
+hand with `just edit-secret` and must be renewed before it expires. An empty token skips reporting, and a failed
+API call only marks the task's own step (`onError: continue`): reporting never fails a build. The checks are
+informational and not required in branch protection, since direct pushes to `main` (and Flux's image automation
+commits) would be blocked waiting for a status that only exists after the push.
 
 ## Webhook verification
 
