@@ -220,9 +220,12 @@ spec:
           < /tmp/paths
     - name: scan-closure
       workingDir: $(workspaces.source.path)/$(params.subdirectory)
+      # vulnix holds the NVD feeds in memory and sbomnix's metadata pass evaluates nixpkgs: at 2Gi
+      # vulnix got the step OOMKilled and sbomnix's nix eval child was killed (SBOM without licenses)
+      # (steps run one after another; Tekton requests only the largest step's memory for the pod)
       computeResources:
         limits:
-          memory: 2Gi
+          memory: 3Gi
       volumeMounts:
         - name: nix
           mountPath: /nix
@@ -256,9 +259,16 @@ spec:
           out="$(nix build --no-link --print-out-paths "$flake#$attr")"
           whitelist="$root/$dir/vulnix.toml"
           if [ -f "$whitelist" ]; then set -- --whitelist "$whitelist"; else set --; fi
-          rc=0
-          nix run --inputs-from "$flake" nixpkgs#vulnix -- --closure --json \
-            --cache-dir /tmp/vulnix "$@" "$out" > "/tmp/vulnix-$name.json" || rc=$?
+          # vulnix fetches the NVD feeds with a fixed 10 s read timeout and nvd.nist.gov is often slow:
+          # retry errors (any exit but 0/2). Feeds already downloaded stay in --cache-dir.
+          for attempt in 1 2 3; do
+            rc=0
+            nix run --inputs-from "$flake" nixpkgs#vulnix -- --closure --json \
+              --cache-dir /tmp/vulnix "$@" "$out" > "/tmp/vulnix-$name.json" || rc=$?
+            case "$rc" in 0|2) break ;; esac
+            echo "vulnix failed (exit $rc), attempt $attempt of 3" >&2
+            [ "$attempt" = 3 ] || sleep $((attempt * 30))
+          done
           case "$rc" in
             0) echo "vulnix: no known CVEs in the $name closure" ;;
             2)
