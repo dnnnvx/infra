@@ -1,0 +1,11 @@
+# Seed for /config/config.yaml, copied only when the file doesn't exist yet: after the first start
+# the web UI owns the file (it rewrites it on save), so set location, filters, etc. there.
+# Anything left out falls back to the app's defaults.
+realtime:
+  rtsp:
+    streams:
+      # rpi-1.local (mDNS) doesn't resolve in pods; this is the tofu-managed LAN record
+      - name: rpi-1 mic
+        url: rtsp://rpi-1.local.casasulgorgo.net:8554/mic
+        type: rtsp
+        transport: tcp

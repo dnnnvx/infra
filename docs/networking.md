@@ -7,6 +7,7 @@
 | `ha.local.casasulgorgo.net`      | Home Assistant |
 | `adguard.local.casasulgorgo.net` | AdGuard Home   |
 | `uptime.local.casasulgorgo.net`  | Gatus          |
+| `birdnet.local.casasulgorgo.net` | BirdNET-Go (mic on rpi-1) |
 | `hubble.local.casasulgorgo.net`  | Hubble UI      |
 | `flux.local.casasulgorgo.net`    | Flux Operator  |
 | `tekton.local.casasulgorgo.net`  | Tekton Dashboard (pocket-id login) |

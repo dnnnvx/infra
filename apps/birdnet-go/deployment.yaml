@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: birdnet-go
+  namespace: birdnet-go
+  labels:
+    app.kubernetes.io/part-of: birdnet-go
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: birdnet-go
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: birdnet-go
+        app.kubernetes.io/part-of: birdnet-go
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: seed-config
+          image: ghcr.io/tphakala/birdnet-go:20261122
+          command: ["cp", "-n", "/seed/config.yaml", "/config/config.yaml"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: seed
+              mountPath: /seed
+            - name: config
+              mountPath: /config
+      containers:
+        - name: birdnet-go
+          image: ghcr.io/tphakala/birdnet-go:20261122
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: TZ
+              value: Europe/Rome
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /data
+            # startup-wrapper.sh logs to /tmp; ffmpeg/model temp files
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: birdnet-go-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: birdnet-go-data
+        - name: tmp
+          emptyDir: {}
+        - name: seed
+          configMap:
+            name: birdnet-go-seed

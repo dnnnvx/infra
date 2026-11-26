@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: birdnet-go
+  namespace: birdnet-go
+  labels:
+    app.kubernetes.io/part-of: birdnet-go
+spec:
+  selector:
+    app.kubernetes.io/name: birdnet-go
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      # live spectrogram/audio and detections stream over SSE/websockets
+      appProtocol: kubernetes.io/ws

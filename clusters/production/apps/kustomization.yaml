@@ -20,4 +20,5 @@ resources:
   - tuwunel.yaml
   - kubbot.yaml
   - radicle.yaml
+  - birdnet-go.yaml
   # - llama-cpp.yaml
